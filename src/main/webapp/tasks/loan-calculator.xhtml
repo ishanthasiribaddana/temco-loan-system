@@ -94,7 +94,7 @@
                         <p:growl id="growl" showDetail="true" life="5000"/> 
                         <div class="grid">
                             <div class="col-12 success-message" style="text-align: center">
-                                <h1>Loan Payment Estimator</h1>
+                                <h1>Investment Payment Estimator</h1>
                             </div>
                             <div class="col-12">
                                 <div class="card ui-fluid">
@@ -104,7 +104,7 @@
                                             <ul>
                                                 <li>Two separate guarantors.</li>
                                                 <li>First guarantor must be your parent or guardian.</li>
-                                                <li>Your monthly loan repayment amount must not exceed 60% of second guarantor's monthly income.</li>
+                                                <li>Your monthly investment repayment amount must not exceed 60% of second guarantor's monthly income.</li>
                                             </ul>  
                                         </div>
                                     </div>
@@ -114,7 +114,7 @@
                                             <p:inputText id="due_course_fee" value="#{loanCalculator.dueCourseFee}" type="number" readonly="true"/>
                                         </div>
                                         <div class="field col">
-                                            <p:outputLabel for="expected_loan_amount">Expected Loan Amount :</p:outputLabel>
+                                            <p:outputLabel for="expected_loan_amount">Expected Investment Amount :</p:outputLabel>
                                             <p:inputText id="expected_loan_amount" value="#{loanCalculator.expectedLoanAmount}" type="number"/>
                                         </div>
                                     </div>
@@ -132,7 +132,7 @@
                                     </div>
                                     <div class="formgrid grid">
                                         <div class="field col">
-                                            <p:outputLabel for="repayment_period">Loan Repayment Period :</p:outputLabel>
+                                            <p:outputLabel for="repayment_period">Investment Repayment Period :</p:outputLabel>
                                             <p:selectOneMenu id="repayment_period" value="#{loanCalculator.repayementPeriod}">
                                                 <f:selectItems value="#{loanCalculator.repaymentPeriodList}" />
                                             </p:selectOneMenu>

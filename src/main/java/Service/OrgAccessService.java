@@ -73,8 +73,9 @@ public class OrgAccessService {
             Date date = new Date();
 
             List<MaterializedStudentLoanEligibleStudentTable> mslet = uniDB.searchByQuery("SELECT g FROM MaterializedStudentLoanEligibleStudentTable g WHERE g.nic='" + nic + "' ");
-
+            System.out.println("mslet " + mslet.size());
             if (mslet.isEmpty()) {
+                System.out.println("A1");
                 MaterializedStudentLoanEligibleStudentTable newMslet = new MaterializedStudentLoanEligibleStudentTable();
 
                 newMslet.setNic(nic);
@@ -83,36 +84,44 @@ public class OrgAccessService {
                 newMslet.setLastName(lastName);
                 newMslet.setEmail(email);
                 newMslet.setMobileNo(mobile_no);
-
-                if (address1 != null) {
-
+                System.out.println("A1.1");
+                if (address1 != null && !address1.isBlank()) {
                     newMslet.setAddressLine1(address1);
                 }
-
-                if (address1 != null) {
-
+                if (address2 != null && !address2.isBlank()) {
                     newMslet.setAddressLine2(address2);
                 }
-
-                if (address1 != null) {
-
+                if (address3 != null && !address3.isBlank()) {
                     newMslet.setAddressLine3(address3);
                 }
-
-                newMslet.setScholarship(Double.valueOf(scholarship));
+                if (scholarship != null && !scholarship.isBlank()) {
+                    newMslet.setScholarship(Double.valueOf(scholarship));
+                }
+                if (intakeId != null && !intakeId.isBlank()) {
+                    newMslet.setIntakeId(Integer.valueOf(intakeId));
+                }
+                if (totalDue != null && !totalDue.isBlank()) {
+                    newMslet.setTotalDue(Double.valueOf(totalDue));
+                }
                 newMslet.setVerificationToken(verificationToken);
                 newMslet.setBranchName(branchName);
-                newMslet.setIntakeId(Integer.valueOf(intakeId));
                 newMslet.setIntakeName(intakeName);
-                newMslet.setTotalDue(Double.valueOf(totalDue));
-                if (profileCreatedDate != null) {
-                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.ENGLISH);
+                System.out.println("A1.2");
+                if (profileCreatedDate != null && !profileCreatedDate.isBlank()) {
 
-                    newMslet.setProfileCreateDate((Date) formatter.parse(profileCreatedDate));
+                    try {
+                        newMslet.setProfileCreateDate(new SimpleDateFormat("yyyy-MM-dd").parse(profileCreatedDate));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
-                uniDB.create(mslet);
+                System.out.println("A2");
+                uniDB.create(newMslet);
             } else {
-                if (checkUserAlreadyInTheSystem(nic)) {
+                System.out.println("A3");
+                boolean b = checkUserAlreadyInTheSystem(nic);
+                System.out.println("A4 " + b);
+                if (b) {
                     mslet.get(0).setNic(nic);
                     mslet.get(0).setGupId(Integer.valueOf(gup_id));
                     mslet.get(0).setFirstName(firstName);
@@ -120,33 +129,38 @@ public class OrgAccessService {
                     mslet.get(0).setEmail(email);
                     mslet.get(0).setMobileNo(mobile_no);
 
-                    if (address1 != null) {
-
+                    if (address1 != null && !address1.isBlank()) {
                         mslet.get(0).setAddressLine1(address1);
                     }
-
-                    if (address1 != null) {
-
+                    if (address2 != null && !address2.isBlank()) {
                         mslet.get(0).setAddressLine2(address2);
                     }
-
-                    if (address1 != null) {
-
+                    if (address3 != null && !address3.isBlank()) {
                         mslet.get(0).setAddressLine3(address3);
                     }
-
-                    mslet.get(0).setScholarship(Double.valueOf(scholarship));
-                    mslet.get(0).setVerificationToken(verificationToken);
-                    mslet.get(0).setBranchName(branchName);
-                    mslet.get(0).setIntakeId(Integer.valueOf(intakeId));
-                    mslet.get(0).setIntakeName(intakeName);
-                    mslet.get(0).setTotalDue(Double.valueOf(totalDue));
-                    if (profileCreatedDate != null) {
-                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.ENGLISH);
-
-                        mslet.get(0).setProfileCreateDate((Date) formatter.parse(profileCreatedDate));
+                    if (scholarship != null && !scholarship.isBlank()) {
+                        mslet.get(0).setScholarship(Double.valueOf(scholarship));
                     }
-                    uniDB.update(mslet);
+                    if (intakeId != null && !intakeId.isBlank()) {
+                        mslet.get(0).setIntakeId(Integer.valueOf(intakeId));
+                    }
+                    if (totalDue != null && !totalDue.isBlank()) {
+                        mslet.get(0).setTotalDue(Double.valueOf(totalDue));
+                    }
+
+                    mslet.get(0).setVerificationToken(verificationToken);
+                    mslet.get(0).setBranchName(branchName);;
+                    mslet.get(0).setIntakeName(intakeName);
+
+                    if (profileCreatedDate != null && !profileCreatedDate.trim().isEmpty()) {
+                        try {
+                            mslet.get(0).setProfileCreateDate(new SimpleDateFormat("yyyy-MM-dd").parse(profileCreatedDate));
+
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    uniDB.update(mslet.get(0));
                 } else {
                     String errorResponse = "{"
                             + "\"status\": 500,"
@@ -175,6 +189,8 @@ public class OrgAccessService {
                 loanCustomer.setVerificationToken(verificationToken);
                 loanCustomer.setIsSubscribe(Short.decode("1"));
                 uniDB.create(loanCustomer);
+            } else {
+                loanCustomer = msle.get(0);
             }
 
             MobileNo mobileNo = new MobileNo();
@@ -205,41 +221,29 @@ public class OrgAccessService {
             System.out.println("msle.get(0).getIntakeName() " + intakeName);
 
             List<Intake> intakes = uniDB.searchByQuery("SELECT g FROM Intake g WHERE g.intakeId= '" + intakeId + "'");
-
+            Intake intake = null;
             if (intakes.isEmpty()) {
-                Intake intake = new Intake();
+                intake = new Intake();
                 intake.setIntakeId(Integer.parseInt(intakeId));
                 intake.setName(intakeName);
                 uniDB.create(intake);
-
-                IntakeManager intakeManager = new IntakeManager();
-                intakeManager.setIntakeId(intake);
-                intakeManager.setLoanCustomerId(loanCustomer);
-
-                if (secondHalf != null && secondHalf.equals("Registered")) {
-                    intakeManager.setStatusid((Status) uniDB.find(1, Status.class));
-                } else if (secondHalf != null && secondHalf.equals("NP")) {
-                    intakeManager.setStatusid((Status) uniDB.find(2, Status.class));
-                } else if (secondHalf == null) {
-                    intakeManager.setStatusid((Status) uniDB.find(3, Status.class));
-                }
-
-                uniDB.create(intakeManager);
             } else {
-                IntakeManager intakeManager = new IntakeManager();
-                intakeManager.setIntakeId(intakes.get(0));
-                intakeManager.setLoanCustomerId(loanCustomer);
-
-                if (secondHalf != null && secondHalf.equals("Registered")) {
-                    intakeManager.setStatusid((Status) uniDB.find(1, Status.class));
-                } else if (secondHalf != null && secondHalf.equals("NP")) {
-                    intakeManager.setStatusid((Status) uniDB.find(2, Status.class));
-                } else if (secondHalf == null) {
-                    intakeManager.setStatusid((Status) uniDB.find(3, Status.class));
-                }
-
-                uniDB.create(intakeManager);
+                intake = intakes.get(0);
             }
+
+            IntakeManager intakeManager = new IntakeManager();
+            intakeManager.setIntakeId(intake);
+            intakeManager.setLoanCustomerId(loanCustomer);
+            intakeManager.setStatusid((Status) uniDB.find(3, Status.class));
+//            if (secondHalf != null && secondHalf.equals("Registered")) {
+//                intakeManager.setStatusid((Status) uniDB.find(1, Status.class));
+//            } else if (secondHalf != null && secondHalf.equals("NP")) {
+//                intakeManager.setStatusid((Status) uniDB.find(2, Status.class));
+//            } else if (secondHalf == null) {
+//                intakeManager.setStatusid((Status) uniDB.find(3, Status.class));
+//            }
+
+            uniDB.create(intakeManager);
 
             OfferManager offerManager = new OfferManager();
             offerManager.setDate(date);

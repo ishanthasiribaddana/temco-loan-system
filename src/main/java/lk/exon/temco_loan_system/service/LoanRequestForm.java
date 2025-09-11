@@ -361,19 +361,6 @@ public class LoanRequestForm implements Serializable {
                     telephone = false;
                     mobileNo = "";
                 }
-                System.out.println("mt.get(0).getGenderType() " + mt.get(0).getGenderType());
-                List<Gender> genderLists = UniDB.searchByQuery("SELECT g FROM Gender g WHERE g.name='" + mt.get(0).getGenderType() + "'");
-                if (genderLists != null) {
-                    genderId = genderLists.get(0).getId();
-                    userGender = genderLists.get(0).getName();
-                } else {
-                    genderBool = false;
-                    List<Gender> genderList = UniDB.searchByQuery("SELECT g FROM GENDER g");
-                    gender_list = new ArrayList<>();
-                    for (Gender gender1 : genderList) {
-                        gender_list.add(new GenderList(gender1.getId(), gender1.getName()));
-                    }
-                }
 
                 System.out.println("orgList" + mt.get(0).getBranchName());
                 List<OrganizationBranches> orgList = UniDB.searchByQuery("SELECT g FROM OrganizationBranches g WHERE g.name LIKE '%" + mt.get(0).getBranchName() + "%'");
@@ -390,6 +377,20 @@ public class LoanRequestForm implements Serializable {
                     org_branch_list = new ArrayList<>();
                     for (OrganizationBranches organizationBranches : orgList2) {
                         org_branch_list.add(new OrganizationBranchesList(organizationBranches.getId(), organizationBranches.getName()));
+                    }
+                }
+
+                System.out.println("mt.get(0).getGenderType() " + mt.get(0).getGenderType());
+                List<Gender> genderLists = UniDB.searchByQuery("SELECT g FROM Gender g WHERE g.name='" + mt.get(0).getGenderType() + "'");
+                if (genderLists != null) {
+                    genderId = genderLists.get(0).getId();
+                    userGender = genderLists.get(0).getName();
+                } else {
+                    genderBool = false;
+                    List<Gender> genderList = UniDB.searchByQuery("SELECT g FROM GENDER g");
+                    gender_list = new ArrayList<>();
+                    for (Gender gender1 : genderList) {
+                        gender_list.add(new GenderList(gender1.getId(), gender1.getName()));
                     }
                 }
             } else {

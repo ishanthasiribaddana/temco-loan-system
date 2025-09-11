@@ -23,15 +23,7 @@ import java.util.Random;
 import lk.exon.temco.security.Security;
 import lk.exon.temco_loan_system.common.ComLib;
 import lk.exon.temco_loan_system.common.UniDBLocal;
-import lk.exon.temco_loan_system.entity.AccountType;
 import lk.exon.temco_loan_system.entity.CustomerResponseHistory;
-import lk.exon.temco_loan_system.entity.District;
-import lk.exon.temco_loan_system.entity.DivisionalSecretarial;
-import lk.exon.temco_loan_system.entity.Gender;
-import lk.exon.temco_loan_system.entity.GeneralOrganizationProfile;
-import lk.exon.temco_loan_system.entity.GeneralUserProfile;
-import lk.exon.temco_loan_system.entity.GnDivision;
-import lk.exon.temco_loan_system.entity.GopHasMember;
 import lk.exon.temco_loan_system.entity.InterestManager;
 import lk.exon.temco_loan_system.entity.Loan;
 import lk.exon.temco_loan_system.entity.LoanApplicantGurantor;
@@ -39,17 +31,13 @@ import lk.exon.temco_loan_system.entity.LoanApplicantHasBranch;
 import lk.exon.temco_loan_system.entity.LoanCustomer;
 import lk.exon.temco_loan_system.entity.LoanInterestRate;
 import lk.exon.temco_loan_system.entity.LoanManager;
-import lk.exon.temco_loan_system.entity.LoanOffer;
 import lk.exon.temco_loan_system.entity.LoanStatus;
 import lk.exon.temco_loan_system.entity.LoanStatusManager;
 import lk.exon.temco_loan_system.entity.Member1;
 import lk.exon.temco_loan_system.entity.MemberBankAccounts;
-import lk.exon.temco_loan_system.entity.MemberOrganizationsHistory;
 import lk.exon.temco_loan_system.entity.OfferManager;
 import lk.exon.temco_loan_system.entity.OrganizationBranches;
-import lk.exon.temco_loan_system.entity.OrganizationType;
 import lk.exon.temco_loan_system.entity.Penalty;
-import lk.exon.temco_loan_system.entity.Province;
 import lk.exon.temco_loan_system.entity.RepaymentPeriod;
 import lk.exon.temco_loan_system.entity.ResponseStatus;
 
@@ -68,7 +56,7 @@ public class LoanCalculator implements Serializable {
     double correctMonthlyInstallment = 0.00;
     boolean correctMonthlyInstallmentBoolean = false;
     private double expectedLoanAmount = 0.00;
-    private double monthlyinstallement = 0.00;
+    private double monthlyinstallement = 24000.00;
     private String repayementPeriod;
     private double grossIncome;
     private double interestRate = 6;
@@ -133,7 +121,7 @@ public class LoanCalculator implements Serializable {
     public void saveLoanDetails() {
         FacesMessage msg;
         if (expectedLoanAmount != 0) {
-            if (monthlyinstallement != 0) {
+            if (monthlyinstallement >= 20000) {
                 if (repayementPeriod != null && !repayementPeriod.equals("0")) {
                     if ((grossIncome != 0) && (monthlyinstallement < grossIncome)) {
                         System.out.println("employement type selected");
@@ -168,14 +156,16 @@ public class LoanCalculator implements Serializable {
                                     String verification_token = Security.encrypt(loanid);
                                     newLoan.setVerificationToke(verification_token);
                                     UniDB.create(newLoan);
-
+                                    System.out.println("branch id a" + branchId);
                                     if (branchId == 0) {
                                         branchId = LoanRequestForm.getBranchId();
+                                        System.out.println("branch id b" + branchId);
                                     }
 
                                     LoanApplicantHasBranch loanApplicantHasBranch = new LoanApplicantHasBranch();
                                     loanApplicantHasBranch.setLoanApplicantGurantorId(loanApplicantGurantor);
                                     loanApplicantHasBranch.setLoanManagerId(newLoan);
+                                    System.out.println("branch id c" + branchId);
                                     loanApplicantHasBranch.setOrganizationBranchesId((OrganizationBranches) UniDB.find(branchId, OrganizationBranches.class));
                                     UniDB.create(loanApplicantHasBranch);
 
@@ -243,7 +233,7 @@ public class LoanCalculator implements Serializable {
                 }
             } else {
                 displaymonthlyInstallment = true;
-                msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "Please Enter the monthly installement amount that you can pay");
+                msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "Minimum Monthly Installement you can pay is Rs.20,000");
                 FacesContext.getCurrentInstance().addMessage("", msg);
             }
         } else {

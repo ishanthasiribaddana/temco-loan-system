@@ -14,16 +14,25 @@ import jakarta.faces.model.SelectItem;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import lk.exon.temco.security.Security;
+import lk.exon.temco.templates.LoanRequestPortalEmail;
+import lk.exon.temco.tools.NewMailSender;
 import lk.exon.temco_loan_system.common.ComLib;
 import lk.exon.temco_loan_system.common.UniDBLocal;
 import lk.exon.temco_loan_system.entity.CustomerResponseHistory;
+import lk.exon.temco_loan_system.entity.GeneralUserProfile;
 import lk.exon.temco_loan_system.entity.InterestManager;
 import lk.exon.temco_loan_system.entity.Loan;
 import lk.exon.temco_loan_system.entity.LoanApplicantGurantor;
@@ -33,6 +42,7 @@ import lk.exon.temco_loan_system.entity.LoanInterestRate;
 import lk.exon.temco_loan_system.entity.LoanManager;
 import lk.exon.temco_loan_system.entity.LoanStatus;
 import lk.exon.temco_loan_system.entity.LoanStatusManager;
+import lk.exon.temco_loan_system.entity.MaterializedStudentLoanEligibleStudentTable;
 import lk.exon.temco_loan_system.entity.Member1;
 import lk.exon.temco_loan_system.entity.MemberBankAccounts;
 import lk.exon.temco_loan_system.entity.OfferManager;
@@ -75,6 +85,8 @@ public class LoanCalculator implements Serializable {
 
     private String error_message;
 
+    private double courseFee;
+
     @Inject
     LoanRequestForm LoanRequestForm;
 
@@ -87,19 +99,56 @@ public class LoanCalculator implements Serializable {
     public void init() {
         System.out.println("in it");
         intializeMethod();
-        dueCourseFee = LoanRequestForm.getDueCourseFee();
+
     }
 
     private void intializeMethod() {
         System.out.println("intializeMethod");
-        updateOfferManager();
+
+        if (LoanRequestForm.getNic() != null) {
+            updateOfferManager(LoanRequestForm.getNic());
+            dueCourseFee = LoanRequestForm.getDueCourseFee();
+        } else {
+            FacesContext facesContext = FacesContext.getCurrentInstance();
+            ExternalContext externalContext = facesContext.getExternalContext();
+            Map<String, String> params = facesContext.getExternalContext().getRequestParameterMap();
+
+            String loanIdPara = "";
+
+            try {
+                loanIdPara = URLDecoder.decode(params.get("en"), StandardCharsets.UTF_8.toString());
+            } catch (UnsupportedEncodingException ex) {
+                Logger.getLogger(EmailUnsubscribe.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
+            String userNic = getUserDetailsFromGeneralUserProfile(loanIdPara);
+
+            updateOfferManager(userNic);
+
+            List<MaterializedStudentLoanEligibleStudentTable> mt = UniDB.searchByQuery("SELECT g FROM MaterializedStudentLoanEligibleStudentTable g WHERE g.nic='" + userNic + "' ");
+
+            if (!mt.isEmpty()) {
+                dueCourseFee = mt.get(0).getTotalDue();
+            }
+
+        }
+
         repaymentPeriod();
     }
 
-    public void updateOfferManager() {
+    private String getUserDetailsFromGeneralUserProfile(String securityCode) {
+
+        List<GeneralUserProfile> generalUserProfile = UniDB.searchByQuery("SELECT g FROM GeneralUserProfile g WHERE g.verificationToken ='" + securityCode + "' ");
+        if (!generalUserProfile.isEmpty()) {
+            return generalUserProfile.get(0).getNic();
+        }
+        return "";
+    }
+
+    public void updateOfferManager(String nic) {
         Date date = new Date();
         System.out.println("updateOfferManager");
-        List<LoanCustomer> loanCustomer = UniDB.searchByQuery("SELECT g FROM LoanCustomer g WHERE g.nic='" + LoanRequestForm.getNic() + "'");
+        List<LoanCustomer> loanCustomer = UniDB.searchByQuery("SELECT g FROM LoanCustomer g WHERE g.nic='" + nic + "'");
         System.out.println("nic " + LoanRequestForm.getNic());
         if (!loanCustomer.isEmpty()) {
             System.out.println("loanCustomer.isEmpty() " + loanCustomer.isEmpty());
@@ -205,10 +254,12 @@ public class LoanCalculator implements Serializable {
                                     FacesContext.getCurrentInstance().getExternalContext().getFlash().setKeepMessages(true);
                                     FacesContext.getCurrentInstance().addMessage("", msg);
 
+                                    sendPortalEmail(member.getGeneralUserProfileId().getFirstName() + " " + member.getGeneralUserProfileId().getLastName(), member.getGeneralUserProfileId().getEmail());
+
                                     System.out.println("saved successfull");
                                     FacesContext facesContext = FacesContext.getCurrentInstance();
                                     ExternalContext externalContext = facesContext.getExternalContext();
-                                    externalContext.redirect(externalContext.getRequestContextPath() + "/tasks/gurantor-details.xhtml?l=" + verification_token);
+                                    externalContext.redirect(externalContext.getRequestContextPath() + "/view/details-submission-success.xhtml");
                                     facesContext.responseComplete();
 
                                 } catch (Exception e) {
@@ -396,6 +447,21 @@ public class LoanCalculator implements Serializable {
             val = -(future_value + present_value) / number_of_payments;
         }
         return val;
+
+    }
+
+    public void sendPortalEmail(String name, String email) {
+
+        String email_content = new LoanRequestPortalEmail().PortalCreatedEmail(name);
+
+        boolean b = new NewMailSender().sendM(email, "Welcome to Your Loan Request Portal", email_content);
+//        boolean b = new NewMailSender().sendM("tryabeywardane@gmail.com", "Secure Your Future with Low-Interest Student Loans from TEMCO Bank and Java Institute", new OfferInformEmailTemplateOne().emailTemplate(studentLoanExpecitngStudentList.get(i).studentName, studentLoanExpecitngStudentList.get(i).verificationToken));
+
+        if (b) {
+            System.out.println("Email send successfull");
+        } else {
+            System.out.println("Email send Failed");
+        }
 
     }
 

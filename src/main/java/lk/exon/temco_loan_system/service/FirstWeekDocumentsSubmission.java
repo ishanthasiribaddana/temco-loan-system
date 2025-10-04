@@ -18,6 +18,10 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -26,6 +30,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import lk.exon.temco_loan_system.common.ComPath;
 import lk.exon.temco_loan_system.common.UniDBLocal;
 import lk.exon.temco_loan_system.entity.DocumentDataVerification;
@@ -87,8 +93,12 @@ public class FirstWeekDocumentsSubmission implements Serializable {
 
         FacesContext facesContext = FacesContext.getCurrentInstance();
         Map<String, String> params = facesContext.getExternalContext().getRequestParameterMap();
-        securityCode = params.get("en");
-        loanId = params.get("lid");
+        try {
+            securityCode = URLDecoder.decode(params.get("en"), StandardCharsets.UTF_8.toString());
+            loanId = URLDecoder.decode(params.get("lid"), StandardCharsets.UTF_8.toString());
+        } catch (UnsupportedEncodingException ex) {
+            Logger.getLogger(EmailUnsubscribe.class.getName()).log(Level.SEVERE, null, ex);
+        }
 
         if (securityCode != null) {
             System.out.println("in if");
@@ -214,7 +224,10 @@ public class FirstWeekDocumentsSubmission implements Serializable {
 
                     FacesContext facesContext = FacesContext.getCurrentInstance();
                     ExternalContext externalContext = facesContext.getExternalContext();
-                    externalContext.redirect(externalContext.getRequestContextPath() + "/user/main/dashboard.xhtml?en=" + securityCode);
+
+                    String encodedSecurityCode = URLEncoder.encode(securityCode, StandardCharsets.UTF_8);
+
+                    externalContext.redirect(externalContext.getRequestContextPath() + "/user/main/dashboard.xhtml?en=" + encodedSecurityCode);
                     facesContext.responseComplete();
 
                 } catch (Exception e) {

@@ -2,7 +2,6 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:h="http://java.sun.com/jsf/html"
       xmlns:f="http://java.sun.com/jsf/core"
-      xmlns:ui="http://java.sun.com/jsf/facelets"
       xmlns:p="http://primefaces.org/ui">
 
     <h:head>
@@ -36,8 +35,8 @@
                 <div class="grid">
                     <div class="col-12 logo-container">
                         <p:graphicImage  name="images/temco.png" library="atlantis-layout" />
-                        <h1>Login to Your Account</h1>
-                        <h2>WELCOME TO TEMCO</h2>
+                        <h1>Login to Your Admin Account</h1>
+                        <h2>WELCOME TO TEMCO Bank Admin Portal</h2>
                     </div>
                     <div class="col-12">
                         <p:inputText placeholder="Username" value="#{adminLogin.username}"/>
@@ -50,7 +49,7 @@
                             <f:ajax execute="@form" render="growl" listener="#{adminLogin.verifyLogin()}"/>
                         </p:commandButton>
                         <!--<p:outputLabel value="Use Java Institute Credentials" />-->
-                        <p:button outcome="/dashboard" value="Forgot Password" icon="pi pi-question-circle" styleClass="ui-button-info" />
+                        <!--<p:button outcome="/dashboard" value="Forgot Password" icon="pi pi-question-circle" styleClass="ui-button-info" />-->
                     </div>
                 </div>
             </h:form>

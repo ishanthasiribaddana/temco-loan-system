@@ -15,6 +15,7 @@ import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Named;
 import java.io.OutputStream;
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.Map;
 import lk.exon.temco_loan_system.common.UniDBLocal;
@@ -22,9 +23,13 @@ import lk.exon.temco_loan_system.entity.LoanManager;
 import lk.exon.temco_loan_system.entity.LoanStatusManager;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
@@ -86,7 +91,12 @@ public class PayOrderSubmittedSuccess implements Serializable {
         ExternalContext externalContext = facesContext.getExternalContext();
         Map<String, String> params = facesContext.getExternalContext().getRequestParameterMap();
 
-        loanIdPara = params.get("l");
+        try {
+                loanIdPara = URLDecoder.decode(params.get("l"), StandardCharsets.UTF_8.toString());
+            } catch (UnsupportedEncodingException ex) {
+                Logger.getLogger(EmailUnsubscribe.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        
         try {
             if (loanIdPara != null) {
                 loanManager = getVerificationToken(loanIdPara);

@@ -15,10 +15,15 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import lk.exon.temco_loan_system.common.ComPath;
 import lk.exon.temco_loan_system.common.UniDBLocal;
 import lk.exon.temco_loan_system.entity.GeneralUserProfile;
@@ -28,6 +33,7 @@ import lk.exon.temco_loan_system.entity.LoanApplicantGurantor;
 import lk.exon.temco_loan_system.entity.LoanManager;
 import lk.exon.temco_loan_system.entity.LoanStatusManager;
 import lk.exon.temco_loan_system.entity.Member1;
+import lk.exon.temco_loan_system.service.EmailUnsubscribe;
 import org.primefaces.model.file.UploadedFile;
 
 /**
@@ -90,8 +96,13 @@ public class UserLoans implements Serializable {
     public void init() {
         FacesContext facesContext = FacesContext.getCurrentInstance();
         Map<String, String> params = facesContext.getExternalContext().getRequestParameterMap();
-        securityCode = params.get("en");
-        loanSecurityCode = params.get("lid");
+
+        try {
+            securityCode = URLDecoder.decode(params.get("en"), StandardCharsets.UTF_8.toString());
+            loanSecurityCode = URLDecoder.decode(params.get("lid"), StandardCharsets.UTF_8.toString());
+        } catch (UnsupportedEncodingException ex) {
+            Logger.getLogger(EmailUnsubscribe.class.getName()).log(Level.SEVERE, null, ex);
+        }
 
         if (securityCode != null) {
             System.out.println("in if");

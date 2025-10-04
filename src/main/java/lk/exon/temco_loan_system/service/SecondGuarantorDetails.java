@@ -20,6 +20,10 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -29,6 +33,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import lk.exon.temco.security.Security;
 import lk.exon.temco_loan_system.common.UniDBLocal;
 import lk.exon.temco_loan_system.entity.CustomerResponseHistory;
@@ -159,7 +165,11 @@ public class SecondGuarantorDetails implements Serializable {
         ExternalContext externalContext = facesContext.getExternalContext();
         Map<String, String> params = facesContext.getExternalContext().getRequestParameterMap();
 
-        loanIdPara = params.get("l");
+        try {
+                loanIdPara = URLDecoder.decode(params.get("l"), StandardCharsets.UTF_8.toString());
+            } catch (UnsupportedEncodingException ex) {
+                Logger.getLogger(EmailUnsubscribe.class.getName()).log(Level.SEVERE, null, ex);
+            }
         System.out.println("loanIdPara" + loanIdPara);
         try {
             if (loanIdPara != null) {
@@ -391,7 +401,10 @@ public class SecondGuarantorDetails implements Serializable {
 
                                         FacesContext facesContext = FacesContext.getCurrentInstance();
                                         ExternalContext externalContext = facesContext.getExternalContext();
-                                        externalContext.redirect(externalContext.getRequestContextPath() + "/tasks/loan-details.xhtml?l=" + loanIdPara);
+                                        
+                                        String encodedloanIdPara = URLEncoder.encode(loanIdPara, StandardCharsets.UTF_8);
+                                        
+                                        externalContext.redirect(externalContext.getRequestContextPath() + "/tasks/loan-details.xhtml?l=" + encodedloanIdPara);
                                         facesContext.responseComplete();
 
                                     } else {

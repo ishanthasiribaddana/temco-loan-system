@@ -43,7 +43,6 @@ import lk.exon.temco_loan_system.entity.WeeksScheduler;
  * @author USER
  */
 @Named
-@LocalBean
 @ViewScoped
 public class LoanDashboard implements Serializable {
 
@@ -256,7 +255,7 @@ public class LoanDashboard implements Serializable {
                 }
 
             } else {
-                msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error ! ! !", "Please Select a Loan Request");
+                msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error ! ! !", "Gurantors Data is Empty.Can not Proceed");
                 FacesContext.getCurrentInstance().addMessage("", msg);
             }
 

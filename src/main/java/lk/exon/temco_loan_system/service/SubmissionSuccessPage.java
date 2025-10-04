@@ -13,8 +13,11 @@ import jakarta.faces.context.ExternalContext;
 import jakarta.faces.context.FacesContext;
 import jakarta.inject.Named;
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -22,6 +25,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import lk.exon.temco_loan_system.common.ComLib;
 import lk.exon.temco_loan_system.common.UniDBLocal;
 import lk.exon.temco_loan_system.entity.LoanInstallementPlan;
@@ -70,25 +75,30 @@ public class SubmissionSuccessPage {
         ExternalContext externalContext = facesContext.getExternalContext();
         Map<String, String> params = facesContext.getExternalContext().getRequestParameterMap();
 
-        loanIdPara = params.get("en");
-        System.out.println("loand id para "+loanIdPara);
+        try {
+            loanIdPara = URLDecoder.decode(params.get("en"), StandardCharsets.UTF_8.toString());
+        } catch (UnsupportedEncodingException ex) {
+            Logger.getLogger(EmailUnsubscribe.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        System.out.println("loand id para " + loanIdPara);
         try {
             if (loanIdPara != null) {
                 loanManager = getVerificationToken(loanIdPara);
                 if (loanManager != null) {
                     loanId = loanManager.getReferenceId();
-                    System.out.println("loan id "+loanId );
+                    System.out.println("loan id " + loanId);
                 }
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        System.out.println("loanManager != null "+(loanManager != null));
+        System.out.println("loanManager != null " + (loanManager != null));
         if (loanManager != null) {
             payAmount = loanManager.getMonthlyInstallement() * 3;
             setDates();
             getLoanLastThreePaymentsDates();
-        }else{
+        } else {
             System.out.println("loan manager null");
         }
         LoadTable();
@@ -150,7 +160,7 @@ public class SubmissionSuccessPage {
     }
 
     public LoanManager getVerificationToken(String token) {
-        List<LoanManager> l = UniDB.searchByQuery("SELECT  g FROM LoanManager g WHERE g.verificationToke='"+token+"' ");
+        List<LoanManager> l = UniDB.searchByQuery("SELECT  g FROM LoanManager g WHERE g.verificationToke='" + token + "' ");
         if (l.isEmpty()) {
             return null;
         } else {

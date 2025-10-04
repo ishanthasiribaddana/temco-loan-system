@@ -15,6 +15,9 @@ import jakarta.faces.model.SelectItem;
 import jakarta.inject.Named;
 import java.io.IOException;
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -193,7 +196,12 @@ public class LoanRequestForm implements Serializable {
         System.out.println("intializeMethod");
         FacesContext facesContext = FacesContext.getCurrentInstance();
         Map<String, String> params = facesContext.getExternalContext().getRequestParameterMap();
-        securityCode = params.get("en");
+
+        try {
+            securityCode = URLDecoder.decode(params.get("en"), StandardCharsets.UTF_8.toString());
+        } catch (UnsupportedEncodingException ex) {
+            Logger.getLogger(EmailUnsubscribe.class.getName()).log(Level.SEVERE, null, ex);
+        }
 
         if (securityCode != null) {
             System.out.println("in if");
@@ -542,12 +550,9 @@ public class LoanRequestForm implements Serializable {
 //                                                                            String loanid = generateRefernceId(member.getMembershipNo());
                                                             String loanid = memberBankAccounts.getAccountNo();
 
-                                                            sendPortalEmail(firstName + " " + lastName, email);
-
                                                             msg = new FacesMessage(FacesMessage.SEVERITY_INFO, "Success ! ! !", "Details Saved Successful.Please check your email");
                                                             FacesContext.getCurrentInstance().getExternalContext().getFlash().setKeepMessages(true);
                                                             FacesContext.getCurrentInstance().addMessage("", msg);
-                                                            sendPortalEmail(firstName + " " + lastName, email);
 
                                                             Date dateTwo = new Date();
                                                             System.out.println("updateOfferManager");
@@ -635,21 +640,6 @@ public class LoanRequestForm implements Serializable {
             msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "Please Enter the mobile number");
             FacesContext.getCurrentInstance().addMessage("", msg);
         }
-    }
-
-    public void sendPortalEmail(String name, String email) {
-
-        String email_content = new LoanRequestPortalEmail().PortalCreatedEmail(name);
-
-        boolean b = new NewMailSender().sendM(email, "Welcome to Your Loan Request Portal", email_content);
-//        boolean b = new NewMailSender().sendM("tryabeywardane@gmail.com", "Secure Your Future with Low-Interest Student Loans from TEMCO Bank and Java Institute", new OfferInformEmailTemplateOne().emailTemplate(studentLoanExpecitngStudentList.get(i).studentName, studentLoanExpecitngStudentList.get(i).verificationToken));
-
-        if (b) {
-            System.out.println("Email send successfull");
-        } else {
-            System.out.println("Email send Failed");
-        }
-
     }
 
     public String generateMemberNo() {

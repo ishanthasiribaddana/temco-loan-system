@@ -14,6 +14,8 @@ import jakarta.faces.model.SelectItem;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import java.io.Serializable;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -200,7 +202,10 @@ public class CalculateLoan implements Serializable {
                                     System.out.println("saved successfull");
                                     FacesContext facesContext = FacesContext.getCurrentInstance();
                                     ExternalContext externalContext = facesContext.getExternalContext();
-                                    externalContext.redirect(externalContext.getRequestContextPath() + "/tasks/gurantor-details.xhtml?l=" + verification_token);
+
+                                    String encodedVerificationToken = URLEncoder.encode(verification_token, StandardCharsets.UTF_8);
+
+                                    externalContext.redirect(externalContext.getRequestContextPath() + "/tasks/gurantor-details.xhtml?l=" + encodedVerificationToken);
                                     facesContext.responseComplete();
 
                                 } catch (Exception e) {

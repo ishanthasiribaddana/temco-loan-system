@@ -4,35 +4,23 @@
  */
 package lk.exon.temco_loan_system.service;
 
-import com.google.gson.Gson;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.ExternalContext;
 import jakarta.faces.context.FacesContext;
-import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.core.Context;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
 import lk.exon.temco.security.Security;
-import lk.exon.temco_loan_system.common.ComPath;
 import lk.exon.temco_loan_system.common.UniDBLocal;
-import lk.exon.temco_loan_system.entity.GeneralUserProfile;
 import lk.exon.temco_loan_system.entity.LoginSession;
 import lk.exon.temco_loan_system.entity.UserLoginGroup;
-import lk.exon.temco_loan_system.model.ResponseModel;
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
 
 /**
  *
@@ -56,6 +44,15 @@ public class AdminLogin implements Serializable {
         httpRequest = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
     }
 
+    public void checkSession() throws IOException {
+        ExternalContext externalContext = FacesContext.getCurrentInstance().getExternalContext();
+        Object adminUser = externalContext.getSessionMap().get("adminUser");
+        if (adminUser == null) {
+            externalContext.redirect(externalContext.getRequestContextPath() + "/admin/login.xhtml");
+            FacesContext.getCurrentInstance().responseComplete();
+        }
+    }
+
     public void verifyLogin() throws Exception {
         try {
             if (username != null && password != null) {
@@ -68,6 +65,7 @@ public class AdminLogin implements Serializable {
                     List<UserLoginGroup> ul_list = uni.searchByQuery(quary);
                     if (ul_list.size() > 0) {
                         UserLoginGroup ulg = ul_list.get(0);
+                        System.out.println("password :" + ulg.getUserLoginId().getPassword());
                         String decryptPassword = Security.decrypt(ulg.getUserLoginId().getPassword());
 
                         System.out.println(password + " : " + decryptPassword);
@@ -77,7 +75,7 @@ public class AdminLogin implements Serializable {
                                 FacesContext.getCurrentInstance().addMessage("", msg);
 
                             } else {
-                                
+
                                 String ip = httpRequest.getHeader("CF-Connecting-IP");
                                 if (ip == null) {
                                     ip = httpRequest.getRemoteAddr();
@@ -93,7 +91,8 @@ public class AdminLogin implements Serializable {
 
                                 FacesContext facesContext = FacesContext.getCurrentInstance();
                                 ExternalContext externalContext = facesContext.getExternalContext();
-                                externalContext.redirect(externalContext.getRequestContextPath() + "/view/dashboard.xhtml");
+                                externalContext.getSessionMap().put("adminUser", ulg);
+                                externalContext.redirect(externalContext.getRequestContextPath() + "/admin/view/dashboard.xhtml");
                                 facesContext.responseComplete();
 
                             }

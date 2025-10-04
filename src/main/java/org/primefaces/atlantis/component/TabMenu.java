@@ -40,32 +40,32 @@ import org.primefaces.util.MapBuilder;
 @ListenerFor(sourceClass = TabMenu.class, systemEventClass = PostAddToViewEvent.class)
 public class TabMenu extends UITabPanel implements org.primefaces.component.api.Widget, ClientBehaviorHolder, PrimeClientBehaviorHolder {
 
-	public static final String COMPONENT_TYPE = "org.primefaces.component.AtlantisTabMenu";
-	public static final String COMPONENT_FAMILY = "org.primefaces.component";
-	public static final String DEFAULT_RENDERER = "org.primefaces.component.AtlantisTabMenuRenderer";
-    
+    public static final String COMPONENT_TYPE = "org.primefaces.component.AtlantisTabMenu";
+    public static final String COMPONENT_FAMILY = "org.primefaces.component";
+    public static final String DEFAULT_RENDERER = "org.primefaces.component.AtlantisTabMenuRenderer";
+
     private static final String[] LEGACY_RESOURCES = new String[]{"primefaces.css", "jquery/jquery.js",
         "jquery/jquery-plugins.js", "primefaces.js"};
     private static final String[] MODERN_RESOURCES = new String[]{"components.css", "jquery/jquery.js",
         "jquery/jquery-plugins.js", "core.js"};
 
-	public enum PropertyKeys {
+    public enum PropertyKeys {
 
         widgetVar, activeIndex, stateful;
 
-		String toString;
+        String toString;
 
-		PropertyKeys(String toString) {
-			this.toString = toString;
-		}
+        PropertyKeys(String toString) {
+            this.toString = toString;
+        }
 
         PropertyKeys() {
         }
 
-		public String toString() {
-			return ((this.toString != null) ? this.toString : super.toString());
-}
-	}
+        public String toString() {
+            return ((this.toString != null) ? this.toString : super.toString());
+        }
+    }
 
     private static final Map<String, Class<? extends BehaviorEvent>> BEHAVIOR_EVENT_MAPPING = MapBuilder.<String, Class<? extends BehaviorEvent>>builder()
             .put("tabChange", TabChangeEvent.class)
@@ -87,29 +87,29 @@ public class TabMenu extends UITabPanel implements org.primefaces.component.api.
         return this.getClientId(context).equals(context.getExternalContext().getRequestParameterMap().get(Constants.RequestParams.PARTIAL_SOURCE_PARAM));
     }
 
-	public TabMenu() {
-		setRendererType(DEFAULT_RENDERER);
-	}
+    public TabMenu() {
+        setRendererType(DEFAULT_RENDERER);
+    }
 
-	public String getFamily() {
-		return COMPONENT_FAMILY;
-	}
+    public String getFamily() {
+        return COMPONENT_FAMILY;
+    }
 
-	public java.lang.String getWidgetVar() {
-		return (java.lang.String) getStateHelper().eval(PropertyKeys.widgetVar, null);
-	}
+    public java.lang.String getWidgetVar() {
+        return (java.lang.String) getStateHelper().eval(PropertyKeys.widgetVar, null);
+    }
 
-	public void setWidgetVar(java.lang.String _widgetVar) {
-		getStateHelper().put(PropertyKeys.widgetVar, _widgetVar);
-	}
+    public void setWidgetVar(java.lang.String _widgetVar) {
+        getStateHelper().put(PropertyKeys.widgetVar, _widgetVar);
+    }
 
-	public int getActiveIndex() {
-		return (java.lang.Integer) getStateHelper().eval(PropertyKeys.activeIndex, 0);
-	}
+    public int getActiveIndex() {
+        return (java.lang.Integer) getStateHelper().eval(PropertyKeys.activeIndex, 0);
+    }
 
-	public void setActiveIndex(int _activeIndex) {
-		getStateHelper().put(PropertyKeys.activeIndex, _activeIndex);
-	}
+    public void setActiveIndex(int _activeIndex) {
+        getStateHelper().put(PropertyKeys.activeIndex, _activeIndex);
+    }
 
     public boolean isStateful() {
         return (java.lang.Boolean) getStateHelper().eval(PropertyKeys.stateful, true);
@@ -119,19 +119,18 @@ public class TabMenu extends UITabPanel implements org.primefaces.component.api.
         getStateHelper().put(PropertyKeys.stateful, _stateful);
     }
 
-	@Override
-	public String resolveWidgetVar() {
-		String userWidgetVar = getWidgetVar();
+    @Override
+    public String resolveWidgetVar() {
+        String userWidgetVar = getWidgetVar();
 
-		if (userWidgetVar != null) {
-			return userWidgetVar;
-		}
-		else {
-			FacesContext context = getFacesContext();
-			String clientId = getClientId(context);
-			return "widget_" + clientId.replaceAll("-|" + UINamingContainer.getSeparatorChar(context), "_");
-		}
-	}
+        if (userWidgetVar != null) {
+            return userWidgetVar;
+        } else {
+            FacesContext context = getFacesContext();
+            String clientId = getClientId(context);
+            return "widget_" + clientId.replaceAll("-|" + UINamingContainer.getSeparatorChar(context), "_");
+        }
+    }
 
     public Tab findTab(String tabClientId) {
         for (UIComponent component : getChildren()) {
@@ -177,10 +176,10 @@ public class TabMenu extends UITabPanel implements org.primefaces.component.api.
 
     @Override
     public void processEvent(ComponentSystemEvent event) throws AbortProcessingException {
-        if(event instanceof PostAddToViewEvent) {
+        if (event instanceof PostAddToViewEvent) {
             FacesContext context = getFacesContext();
             UIViewRoot root = context.getViewRoot();
-            
+
             boolean isPrimeConfig;
             try {
                 isPrimeConfig = Class.forName("org.primefaces.config.PrimeConfiguration") != null;
@@ -190,7 +189,7 @@ public class TabMenu extends UITabPanel implements org.primefaces.component.api.
 
             String[] resources = (isPrimeConfig) ? MODERN_RESOURCES : LEGACY_RESOURCES;
 
-            for(String res : resources) {
+            for (String res : resources) {
                 UIComponent component = context.getApplication().createComponent(UIOutput.COMPONENT_TYPE);
                 if (res.endsWith("css")) {
                     component.setRendererType("jakarta.faces.resource.Stylesheet");

@@ -37,9 +37,10 @@ public class DashboardBean implements Serializable {
 
     private String url;
     private String urlTwo;
+    private String urlThree;
 
     private String userVerificationToken;
-
+    private String verificationToken;
     private String firstName;
     private String loanSecurityCode;
 
@@ -49,6 +50,7 @@ public class DashboardBean implements Serializable {
     private double requestedAmount;
     private String loanProgression;
     private boolean urlView = true;
+    private boolean urlViewForApplyLoan = true;
     private boolean loggedIn;
 
     private String loanApplicantFirstName;
@@ -106,7 +108,7 @@ public class DashboardBean implements Serializable {
         ExternalContext externalContext = facesContext.getExternalContext();
         url = externalContext.getRequestContextPath() + "/user/main/tasks/loan.xhtml?en=" + securityCode + "&" + "lid=" + loanSecurityCode;
         urlTwo = externalContext.getRequestContextPath() + "/user/main/tasks/document-submission.xhtml?en=" + securityCode + "&" + "lid=" + loanSecurityCode;
-
+        urlThree = externalContext.getRequestContextPath() + "/tasks/loan-calculator.xhtml?en=" + verificationToken;
     }
 
     public void loadCurrentLoan() {
@@ -126,6 +128,7 @@ public class DashboardBean implements Serializable {
                     List<LoanManager> loan_manager = uniDB.searchByQueryLimit("SELECT g FROM LoanManager g WHERE g.loanApplicantAndGurantorsId.id='" + loan_applicant_gurantor.get(0).getId() + "' ORDER BY g.date DESC ", 1);
 
                     if (!loan_manager.isEmpty()) {
+                        urlViewForApplyLoan = false;
                         System.out.println("loan_manager " + loan_manager.size());
                         List<LoanStatusManager> loan_status_managers = uniDB.searchByQueryLimit("SELECT g FROM LoanStatusManager g WHERE g.loanManagerId.id='" + loan_manager.get(0).getId() + "' ORDER BY g.date DESC ", 1);
                         if (!loan_status_managers.isEmpty()) {
@@ -257,6 +260,8 @@ public class DashboardBean implements Serializable {
 
                             loanSecurityCode = loan_manager.get(0).getVerificationToke();
                         }
+                    } else {
+                        urlViewForApplyLoan = true;
                     }
                 }
             }
@@ -267,6 +272,7 @@ public class DashboardBean implements Serializable {
 
         List<GeneralUserProfile> generalUserProfile = uniDB.searchByQuery("SELECT g FROM GeneralUserProfile g WHERE g.verificationToken ='" + securityCode + "' ");
         if (!generalUserProfile.isEmpty()) {
+            verificationToken = generalUserProfile.get(0).getVerificationToken();
             firstName = generalUserProfile.get(0).getFirstName();
             System.out.println("name " + generalUserProfile.get(0).getFirstName());
         }
@@ -606,6 +612,22 @@ public class DashboardBean implements Serializable {
 
     public void setSecondGuarantorMemberId(String secondGuarantorMemberId) {
         this.secondGuarantorMemberId = secondGuarantorMemberId;
+    }
+
+    public boolean isUrlViewForApplyLoan() {
+        return urlViewForApplyLoan;
+    }
+
+    public void setUrlViewForApplyLoan(boolean urlViewForApplyLoan) {
+        this.urlViewForApplyLoan = urlViewForApplyLoan;
+    }
+
+    public String getUrlThree() {
+        return urlThree;
+    }
+
+    public void setUrlThree(String urlThree) {
+        this.urlThree = urlThree;
     }
 
 }

@@ -35,6 +35,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import lk.exon.temco.filteration.Filteration;
 import lk.exon.temco.security.Security;
 import lk.exon.temco_loan_system.common.UniDBLocal;
 import lk.exon.temco_loan_system.entity.CustomerResponseHistory;
@@ -166,10 +167,10 @@ public class SecondGuarantorDetails implements Serializable {
         Map<String, String> params = facesContext.getExternalContext().getRequestParameterMap();
 
         try {
-                loanIdPara = URLDecoder.decode(params.get("l"), StandardCharsets.UTF_8.toString());
-            } catch (UnsupportedEncodingException ex) {
-                Logger.getLogger(EmailUnsubscribe.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            loanIdPara = URLDecoder.decode(params.get("l"), StandardCharsets.UTF_8.toString());
+        } catch (UnsupportedEncodingException ex) {
+            Logger.getLogger(EmailUnsubscribe.class.getName()).log(Level.SEVERE, null, ex);
+        }
         System.out.println("loanIdPara" + loanIdPara);
         try {
             if (loanIdPara != null) {
@@ -251,7 +252,7 @@ public class SecondGuarantorDetails implements Serializable {
                                             gupSecondGuarantor.setNic(secondGuarantorNic);
                                             gupSecondGuarantor.setMobileNo(secondGuarantorMobileNo);
                                             gupSecondGuarantor.setProfileCreatedDate(date);
-                                            gupSecondGuarantor.setVerificationToken(Security.encrypt(secondGuarantorMobileNo));
+                                            gupSecondGuarantor.setVerificationToken(Security.encrypt(Filteration.getFilteredSHA256HashedPassword(secondGuarantorMobileNo)));
                                             gupSecondGuarantor.setProvinceId((Province) UniDB.find(Integer.parseInt(selectedProvinceIdSecond), Province.class));
                                             gupSecondGuarantor.setDistrictId((District) UniDB.find(Integer.parseInt(selectedDistrictSecond), District.class));
                                             gupSecondGuarantor.setDivisionalSecretarialId((DivisionalSecretarial) UniDB.find(Integer.parseInt(selectedDivisionalSecretarialSecond), DivisionalSecretarial.class));
@@ -401,9 +402,9 @@ public class SecondGuarantorDetails implements Serializable {
 
                                         FacesContext facesContext = FacesContext.getCurrentInstance();
                                         ExternalContext externalContext = facesContext.getExternalContext();
-                                        
+
                                         String encodedloanIdPara = URLEncoder.encode(loanIdPara, StandardCharsets.UTF_8);
-                                        
+
                                         externalContext.redirect(externalContext.getRequestContextPath() + "/tasks/loan-details.xhtml?l=" + encodedloanIdPara);
                                         facesContext.responseComplete();
 

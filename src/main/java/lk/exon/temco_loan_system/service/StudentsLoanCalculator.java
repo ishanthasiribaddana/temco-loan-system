@@ -45,7 +45,7 @@ import lk.exon.temco_loan_system.entity.ResponseStatus;
  */
 @Named
 @ViewScoped
-public class StudentsLoanCalculator implements Serializable{
+public class StudentsLoanCalculator implements Serializable {
 
     private List<LoanCalculatorRecords> loanStrucure = new ArrayList<>();
 
@@ -88,8 +88,6 @@ public class StudentsLoanCalculator implements Serializable{
         System.out.println("intializeMethod");
         repaymentPeriod();
     }
-
-  
 
 //    public void saveLoanDetails() {
 //        FacesMessage msg;
@@ -209,7 +207,6 @@ public class StudentsLoanCalculator implements Serializable{
 //            FacesContext.getCurrentInstance().addMessage("", msg);
 //        }
 //    }
-
     public void calulateLoan() {
         FacesMessage msg;
         System.out.println("calculateMonthlyInstallementIsLessThanGuarantorsIncome() " + calculateMonthlyInstallementIsLessThanGuarantorsIncome());

@@ -291,14 +291,14 @@
                                             <div class="formgrid grid">
                                                 <div class="field col">
                                                     <p:outputLabel for="snicFront" style="display: block; text-align: center; margin-bottom: 10px;">Front of NIC</p:outputLabel>
-                                                    <p:graphicImage id="snicFront" value="/imageServlet?path=#{userLoans.sfrontNic}" alt="Sample Image" style="width: 75%; height: 50%; display: block; margin: 0 0 0 5%;"/>
+                                                    <p:graphicImage id="snicFront" value="/imageServlet?path=#{dashboardBean.sfrontNic}" alt="Sample Image" style="width: 75%; height: 50%; display: block; margin: 0 0 0 5%;"/>
                                                                                                 <p:fileUpload style="margin: 2% 0 0 5%" id="guarantor_front_two" mode="simple" accept="image/jpeg,image/png" sizeLimit="2097152"
                                                                                                               fileLimitMessage="File size exceeds 2 MB limit. Please upload a smaller file." value="#{userLoans.secondGuarantorUploadFIleOne}"/>
         
                                                 </div>
                                                 <div class="field col">
                                                     <p:outputLabel for="snicBack" style="display: block; text-align: center; margin-bottom: 10px;">Back of NIC</p:outputLabel>
-                                                    <p:graphicImage id="snicBack" value="/imageServlet?path=#{userLoans.secondBackNic}" alt="Sample Image" style="width: 75%; height: 50%; display: block; margin: 0 0 0 5%;"/>
+                                                    <p:graphicImage id="snicBack" value="/imageServlet?path=#{dashboardBean.secondBackNic}" alt="Sample Image" style="width: 75%; height: 50%; display: block; margin: 0 0 0 5%;"/>
                                                                                                 <p:fileUpload style="margin: 2% 0 0 5%" id="guarantor_back_two" mode="simple" accept="image/jpeg,image/png" sizeLimit="2097152"
                                                                                                               fileLimitMessage="File size exceeds 2 MB limit. Please upload a smaller file." value="#{userLoans.secondGuarantorUploadFIleTwo}"/>
         

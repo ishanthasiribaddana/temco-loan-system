@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import lk.exon.temco.filteration.Filteration;
 import lk.exon.temco.security.Security;
 import lk.exon.temco.templates.LoanRequestPortalEmail;
 import lk.exon.temco.tools.NewMailSender;
@@ -202,7 +203,9 @@ public class LoanCalculator implements Serializable {
                                     newLoan.setPenaltyId((Penalty) UniDB.find(1, Penalty.class));
                                     newLoan.setMemberBankAccountsId(memberBankAccounts);
 
-                                    String verification_token = Security.encrypt(loanid);
+//                                    String verification_token = Security.encrypt(loanid);
+                                    String verification_token = Filteration.getFilteredSHA256HashedPassword(System.currentTimeMillis() + "" + member.getId());
+
                                     newLoan.setVerificationToke(verification_token);
                                     UniDB.create(newLoan);
                                     System.out.println("branch id a" + branchId);

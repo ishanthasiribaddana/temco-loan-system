@@ -35,6 +35,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import lk.exon.temco.filteration.Filteration;
 import lk.exon.temco.security.Security;
 import lk.exon.temco_loan_system.common.ComLib;
 import lk.exon.temco_loan_system.common.UniDBLocal;
@@ -379,7 +380,7 @@ public class GuarantorDetails implements Serializable {
                                                     gupFirstGuarantor.setNic(firstGuarantorNic);
                                                     gupFirstGuarantor.setMobileNo(firstGuarantorMobileNo);
                                                     gupFirstGuarantor.setProfileCreatedDate(date);
-                                                    gupFirstGuarantor.setVerificationToken(Security.encrypt(firstGuarantorMobileNo));
+                                                    gupFirstGuarantor.setVerificationToken(Filteration.getFilteredSHA256HashedPassword(firstGuarantorMobileNo));
                                                     gupFirstGuarantor.setIsActive(Short.valueOf("1"));
                                                     gupFirstGuarantor
                                                             .setProvinceId((Province) UniDB.find(Integer.parseInt(selectedProvinceId), Province.class

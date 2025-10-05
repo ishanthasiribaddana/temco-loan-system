@@ -20,6 +20,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import lk.exon.temco.filteration.Filteration;
 import lk.exon.temco.security.Security;
 import lk.exon.temco_loan_system.common.ComLib;
 import lk.exon.temco_loan_system.common.UniDBLocal;
@@ -153,7 +154,8 @@ public class CalculateLoan implements Serializable {
                                     newLoan.setPenaltyId((Penalty) UniDB.find(1, Penalty.class));
                                     newLoan.setMemberBankAccountsId(memberBankAccounts);
 
-                                    String verification_token = Security.encrypt(loanid);
+//                                    String verification_token = Security.encrypt(loanid);
+                                    String verification_token = Filteration.getFilteredSHA256HashedPassword(System.currentTimeMillis() + "" + member.getId());
                                     newLoan.setVerificationToke(verification_token);
                                     UniDB.create(newLoan);
 

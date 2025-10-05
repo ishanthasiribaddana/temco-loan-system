@@ -7,7 +7,7 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="temco_loan_system" />
-        <module name="temco_loan_system-1.0" />
+        <module name="temco_loan_system" />
       </profile>
     </annotationProcessing>
   </component>

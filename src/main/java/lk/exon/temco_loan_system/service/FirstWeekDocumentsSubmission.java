@@ -93,12 +93,8 @@ public class FirstWeekDocumentsSubmission implements Serializable {
 
         FacesContext facesContext = FacesContext.getCurrentInstance();
         Map<String, String> params = facesContext.getExternalContext().getRequestParameterMap();
-        try {
-            securityCode = URLDecoder.decode(params.get("en"), StandardCharsets.UTF_8.toString());
-            loanId = URLDecoder.decode(params.get("lid"), StandardCharsets.UTF_8.toString());
-        } catch (UnsupportedEncodingException ex) {
-            Logger.getLogger(EmailUnsubscribe.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        securityCode = params.get("en");
+        loanId = params.get("lid");
 
         if (securityCode != null) {
             System.out.println("in if");
@@ -224,10 +220,7 @@ public class FirstWeekDocumentsSubmission implements Serializable {
 
                     FacesContext facesContext = FacesContext.getCurrentInstance();
                     ExternalContext externalContext = facesContext.getExternalContext();
-
-                    String encodedSecurityCode = URLEncoder.encode(securityCode, StandardCharsets.UTF_8);
-
-                    externalContext.redirect(externalContext.getRequestContextPath() + "/user/main/dashboard.xhtml?en=" + encodedSecurityCode);
+                    externalContext.redirect(externalContext.getRequestContextPath() + "/user/main/dashboard.xhtml?en=" + securityCode);
                     facesContext.responseComplete();
 
                 } catch (Exception e) {

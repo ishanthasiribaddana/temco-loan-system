@@ -168,6 +168,8 @@ public class GuarantorDetails implements Serializable {
 
     private GurantorCount gurantorNo;
 
+    String nic = "";
+
     @Inject
     LoanRequestForm LoanRequestForm;
 
@@ -208,13 +210,8 @@ public class GuarantorDetails implements Serializable {
         ExternalContext externalContext = facesContext.getExternalContext();
         Map<String, String> params = facesContext.getExternalContext().getRequestParameterMap();
 
-        try {
-            loanIdPara = URLDecoder.decode(params.get("l"), StandardCharsets.UTF_8.toString());
-        } catch (UnsupportedEncodingException ex) {
-            Logger.getLogger(EmailUnsubscribe.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-        System.out.println("loanIdPara" + loanIdPara);
+        loanIdPara = params.get("l");
+        System.out.println("loanIdPara " + loanIdPara);
         try {
             if (loanIdPara != null) {
                 loanManager = getVerificationToken(loanIdPara);
@@ -222,7 +219,7 @@ public class GuarantorDetails implements Serializable {
                 if (loanManager != null) {
                     loanId = loanManager.getReferenceId();
                     System.out.println("set the referrence id");
-                    updateOfferManager();
+                    updateOfferManager(loanManager);
                     folderPath = "/root/temodocs/studentloansdocs/gurantordetails";
                 } else {
                     externalContext.redirect(externalContext.getRequestContextPath() + "/view/error.xhtml");
@@ -235,11 +232,14 @@ public class GuarantorDetails implements Serializable {
         }
     }
 
-    public void updateOfferManager() {
+    public void updateOfferManager(LoanManager loanManagerObj) {
+
+        nic = loanManagerObj.getLoanApplicantAndGurantorsId().getMemberId().getGeneralUserProfileId().getNic();
+
         Date date = new Date();
-        System.out.println("updateOfferManager");
-        List<LoanCustomer> loanCustomer = UniDB.searchByQuery("SELECT g FROM LoanCustomer g WHERE g.nic='" + LoanRequestForm.getNic() + "'");
-        System.out.println("nic " + LoanRequestForm.getNic());
+        System.out.println("updateOfferManager " + nic);
+        List<LoanCustomer> loanCustomer = UniDB.searchByQuery("SELECT g FROM LoanCustomer g WHERE g.nic='" + nic + "'");
+        System.out.println("nic " + nic);
         if (!loanCustomer.isEmpty()) {
             System.out.println("loanCustomer.isEmpty() " + loanCustomer.isEmpty());
             List<OfferManager> offerManager = UniDB.searchByQuery("SELECT g FROM OfferManager g WHERE g.loanCustomerId.id='" + loanCustomer.get(0).getId() + "' AND g.loanOfferId.id='1'");
@@ -514,8 +514,8 @@ public class GuarantorDetails implements Serializable {
 
                                                 Date dateTwo = new Date();
                                                 System.out.println("updateOfferManager");
-                                                List<LoanCustomer> loanCustomer = UniDB.searchByQuery("SELECT g FROM LoanCustomer g WHERE g.nic='" + LoanRequestForm.getNic() + "'");
-                                                System.out.println("nic " + LoanRequestForm.getNic());
+                                                List<LoanCustomer> loanCustomer = UniDB.searchByQuery("SELECT g FROM LoanCustomer g WHERE g.nic='" + nic + "'");
+                                                System.out.println("nic " + nic);
                                                 if (!loanCustomer.isEmpty()) {
                                                     System.out.println("loanCustomer.isEmpty() " + loanCustomer.isEmpty());
                                                     List<OfferManager> offerManager = UniDB.searchByQuery("SELECT g FROM OfferManager g WHERE g.loanCustomerId.id='" + loanCustomer.get(0).getId() + "' AND g.loanOfferId.id='1'");
@@ -534,10 +534,7 @@ public class GuarantorDetails implements Serializable {
 
                                                 FacesContext facesContext = FacesContext.getCurrentInstance();
                                                 ExternalContext externalContext = facesContext.getExternalContext();
-
-                                                String encodedloanId = URLEncoder.encode(loanIdPara, StandardCharsets.UTF_8);
-
-                                                externalContext.redirect(externalContext.getRequestContextPath() + "/tasks/second-guarantor-details.xhtml?l=" + encodedloanId);
+                                                externalContext.redirect(externalContext.getRequestContextPath() + "/tasks/second-guarantor-details.xhtml?l=" + loanIdPara);
 
                                             } else {
                                                 firstGsaved = false;
@@ -1017,9 +1014,7 @@ public class GuarantorDetails implements Serializable {
                         ExternalContext externalContext = facesContext.getExternalContext();
                         //                externalContext.redirect(externalContext.getRequestContextPath() + "/view/guarantor-details-submission-successful.xhtml?en=" + loanIdPara);
 
-                        String encodedloanIdPara = URLEncoder.encode(loanIdPara, StandardCharsets.UTF_8);
-
-                        externalContext.redirect(externalContext.getRequestContextPath() + "/tasks/loan-details.xhtml?l=" + encodedloanIdPara);
+                        externalContext.redirect(externalContext.getRequestContextPath() + "/tasks/loan-details.xhtml?l=" + loanIdPara);
 //                        externalContext.redirect(externalContext.getRequestContextPath() + "/view/success.xhtml");
                         facesContext.responseComplete();
                     } catch (Exception e) {

@@ -91,12 +91,8 @@ public class PayOrderSubmittedSuccess implements Serializable {
         ExternalContext externalContext = facesContext.getExternalContext();
         Map<String, String> params = facesContext.getExternalContext().getRequestParameterMap();
 
-        try {
-                loanIdPara = URLDecoder.decode(params.get("l"), StandardCharsets.UTF_8.toString());
-            } catch (UnsupportedEncodingException ex) {
-                Logger.getLogger(EmailUnsubscribe.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        
+        loanIdPara = params.get("l");
+
         try {
             if (loanIdPara != null) {
                 loanManager = getVerificationToken(loanIdPara);

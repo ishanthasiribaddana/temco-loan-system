@@ -127,6 +127,8 @@ public class SecondGuarantorDetails implements Serializable {
 
     private GurantorCount gurantorNo;
 
+    String nic = "";
+
     @Inject
     LoanRequestForm LoanRequestForm;
 
@@ -166,11 +168,8 @@ public class SecondGuarantorDetails implements Serializable {
         ExternalContext externalContext = facesContext.getExternalContext();
         Map<String, String> params = facesContext.getExternalContext().getRequestParameterMap();
 
-        try {
-            loanIdPara = URLDecoder.decode(params.get("l"), StandardCharsets.UTF_8.toString());
-        } catch (UnsupportedEncodingException ex) {
-            Logger.getLogger(EmailUnsubscribe.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        loanIdPara = params.get("l");
+
         System.out.println("loanIdPara" + loanIdPara);
         try {
             if (loanIdPara != null) {
@@ -179,7 +178,7 @@ public class SecondGuarantorDetails implements Serializable {
                 if (loanManager != null) {
                     loanId = loanManager.getReferenceId();
                     System.out.println("set the referrence id");
-                    updateOfferManager();
+                    updateOfferManager(loanManager);
                 } else {
                     externalContext.redirect(externalContext.getRequestContextPath() + "/view/error.xhtml");
                 }
@@ -191,11 +190,14 @@ public class SecondGuarantorDetails implements Serializable {
         }
     }
 
-    public void updateOfferManager() {
+    public void updateOfferManager(LoanManager loanManagerObj) {
+
+        nic = loanManagerObj.getLoanApplicantAndGurantorsId().getMemberId().getGeneralUserProfileId().getNic();
+
         Date date = new Date();
         System.out.println("updateOfferManager");
-        List<LoanCustomer> loanCustomer = UniDB.searchByQuery("SELECT g FROM LoanCustomer g WHERE g.nic='" + LoanRequestForm.getNic() + "'");
-        System.out.println("nic " + LoanRequestForm.getNic());
+        List<LoanCustomer> loanCustomer = UniDB.searchByQuery("SELECT g FROM LoanCustomer g WHERE g.nic='" + nic + "'");
+        System.out.println("nic " + nic);
         if (!loanCustomer.isEmpty()) {
             System.out.println("loanCustomer.isEmpty() " + loanCustomer.isEmpty());
             List<OfferManager> offerManager = UniDB.searchByQuery("SELECT g FROM OfferManager g WHERE g.loanCustomerId.id='" + loanCustomer.get(0).getId() + "' AND g.loanOfferId.id='1'");
@@ -379,8 +381,8 @@ public class SecondGuarantorDetails implements Serializable {
 
                                         Date dateTwo = new Date();
                                         System.out.println("updateOfferManager");
-                                        List<LoanCustomer> loanCustomer = UniDB.searchByQuery("SELECT g FROM LoanCustomer g WHERE g.nic='" + LoanRequestForm.getNic() + "'");
-                                        System.out.println("nic " + LoanRequestForm.getNic());
+                                        List<LoanCustomer> loanCustomer = UniDB.searchByQuery("SELECT g FROM LoanCustomer g WHERE g.nic='" + nic + "'");
+                                        System.out.println("nic " + nic);
                                         if (!loanCustomer.isEmpty()) {
                                             System.out.println("loanCustomer.isEmpty() " + loanCustomer.isEmpty());
                                             List<OfferManager> offerManager = UniDB.searchByQuery("SELECT g FROM OfferManager g WHERE g.loanCustomerId.id='" + loanCustomer.get(0).getId() + "' AND g.loanOfferId.id='1'");

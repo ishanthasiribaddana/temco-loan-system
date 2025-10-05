@@ -197,16 +197,24 @@ public class LoanRequestForm implements Serializable {
         FacesContext facesContext = FacesContext.getCurrentInstance();
         Map<String, String> params = facesContext.getExternalContext().getRequestParameterMap();
 
-        try {
-            securityCode = URLDecoder.decode(params.get("en"), StandardCharsets.UTF_8.toString());
-        } catch (UnsupportedEncodingException ex) {
-            Logger.getLogger(EmailUnsubscribe.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        securityCode = params.get("en");
 
         if (securityCode != null) {
             System.out.println("in if");
             getUserDetailsFromMaterializeTable(securityCode);
-            updateOfferManager();
+
+            if (userAlreadyHaveALoan(nic)) {
+                try {
+                    ExternalContext externalContext = facesContext.getExternalContext();
+                    externalContext.redirect(externalContext.getRequestContextPath());
+                    facesContext.responseComplete();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            } else {
+                updateOfferManager();
+            }
+
         } else {
             System.out.println("in else");
         }
@@ -414,6 +422,38 @@ public class LoanRequestForm implements Serializable {
             }
         }
 
+    }
+
+    public boolean userAlreadyHaveALoan(String nic) {
+        List<GeneralUserProfile> gupExist = UniDB.searchByQuery("SELECT g FROM GeneralUserProfile g WHERE g.nic='" + nic + "'");
+        if (gupExist.size() > 0) {
+            List<Member1> existmember = UniDB.searchByQuery("SELECT g FROM Member1 g WHERE g.generalUserProfileId.id='" + gupExist.get(0).getId() + "' ");
+            if (existmember.size() > 0) {
+                List<MemberBankAccounts> memberBankAccountsList = UniDB.searchByQuery("SELECT g FROM MemberBankAccounts g WHERE g.memberId.id='" + member.getId() + "'");
+                if (memberBankAccountsList.size() > 0) {
+                    for (MemberBankAccounts memberBankAccountsObj : memberBankAccountsList) {
+                        List<LoanManager> memberLoans = UniDB.searchByQuery("SELECT g FROM LoanManager g WHERE g.memberBankAccountsId.id='" + memberBankAccountsObj.getId() + "'");
+                        for (LoanManager memberLoan : memberLoans) {
+                            List<LoanStatusManager> status = UniDB.searchByQuery(
+                                    "SELECT g FROM LoanStatusManager g WHERE g.loanManagerId.id = '" + memberLoan.getId()
+                                    + "' AND g.loanStatusId.id IN ('1', '2', '3', '4', '5') AND g.date = ("
+                                    + "SELECT MAX(gs.date) FROM LoanStatusManager gs WHERE gs.loanManagerId.id = '" + memberLoan.getId() + "')"
+                            );
+                            return (status.size() > 0);
+                        }
+                    }
+                } else {
+                    return false;
+                }
+            } else {
+
+                return false;
+            }
+        } else {
+
+            return false;
+        }
+        return false;
     }
 
     public void saveUserDetails() {

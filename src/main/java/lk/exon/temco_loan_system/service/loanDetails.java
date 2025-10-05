@@ -69,11 +69,8 @@ public class loanDetails implements Serializable {
         FacesContext facesContext = FacesContext.getCurrentInstance();
         Map<String, String> params = facesContext.getExternalContext().getRequestParameterMap();
 
-        try {
-            loanIdPara = URLDecoder.decode(params.get("l"), StandardCharsets.UTF_8.toString());
-        } catch (UnsupportedEncodingException ex) {
-            Logger.getLogger(EmailUnsubscribe.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        loanIdPara = params.get("l");
+
         System.out.println("loand id para " + loanIdPara);
         try {
             if (loanIdPara != null) {

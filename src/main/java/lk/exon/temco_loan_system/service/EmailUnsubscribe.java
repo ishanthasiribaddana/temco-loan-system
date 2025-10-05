@@ -12,14 +12,9 @@ import jakarta.enterprise.context.RequestScoped;
 import jakarta.faces.context.ExternalContext;
 import jakarta.faces.context.FacesContext;
 import jakarta.inject.Named;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import lk.exon.temco_loan_system.common.UniDBLocal;
 import lk.exon.temco_loan_system.entity.LoanCustomer;
 import lk.exon.temco_loan_system.entity.LoanManager;
@@ -50,7 +45,7 @@ public class EmailUnsubscribe {
     public void unsubscribeEmail() {
         System.out.println("loan id " + securityCode);
         List<LoanCustomer> loanCustomerList = uniDB.searchByQuery("SELECT g FROM LoanCustomer g WHERE g.verificationToken='" + securityCode + "' AND g.isSubscribe='1' ");
-        System.out.println("loanCustomerList.isEmpty() " + loanCustomerList.isEmpty());
+        System.out.println("loanCustomerList.isEmpty() "+loanCustomerList.isEmpty());
         if (!loanCustomerList.isEmpty()) {
             LoanCustomer obj = loanCustomerList.get(0);
             obj.setIsSubscribe(Short.decode("0"));
@@ -61,12 +56,7 @@ public class EmailUnsubscribe {
     public void getVerificationToken() {
         FacesContext facesContext = FacesContext.getCurrentInstance();
         Map<String, String> params = facesContext.getExternalContext().getRequestParameterMap();
-
-        try {
-            securityCode = URLDecoder.decode(params.get("en"), StandardCharsets.UTF_8.toString());
-        } catch (UnsupportedEncodingException ex) {
-            Logger.getLogger(EmailUnsubscribe.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        securityCode = params.get("en");
 
         if (securityCode != null) {
             System.out.println("in if");

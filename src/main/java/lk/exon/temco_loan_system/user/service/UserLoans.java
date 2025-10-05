@@ -97,12 +97,8 @@ public class UserLoans implements Serializable {
         FacesContext facesContext = FacesContext.getCurrentInstance();
         Map<String, String> params = facesContext.getExternalContext().getRequestParameterMap();
 
-        try {
-            securityCode = URLDecoder.decode(params.get("en"), StandardCharsets.UTF_8.toString());
-            loanSecurityCode = URLDecoder.decode(params.get("lid"), StandardCharsets.UTF_8.toString());
-        } catch (UnsupportedEncodingException ex) {
-            Logger.getLogger(EmailUnsubscribe.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        securityCode = params.get("en");
+        loanSecurityCode = params.get("lid");
 
         if (securityCode != null) {
             System.out.println("in if");

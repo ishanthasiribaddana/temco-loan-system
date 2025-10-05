@@ -114,13 +114,7 @@ public class LoanCalculator implements Serializable {
             ExternalContext externalContext = facesContext.getExternalContext();
             Map<String, String> params = facesContext.getExternalContext().getRequestParameterMap();
 
-            String loanIdPara = "";
-
-            try {
-                loanIdPara = URLDecoder.decode(params.get("en"), StandardCharsets.UTF_8.toString());
-            } catch (UnsupportedEncodingException ex) {
-                Logger.getLogger(EmailUnsubscribe.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            String loanIdPara = params.get("en");
 
             String userNic = getUserDetailsFromGeneralUserProfile(loanIdPara);
 

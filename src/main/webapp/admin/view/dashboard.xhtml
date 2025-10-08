@@ -28,6 +28,19 @@
                 </div>
             </div>
             <div class="col-12 md:col-6 lg:col-3">
+                <div class="grid grid-nogutter card overview-box overview-box-3">
+                    <div class="col-12 overview-box-icon">
+                        <i class="pi pi-file-o"></i>
+                    </div>
+                    <div class="col-12" style="text-align: center">
+                        <span class="overview-box-count">#{loanDashboard.totalSubmittedPayOrders}</span>
+                    </div>
+                    <div class="col-12 overview-box-footer">
+                        Total Credit Notes Submitted
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 md:col-6 lg:col-3">
                 <a href="dashboard.xhtml"></a>
                 <div class="grid grid-nogutter card overview-box overview-box-2">
                     <div class="col-12 overview-box-icon">
@@ -37,20 +50,7 @@
                         <span class="overview-box-count">Rs.#{loanDashboard.totalRequestedLoanAmount}</span>
                     </div>
                     <div class="col-12 overview-box-footer">
-                        Total Credit Notes Submitted
-                    </div>
-                </div>
-            </div>
-            <div class="col-12 md:col-6 lg:col-3">
-                <div class="grid grid-nogutter card overview-box overview-box-3">
-                    <div class="col-12 overview-box-icon">
-                        <i class="pi pi-file-o"></i>
-                    </div>
-                    <div class="col-12" style="text-align: center">
-                        <span class="overview-box-count">#{loanDashboard.totalReleasedPayOrders}</span>
-                    </div>
-                    <div class="col-12 overview-box-footer">
-                        Total Credit Note Volume
+                        Total Dues to Collected
                     </div>
                 </div>
             </div>
@@ -68,19 +68,19 @@
                             </div>
                         </div>-->
 
-            <div class="col-12 md:col-6 lg:col-3">
-                <div class="grid grid-nogutter card overview-box overview-box-4">
-                    <div class="col-12 overview-box-icon">
-                        <i class="pi pi-users"></i>
-                    </div>
-                    <div class="col-12" style="text-align: center">
-                        <span class="overview-box-count">#{loanDashboard.classAttenededRequestors}</span>
-                    </div>
-                    <div class="col-12 overview-box-footer">
-                        Total Dues to Collected
-                    </div>
-                </div>
-            </div>
+            <!--            <div class="col-12 md:col-6 lg:col-3">
+                            <div class="grid grid-nogutter card overview-box overview-box-4">
+                                <div class="col-12 overview-box-icon">
+                                    <i class="pi pi-users"></i>
+                                </div>
+                                <div class="col-12" style="text-align: center">
+                                    <span class="overview-box-count">#{loanDashboard.classAttenededRequestors}</span>
+                                </div>
+                                <div class="col-12 overview-box-footer">
+                                    Total Dues to Collected
+                                </div>
+                            </div>
+                        </div>-->
 
             <div class="grid formgrid col-12" style="margin: 3% 0 0 0">
                 <!--                <div class="col-4 mb-2 lg:col-4 mb-lg-0">
@@ -116,11 +116,11 @@
                         <p:growl id="growl" showDetail="true" life="5000"/> 
                         <p:dataTable id="productsTable" var="loan" value="#{loanDashboard.loans}" reflow="true"
                                      paginatorPosition="bottom"
-                                     rowIndexVar="index" paginator="true" rows="5">
+                                     rowIndexVar="index" paginator="true" rows="100">
                             <p:column style="width: 2%">
                                 <h:outputText value="#{index + 1}"/>
                             </p:column>
-                            <p:column headerText="Acc No" sortBy="#{loan.assoNo}">
+                            <p:column headerText="NIC" sortBy="#{loan.assoNo}">
                                 <h:outputText value="#{loan.assoNo}"/>
                             </p:column>
                             <p:column headerText="Name" sortBy="#{loan.name}">

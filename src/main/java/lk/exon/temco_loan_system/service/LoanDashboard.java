@@ -51,8 +51,9 @@ public class LoanDashboard implements Serializable {
 
     private int loanRequests = 0;
     private double totalRequestedLoanAmount;
-    private int totalReleasedPayOrders;
+    private int totalSubmittedPayOrders = 0;
     private int classAttenededRequestors;
+    private double totalDuesToCollected = 0.00;
 
     private Loan loanObject;
 
@@ -113,16 +114,17 @@ public class LoanDashboard implements Serializable {
                 for (InterestManager loanMangerObj : interestManagerList) {
                     List<LoanStatusManager> loanStatusLists = uniDB.searchByQuery("SELECT g FROM LoanStatusManager g WHERE g.loanStatusId.id='3' AND g.loanManagerId.id='" + loanMangerObj.getId() + "' ");
                     if (!loanStatusLists.isEmpty()) {
-                        totalReleasedPayOrders = totalReleasedPayOrders + loanStatusLists.size();
                         totalRequestedLoanAmount = totalRequestedLoanAmount += loanStatusLists.get(0).getLoanManagerId().getLoanCapitalAmount();
                     }
                     System.out.println("loanMangerObj id " + loanMangerObj.getId());
                     List<LoanStatusManager> loanStatusManager = uniDB.searchByQueryLimit("SELECT g FROM LoanStatusManager g WHERE g.loanManagerId.id='" + loanMangerObj.getLoanManagerId().getId() + "' ORDER BY g.date DESC", 1);
                     System.out.println("loanStatusManager.size() " + loanStatusManager.size());
                     if (!loanStatusManager.isEmpty()) {
-                        loans.add(new Loan(loanMangerObj.getLoanManagerId().getReferenceId(), loanMangerObj.getLoanManagerId().getMemberBankAccountsId().getMemberId().getGeneralUserProfileId().getFirstName() + " " + loanMangerObj.getLoanManagerId().getMemberBankAccountsId().getMemberId().getGeneralUserProfileId().getLastName(), loanMangerObj.getLoanManagerId().getLoanCapitalAmount(), loanStatusManager.get(0).getLoanStatusId().getName(), new SimpleDateFormat("yyyy/MM/dd").format(loanStatusManager.get(0).getDate()), 0.00, "", loanMangerObj));
+                        loans.add(new Loan(loanMangerObj.getLoanManagerId().getLoanApplicantAndGurantorsId().getMemberId().getGeneralUserProfileId().getNic(), loanMangerObj.getLoanManagerId().getMemberBankAccountsId().getMemberId().getGeneralUserProfileId().getFirstName() + " " + loanMangerObj.getLoanManagerId().getMemberBankAccountsId().getMemberId().getGeneralUserProfileId().getLastName(), loanMangerObj.getLoanManagerId().getLoanCapitalAmount(), loanStatusManager.get(0).getLoanStatusId().getName(), new SimpleDateFormat("yyyy/MM/dd").format(loanStatusManager.get(0).getDate()), 0.00, "", loanMangerObj));
                     }
                 }
+                List<LoanStatusManager> loanStatusLists = uniDB.searchByQuery("SELECT g FROM LoanStatusManager g WHERE g.loanStatusId.id='3'");
+                totalSubmittedPayOrders = loanStatusLists.size();
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -641,12 +643,12 @@ public class LoanDashboard implements Serializable {
         this.totalRequestedLoanAmount = totalRequestedLoanAmount;
     }
 
-    public int getTotalReleasedPayOrders() {
-        return totalReleasedPayOrders;
+    public int getTotalSubmittedPayOrders() {
+        return totalSubmittedPayOrders;
     }
 
-    public void setTotalReleasedPayOrders(int totalReleasedPayOrders) {
-        this.totalReleasedPayOrders = totalReleasedPayOrders;
+    public void setTotalSubmittedPayOrders(int totalSubmittedPayOrders) {
+        this.totalSubmittedPayOrders = totalSubmittedPayOrders;
     }
 
     public int getClassAttenededRequestors() {
@@ -919,6 +921,14 @@ public class LoanDashboard implements Serializable {
 
     public void setLoanInstallementPlanList(List<UserLoanInstallementPlan> loanInstallementPlanList) {
         this.loanInstallementPlanList = loanInstallementPlanList;
+    }
+
+    public double getTotalDuesToCollected() {
+        return totalDuesToCollected;
+    }
+
+    public void setTotalDuesToCollected(double totalDuesToCollected) {
+        this.totalDuesToCollected = totalDuesToCollected;
     }
 
 }

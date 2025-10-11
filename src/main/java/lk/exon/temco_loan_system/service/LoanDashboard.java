@@ -4,6 +4,9 @@
  */
 package lk.exon.temco_loan_system.service;
 
+import com.lowagie.text.Document;
+import com.lowagie.text.PageSize;
+import com.lowagie.text.Row;
 import jakarta.annotation.PostConstruct;
 import jakarta.ejb.EJB;
 import jakarta.ejb.LocalBean;
@@ -37,6 +40,20 @@ import lk.exon.temco_loan_system.entity.StatusCommentManager;
 import lk.exon.temco_loan_system.entity.UniversalUserDocument;
 import lk.exon.temco_loan_system.entity.Weeks;
 import lk.exon.temco_loan_system.entity.WeeksScheduler;
+import org.apache.poi.hssf.usermodel.HSSFCellStyle;
+import org.apache.poi.hssf.usermodel.HSSFDataFormat;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.DataFormat;
+import org.apache.poi.ss.usermodel.DateUtil;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFDataFormat;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 /**
  *
@@ -54,6 +71,8 @@ public class LoanDashboard implements Serializable {
     private int totalSubmittedPayOrders = 0;
     private int classAttenededRequestors;
     private double totalDuesToCollected = 0.00;
+    private String aggregateDisbursementToJIAT = "";
+    private double cumulativeDisbursementToJIAT = 0.00;
 
     private Loan loanObject;
 
@@ -107,25 +126,233 @@ public class LoanDashboard implements Serializable {
 
     public void LoanBean() {
         try {
-            List<InterestManager> interestManagerList = uniDB.searchByQuery("SELECT g FROM InterestManager g WHERE g.loanid.id='1' ORDER BY g.id DESC");
+            // First, get the latest loan request for each member
+
+            double total = 0.00;
+
+            List<InterestManager> interestManagerList = uniDB.searchByQuery(
+                    "SELECT im FROM InterestManager im "
+                    + "WHERE im.loanid.id='1' "
+                    + "AND im.id IN ("
+                    + "SELECT MAX(im2.id) FROM InterestManager im2 "
+                    + "WHERE im2.loanid.id='1' "
+                    + "GROUP BY im2.loanManagerId.loanApplicantAndGurantorsId.memberId.id"
+                    + ") "
+                    + "ORDER BY im.id DESC"
+            );
+
             if (!interestManagerList.isEmpty()) {
                 loanRequests = interestManagerList.size();
                 System.out.println("loanRequests " + loanRequests);
+
                 for (InterestManager loanMangerObj : interestManagerList) {
-                    List<LoanStatusManager> loanStatusLists = uniDB.searchByQuery("SELECT g FROM LoanStatusManager g WHERE g.loanStatusId.id='3' AND g.loanManagerId.id='" + loanMangerObj.getId() + "' ");
+
+                    total = total + loanMangerObj.getLoanManagerId().getLoanCapitalAmount();
+
+                    aggregateDisbursementToJIAT = String.format("%,.2f", total);
+
+                    List<LoanStatusManager> loanStatusLists = uniDB.searchByQuery(
+                            "SELECT g FROM LoanStatusManager g WHERE g.loanStatusId.id='3' AND g.loanManagerId.id='" + loanMangerObj.getId() + "' "
+                    );
+
                     if (!loanStatusLists.isEmpty()) {
                         totalRequestedLoanAmount = totalRequestedLoanAmount += loanStatusLists.get(0).getLoanManagerId().getLoanCapitalAmount();
                     }
+
                     System.out.println("loanMangerObj id " + loanMangerObj.getId());
-                    List<LoanStatusManager> loanStatusManager = uniDB.searchByQueryLimit("SELECT g FROM LoanStatusManager g WHERE g.loanManagerId.id='" + loanMangerObj.getLoanManagerId().getId() + "' ORDER BY g.date DESC", 1);
+                    List<LoanStatusManager> loanStatusManager = uniDB.searchByQueryLimit(
+                            "SELECT g FROM LoanStatusManager g WHERE g.loanManagerId.id='" + loanMangerObj.getLoanManagerId().getId() + "' ORDER BY g.date DESC", 1
+                    );
+
                     System.out.println("loanStatusManager.size() " + loanStatusManager.size());
                     if (!loanStatusManager.isEmpty()) {
-                        loans.add(new Loan(loanMangerObj.getLoanManagerId().getLoanApplicantAndGurantorsId().getMemberId().getGeneralUserProfileId().getNic(), loanMangerObj.getLoanManagerId().getMemberBankAccountsId().getMemberId().getGeneralUserProfileId().getFirstName() + " " + loanMangerObj.getLoanManagerId().getMemberBankAccountsId().getMemberId().getGeneralUserProfileId().getLastName(), loanMangerObj.getLoanManagerId().getLoanCapitalAmount(), loanStatusManager.get(0).getLoanStatusId().getName(), new SimpleDateFormat("yyyy/MM/dd").format(loanStatusManager.get(0).getDate()), 0.00, "", loanMangerObj));
+                        loans.add(new Loan(
+                                loanMangerObj.getLoanManagerId().getLoanApplicantAndGurantorsId().getMemberId().getGeneralUserProfileId().getNic(),
+                                loanMangerObj.getLoanManagerId().getMemberBankAccountsId().getMemberId().getGeneralUserProfileId().getFirstName() + " "
+                                + loanMangerObj.getLoanManagerId().getMemberBankAccountsId().getMemberId().getGeneralUserProfileId().getLastName(),
+                                loanMangerObj.getLoanManagerId().getLoanCapitalAmount(),
+                                loanStatusManager.get(0).getLoanStatusId().getName(),
+                                new SimpleDateFormat("yyyy/MM/dd").format(loanStatusManager.get(0).getDate()),
+                                0.00,
+                                "",
+                                loanMangerObj
+                        ));
                     }
                 }
+
                 List<LoanStatusManager> loanStatusLists = uniDB.searchByQuery("SELECT g FROM LoanStatusManager g WHERE g.loanStatusId.id='3'");
                 totalSubmittedPayOrders = loanStatusLists.size();
             }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void postProcessXLSX(Object document) {
+        try {
+            XSSFWorkbook workbook = (XSSFWorkbook) document;
+            XSSFSheet sheet = workbook.getSheetAt(0);
+
+            // Create text format style
+            XSSFCellStyle textStyle = workbook.createCellStyle();
+            XSSFDataFormat format = workbook.createDataFormat();
+            textStyle.setDataFormat(format.getFormat("@")); // Text format
+
+            // Find NIC column by header
+            int nicColumnIndex = findNICColumnIndex(sheet);
+            if (nicColumnIndex == -1) {
+                nicColumnIndex = 1; // Fallback to column index 1
+            }
+
+            System.out.println("Processing NIC column at index: " + nicColumnIndex);
+
+            // Process all rows (skip header row 0)
+            for (int rowNum = 1; rowNum <= sheet.getLastRowNum(); rowNum++) {
+                org.apache.poi.ss.usermodel.Row row = sheet.getRow(rowNum);
+                if (row != null) {
+                    org.apache.poi.ss.usermodel.Cell nicCell = row.getCell(nicColumnIndex);
+                    if (nicCell != null) {
+                        // Get the original value as string
+                        String originalValue = getCellValueAsString(nicCell);
+                        System.out.println("Original NIC value at row " + rowNum + ": " + originalValue);
+
+                        if (originalValue != null && !originalValue.trim().isEmpty()) {
+                            String cleanValue = originalValue.trim();
+
+                            // Apply text style
+                            nicCell.setCellStyle(textStyle);
+
+                            // Handle different NIC formats
+                            if (cleanValue.matches("\\d{12}")) {
+                                // 12-digit new NIC - ensure it displays as full number
+                                nicCell.setCellValue(cleanValue);
+                                System.out.println("Formatted 12-digit NIC: " + cleanValue);
+                            } else if (cleanValue.matches("\\d{9}[Vv]")) {
+                                // 10-character old NIC with V - keep as is
+                                nicCell.setCellValue(cleanValue);
+                                System.out.println("Formatted 9-digit NIC with V: " + cleanValue);
+                            } else if (cleanValue.contains("E+")) {
+                                // Scientific notation - extract the original number
+                                String fixedValue = convertScientificToFullNumber(cleanValue);
+                                nicCell.setCellValue(fixedValue);
+                                System.out.println("Converted scientific to: " + fixedValue);
+                            } else {
+                                // Any other format
+                                nicCell.setCellValue(cleanValue);
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Auto-size columns
+            for (int i = 0; i < sheet.getRow(0).getLastCellNum(); i++) {
+                sheet.autoSizeColumn(i);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+// Helper method to find NIC column index by header
+    private int findNICColumnIndex(XSSFSheet sheet) {
+        org.apache.poi.ss.usermodel.Row headerRow = sheet.getRow(0);
+        if (headerRow != null) {
+            for (org.apache.poi.ss.usermodel.Cell cell : headerRow) {
+                if (cell != null && "NIC".equalsIgnoreCase(cell.getStringCellValue().trim())) {
+                    return cell.getColumnIndex();
+                }
+            }
+        }
+        return -1;
+    }
+
+// Helper method to convert scientific notation to full number
+    private String convertScientificToFullNumber(String scientificValue) {
+        try {
+            if (scientificValue.contains("E+")) {
+                // This is scientific notation like "2.00407E+11"
+                String[] parts = scientificValue.split("E\\+");
+                double base = Double.parseDouble(parts[0]);
+                int exponent = Integer.parseInt(parts[1]);
+
+                // Convert to full number
+                double fullNumber = base * Math.pow(10, exponent);
+
+                // Format as integer without decimal places
+                if (fullNumber == Math.floor(fullNumber)) {
+                    return String.format("%.0f", fullNumber);
+                } else {
+                    return String.valueOf(fullNumber);
+                }
+            }
+            return scientificValue;
+        } catch (Exception e) {
+            return scientificValue;
+        }
+    }
+
+    public String formatNICForExport(Object value) {
+        if (value == null) {
+            return "";
+        }
+
+        String nic = value.toString().trim();
+        // For 12-digit NICs, ensure they're treated as text
+        if (nic.length() == 12 && nic.matches("\\d+")) {
+            return "'" + nic;
+        }
+        return nic;
+    }
+
+// Enhanced helper method to handle different cell types
+    private String getCellValueAsString(Cell cell) {
+        if (cell == null) {
+            return "";
+        }
+
+        switch (cell.getCellType()) {
+            case STRING:
+                return cell.getStringCellValue();
+            case NUMERIC:
+                if (DateUtil.isCellDateFormatted(cell)) {
+                    return cell.getDateCellValue().toString();
+                } else {
+                    double numValue = cell.getNumericCellValue();
+                    // Handle NIC numbers that might be stored as numeric
+                    // For 12-digit numbers, format without decimal
+                    if (numValue >= 100000000000L && numValue < 1000000000000L) {
+                        // It's a 12-digit number (like NIC)
+                        return String.format("%.0f", numValue);
+                    } else if (numValue >= 1000000000L && numValue < 10000000000L) {
+                        // It's a 10-digit number (old NIC)
+                        return String.format("%.0f", numValue);
+                    } else {
+                        return String.valueOf(numValue);
+                    }
+                }
+            case BOOLEAN:
+                return String.valueOf(cell.getBooleanCellValue());
+            case FORMULA:
+            try {
+                return cell.getStringCellValue();
+            } catch (Exception e) {
+                return String.valueOf(cell.getNumericCellValue());
+            }
+            default:
+                return "";
+        }
+    }
+
+    public void preProcessPDF(Object document) {
+        try {
+            Document pdf = (Document) document;
+            pdf.open();
+            pdf.setPageSize(PageSize.A4.rotate());
+
+            // You can also set margins
+            pdf.setMargins(20, 20, 20, 20);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -929,6 +1156,30 @@ public class LoanDashboard implements Serializable {
 
     public void setTotalDuesToCollected(double totalDuesToCollected) {
         this.totalDuesToCollected = totalDuesToCollected;
+    }
+
+    public String getAggregateDisbursementToJIAT() {
+        return aggregateDisbursementToJIAT;
+    }
+
+    public void setAggregateDisbursementToJIAT(String aggregateDisbursementToJIAT) {
+        this.aggregateDisbursementToJIAT = aggregateDisbursementToJIAT;
+    }
+
+    public Loan getLoanObject() {
+        return loanObject;
+    }
+
+    public void setLoanObject(Loan loanObject) {
+        this.loanObject = loanObject;
+    }
+
+    public double getCumulativeDisbursementToJIAT() {
+        return cumulativeDisbursementToJIAT;
+    }
+
+    public void setCumulativeDisbursementToJIAT(double cumulativeDisbursementToJIAT) {
+        this.cumulativeDisbursementToJIAT = cumulativeDisbursementToJIAT;
     }
 
 }

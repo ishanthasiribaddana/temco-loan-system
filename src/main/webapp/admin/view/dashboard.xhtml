@@ -28,6 +28,32 @@
                 </div>
             </div>
             <div class="col-12 md:col-6 lg:col-3">
+                <div class="grid grid-nogutter card overview-box overview-box-4">
+                    <div class="col-12 overview-box-icon">
+                        <i class="pi pi-money-bill"></i>
+                    </div>
+                    <div class="col-12" style="text-align: center">
+                        <span class="overview-box-count">#{loanDashboard.aggregateDisbursementToJIAT}</span>
+                    </div>
+                    <div class="col-12 overview-box-footer" >
+                        Aggregate Disbursement To JIAT
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 md:col-6 lg:col-3">
+                <div class="grid grid-nogutter card overview-box overview-box-2">
+                    <div class="col-12 overview-box-icon">
+                        <i class="pi pi-arrow-circle-right"></i>
+                    </div>
+                    <div class="col-12" style="text-align: center">
+                        <span class="overview-box-count">#{loanDashboard.cumulativeDisbursementToJIAT}</span>
+                    </div>
+                    <div class="col-12 overview-box-footer" >
+                        Cumulative Disbursement To JIAT
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 md:col-6 lg:col-3">
                 <div class="grid grid-nogutter card overview-box overview-box-3">
                     <div class="col-12 overview-box-icon">
                         <i class="pi pi-file-o"></i>
@@ -37,20 +63,6 @@
                     </div>
                     <div class="col-12 overview-box-footer">
                         Total Credit Notes Submitted
-                    </div>
-                </div>
-            </div>
-            <div class="col-12 md:col-6 lg:col-3">
-                <a href="dashboard.xhtml"></a>
-                <div class="grid grid-nogutter card overview-box overview-box-2">
-                    <div class="col-12 overview-box-icon">
-                        <i class="pi pi-dollar"></i>
-                    </div>
-                    <div class="col-12" style="text-align: center">
-                        <span class="overview-box-count">Rs.#{loanDashboard.totalRequestedLoanAmount}</span>
-                    </div>
-                    <div class="col-12 overview-box-footer">
-                        Total Dues to Collected
                     </div>
                 </div>
             </div>
@@ -114,13 +126,30 @@
                 <div class="card">
                     <h:form id="dataTable">
                         <p:growl id="growl" showDetail="true" life="5000"/> 
+                        <div class="p-mb-3">
+                            <p:commandButton value="Export to PDF" icon="pi pi-file-pdf" 
+                                             ajax="false" style="margin-left: 10px;">
+                                <p:dataExporter type="pdf" target="productsTable" 
+                                                fileName="loans" pageOnly="true"
+                                                preProcessor="#{loanDashboard.preProcessPDF}"/>
+                            </p:commandButton>
+
+                            <p:commandButton value="Export to XLSX" icon="pi pi-file-excel" 
+                                             ajax="false" style="margin-left: 10px;">
+                                <p:dataExporter type="xlsx" target="productsTable" 
+                                                fileName="loans" pageOnly="true"
+                                                postProcessor="#{loanDashboard.postProcessXLSX}"/>
+                            </p:commandButton>
+                        </div>
+
                         <p:dataTable id="productsTable" var="loan" value="#{loanDashboard.loans}" reflow="true"
                                      paginatorPosition="bottom"
                                      rowIndexVar="index" paginator="true" rows="100">
-                            <p:column style="width: 2%">
+                            <p:column style="width: 2%" exportable="false">
                                 <h:outputText value="#{index + 1}"/>
                             </p:column>
-                            <p:column headerText="NIC" sortBy="#{loan.assoNo}">
+                            <p:column headerText="NIC" sortBy="#{loan.assoNo}" 
+                                      exportValue="#{loan.assoNo}">
                                 <h:outputText value="#{loan.assoNo}"/>
                             </p:column>
                             <p:column headerText="Name" sortBy="#{loan.name}">
@@ -131,15 +160,13 @@
                                     <f:convertNumber currencySymbol="LKR" type="currency"/>
                                 </h:outputText>
                             </p:column>
-                            <p:column headerText="Monthly Installement" sortBy="#{loan.loanAmount}">
+                            <p:column headerText="Monthly Installment" sortBy="#{loan.loanAmount}">
                                 <h:outputText value="#{loan.loanMangerObj.loanManagerId.monthlyInstallement}">
                                     <f:convertNumber currencySymbol="LKR" type="currency"/>
                                 </h:outputText>
                             </p:column>
                             <p:column headerText="Time Period" sortBy="#{loan.loanAmount}">
-                                <h:outputText value="#{loan.loanMangerObj.loanManagerId.repaymentPeriodId.period}">
-                                    <f:convertNumber currencySymbol="LKR" type="currency"/>
-                                </h:outputText>
+                                <h:outputText value="#{loan.loanMangerObj.loanManagerId.repaymentPeriodId.period}"/>
                             </p:column>
                             <p:column headerText="Pay Order Status" sortBy="#{loan.payOrderStatus}">
                                 <h:outputText value="#{loan.payOrderStatus}" />
@@ -147,15 +174,12 @@
                             <p:column headerText="Pay Order Date" sortBy="#{loan.payOrderDate}">
                                 <h:outputText value="#{loan.payOrderDate}" />
                             </p:column>
-<!--                            <p:column headerText="Lecuter Started" sortBy="#{loan.lecturesStarted}">
-                                <h:outputText value="#{loan.lecturesStarted}">
-                                    <f:convertNumber currencySymbol="$" type="currency"/>
-                                </h:outputText>
-                            </p:column>-->
-                            <p:column headerText="">
-                                <p:commandButton actionListener="#{loanDashboard.setSelectedUser(loan)}" icon="pi pi-eye" update=":dataTable" oncomplete="PF('dlg').show();"/>
+                            <p:column headerText="" exportable="false">
+                                <p:commandButton actionListener="#{loanDashboard.setSelectedUser(loan)}" 
+                                                 icon="pi pi-eye" update=":dataTable" 
+                                                 oncomplete="PF('dlg').show();"/>
                             </p:column>
-                        </p:dataTable >
+                        </p:dataTable>
 
                         <p:dialog responsive="true" style="overflow:auto;" height="600" header="Requested Loan Details" widgetVar="dlg" modal="true" resizable="false" draggable="false" width="1200">
                             <p:panel>

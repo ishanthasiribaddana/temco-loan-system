@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>lk.exon</groupId>
     <artifactId>temco_loan_system</artifactId>
-    <version>1.5</version>
+    <version>1.6</version>
     <packaging>war</packaging>
     <name>temco_loan_system-1.0</name>
     <properties>
@@ -155,6 +155,17 @@
             <artifactId>jakarta.ws.rs-api</artifactId>
             <version>3.1.0</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi</artifactId>
+            <version>5.2.3</version>
+        </dependency>
+    
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml</artifactId>
+            <version>5.2.3</version>
         </dependency>
     </dependencies>
     <repositories>

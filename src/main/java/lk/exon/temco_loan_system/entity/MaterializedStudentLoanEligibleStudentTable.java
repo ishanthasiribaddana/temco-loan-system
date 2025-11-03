@@ -82,7 +82,7 @@ public class MaterializedStudentLoanEligibleStudentTable implements Serializable
     private Double scholarship;
     @Column(name = "total_due")
     private Double totalDue;
-    @Column(name = "gender_type", nullable = true)
+    @Column(name = "gender_type")
     private String genderType;
     @Column(name = "verification_token")
     private String verificationToken;
@@ -287,5 +287,5 @@ public class MaterializedStudentLoanEligibleStudentTable implements Serializable
     public String toString() {
         return "lk.exon.temco_loan_system.entity.MaterializedStudentLoanEligibleStudentTable[ id=" + id + " ]";
     }
-
+    
 }

@@ -45,7 +45,7 @@ public class DocumentCreator implements Serializable {
     private Integer id;
     @Column(name = "version")
     private String version;
-    @Column(name = "isActive")
+    @Column(name = "is_active")
     private Short isActive;
     @Column(name = "date_created")
     @Temporal(TemporalType.TIMESTAMP)

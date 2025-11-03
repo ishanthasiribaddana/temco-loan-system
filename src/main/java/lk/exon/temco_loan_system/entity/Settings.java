@@ -52,12 +52,12 @@ public class Settings implements Serializable {
     @Column(name = "updated_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedDate;
-    @JoinColumn(name = "general_user_profile_created_by", referencedColumnName = "id")
-    @ManyToOne
-    private GeneralUserProfile generalUserProfileCreatedBy;
     @JoinColumn(name = "general_user_profile_updated_by", referencedColumnName = "id")
     @ManyToOne
     private GeneralUserProfile generalUserProfileUpdatedBy;
+    @JoinColumn(name = "general_user_profile_created_by", referencedColumnName = "id")
+    @ManyToOne
+    private GeneralUserProfile generalUserProfileCreatedBy;
     @JoinColumn(name = "settings_type_id", referencedColumnName = "id")
     @ManyToOne(optional = false)
     private SettingsType settingsTypeId;
@@ -109,20 +109,20 @@ public class Settings implements Serializable {
         this.updatedDate = updatedDate;
     }
 
-    public GeneralUserProfile getGeneralUserProfileCreatedBy() {
-        return generalUserProfileCreatedBy;
-    }
-
-    public void setGeneralUserProfileCreatedBy(GeneralUserProfile generalUserProfileCreatedBy) {
-        this.generalUserProfileCreatedBy = generalUserProfileCreatedBy;
-    }
-
     public GeneralUserProfile getGeneralUserProfileUpdatedBy() {
         return generalUserProfileUpdatedBy;
     }
 
     public void setGeneralUserProfileUpdatedBy(GeneralUserProfile generalUserProfileUpdatedBy) {
         this.generalUserProfileUpdatedBy = generalUserProfileUpdatedBy;
+    }
+
+    public GeneralUserProfile getGeneralUserProfileCreatedBy() {
+        return generalUserProfileCreatedBy;
+    }
+
+    public void setGeneralUserProfileCreatedBy(GeneralUserProfile generalUserProfileCreatedBy) {
+        this.generalUserProfileCreatedBy = generalUserProfileCreatedBy;
     }
 
     public SettingsType getSettingsTypeId() {

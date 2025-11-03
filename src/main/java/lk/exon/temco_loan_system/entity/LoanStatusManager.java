@@ -32,7 +32,8 @@ import java.util.Date;
 @NamedQueries({
     @NamedQuery(name = "LoanStatusManager.findAll", query = "SELECT l FROM LoanStatusManager l"),
     @NamedQuery(name = "LoanStatusManager.findById", query = "SELECT l FROM LoanStatusManager l WHERE l.id = :id"),
-    @NamedQuery(name = "LoanStatusManager.findByDate", query = "SELECT l FROM LoanStatusManager l WHERE l.date = :date")})
+    @NamedQuery(name = "LoanStatusManager.findByDate", query = "SELECT l FROM LoanStatusManager l WHERE l.date = :date"),
+    @NamedQuery(name = "LoanStatusManager.findByUpdatedAt", query = "SELECT l FROM LoanStatusManager l WHERE l.updatedAt = :updatedAt")})
 public class LoanStatusManager implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -44,6 +45,9 @@ public class LoanStatusManager implements Serializable {
     @Column(name = "date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date date;
+    @Column(name = "updated_at")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date updatedAt;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "loanStatusManagerId")
     private Collection<StatusCommentManager> statusCommentManagerCollection;
     @JoinColumn(name = "loan_manager_id", referencedColumnName = "id")
@@ -74,6 +78,14 @@ public class LoanStatusManager implements Serializable {
 
     public void setDate(Date date) {
         this.date = date;
+    }
+
+    public Date getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(Date updatedAt) {
+        this.updatedAt = updatedAt;
     }
 
     public Collection<StatusCommentManager> getStatusCommentManagerCollection() {

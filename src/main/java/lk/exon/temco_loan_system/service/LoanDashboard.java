@@ -20,6 +20,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 import lk.exon.temco.templates.AcceptanceEmail;
 import lk.exon.temco.templates.LoanApplicationRejectionEmail;
 import lk.exon.temco.tools.CustomPDFExporter;
@@ -65,6 +66,7 @@ public class LoanDashboard implements Serializable {
 
     private List<Loan> loans = new ArrayList<>();
     private List<SelectItem> commentType;
+    private List<Loan> filteredLoans;
 
     private int loanRequests = 0;
     private double totalRequestedLoanAmount;
@@ -109,6 +111,8 @@ public class LoanDashboard implements Serializable {
 
     private boolean viewButtons;
 
+    private String globalFilter;
+
     private List<GurantorManager> gurantorManagersList;
     private List<UserLoanInstallementPlan> loanInstallementPlanList;
 
@@ -146,7 +150,7 @@ public class LoanDashboard implements Serializable {
                 System.out.println("loanRequests " + loanRequests);
 
                 for (InterestManager loanMangerObj : interestManagerList) {
-
+                    System.out.println("InterestManager Loan Manager Id " + loanMangerObj.getLoanManagerId().getId());
                     total = total + loanMangerObj.getLoanManagerId().getLoanCapitalAmount();
 
                     aggregateDisbursementToJIAT = String.format("%,.2f", total);
@@ -171,6 +175,7 @@ public class LoanDashboard implements Serializable {
                                 loanMangerObj.getLoanManagerId().getMemberBankAccountsId().getMemberId().getGeneralUserProfileId().getFirstName() + " "
                                 + loanMangerObj.getLoanManagerId().getMemberBankAccountsId().getMemberId().getGeneralUserProfileId().getLastName(),
                                 loanMangerObj.getLoanManagerId().getLoanCapitalAmount(),
+                                new SimpleDateFormat("yyyy/MM/dd").format(loanMangerObj.getLoanManagerId().getDate()),
                                 loanStatusManager.get(0).getLoanStatusId().getName(),
                                 new SimpleDateFormat("yyyy/MM/dd").format(loanStatusManager.get(0).getDate()),
                                 0.00,
@@ -185,6 +190,19 @@ public class LoanDashboard implements Serializable {
             }
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    public void filterLoans() {
+        if (globalFilter == null || globalFilter.isEmpty()) {
+            filteredLoans = new ArrayList<>(loans);
+        } else {
+            String filterText = globalFilter.toLowerCase();
+            filteredLoans = loans.stream()
+                    .filter(loan
+                            -> loan.getAssoNo().toLowerCase().contains(filterText)
+                    )
+                    .collect(Collectors.toList());
         }
     }
 
@@ -771,16 +789,18 @@ public class LoanDashboard implements Serializable {
         private String assoNo;
         private String name;
         private double loanAmount;
+        private String loanAppliedDate;
         private String payOrderStatus;
         private String PayOrderDate;
         private double downPayment;
         private String lecturesStarted;
         private InterestManager loanMangerObj;
 
-        public Loan(String assoNo, String name, double loanAmount, String payOrderStatus, String PayOrderDate, double downPayment, String lecturesStarted, InterestManager loanMangerObj) {
+        public Loan(String assoNo, String name, double loanAmount, String loanAppliedDate, String payOrderStatus, String PayOrderDate, double downPayment, String lecturesStarted, InterestManager loanMangerObj) {
             this.assoNo = assoNo;
             this.name = name;
             this.loanAmount = loanAmount;
+            this.loanAppliedDate = loanAppliedDate;
             this.payOrderStatus = payOrderStatus;
             this.PayOrderDate = PayOrderDate;
             this.downPayment = downPayment;
@@ -810,6 +830,14 @@ public class LoanDashboard implements Serializable {
 
         public void setLoanAmount(double loanAmount) {
             this.loanAmount = loanAmount;
+        }
+
+        public String getLoanAppliedDate() {
+            return loanAppliedDate;
+        }
+
+        public void setLoanAppliedDate(String loanAppliedDate) {
+            this.loanAppliedDate = loanAppliedDate;
         }
 
         public String getPayOrderStatus() {
@@ -1180,6 +1208,22 @@ public class LoanDashboard implements Serializable {
 
     public void setCumulativeDisbursementToJIAT(double cumulativeDisbursementToJIAT) {
         this.cumulativeDisbursementToJIAT = cumulativeDisbursementToJIAT;
+    }
+
+    public List<Loan> getFilteredLoans() {
+        return filteredLoans;
+    }
+
+    public void setFilteredLoans(List<Loan> filteredLoans) {
+        this.filteredLoans = filteredLoans;
+    }
+
+    public String getGlobalFilter() {
+        return globalFilter;
+    }
+
+    public void setGlobalFilter(String globalFilter) {
+        this.globalFilter = globalFilter;
     }
 
 }

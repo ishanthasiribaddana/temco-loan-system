@@ -86,7 +86,9 @@ public class LoanCalculator implements Serializable {
 
     private String error_message;
 
-    private double courseFee;
+    GeneralUserProfile gup = null;
+
+    String userNic = "";
 
     @Inject
     LoanRequestForm LoanRequestForm;
@@ -107,17 +109,20 @@ public class LoanCalculator implements Serializable {
         System.out.println("intializeMethod");
 
         if (LoanRequestForm.getNic() != null) {
+            System.out.println("LoanRequestForm.getNic() " + LoanRequestForm.getNic());
+            System.out.println("loan calculator initialize if");
             updateOfferManager(LoanRequestForm.getNic());
+            getUserDetailsFromNIC(LoanRequestForm.getNic());
             dueCourseFee = LoanRequestForm.getDueCourseFee();
         } else {
+            System.out.println("initialize else");
             FacesContext facesContext = FacesContext.getCurrentInstance();
-            ExternalContext externalContext = facesContext.getExternalContext();
             Map<String, String> params = facesContext.getExternalContext().getRequestParameterMap();
 
             String loanIdPara = params.get("en");
 
-            String userNic = getUserDetailsFromGeneralUserProfile(loanIdPara);
-
+            userNic = getUserDetailsFromGeneralUserProfile(loanIdPara);
+            System.out.println("userNic " + userNic);
             updateOfferManager(userNic);
 
             List<MaterializedStudentLoanEligibleStudentTable> mt = UniDB.searchByQuery("SELECT g FROM MaterializedStudentLoanEligibleStudentTable g WHERE g.nic='" + userNic + "' ");
@@ -131,10 +136,23 @@ public class LoanCalculator implements Serializable {
         repaymentPeriod();
     }
 
-    private String getUserDetailsFromGeneralUserProfile(String securityCode) {
-
-        List<GeneralUserProfile> generalUserProfile = UniDB.searchByQuery("SELECT g FROM GeneralUserProfile g WHERE g.verificationToken ='" + securityCode + "' ");
+    private String getUserDetailsFromNIC(String nic) {
+        System.out.println("getUserDetailsFromGeneralUserProfile(String securityCode) " + nic);
+        List<GeneralUserProfile> generalUserProfile = UniDB.searchByQuery("SELECT g FROM GeneralUserProfile g WHERE g.nic ='" + nic + "' ");
+        System.out.println("getUserDetailsFromGeneralUserProfile(String securityCode) " + !generalUserProfile.isEmpty());
         if (!generalUserProfile.isEmpty()) {
+            gup = generalUserProfile.get(0);
+            return generalUserProfile.get(0).getNic();
+        }
+        return "";
+    }
+
+    private String getUserDetailsFromGeneralUserProfile(String securityCode) {
+        System.out.println("getUserDetailsFromGeneralUserProfile(String securityCode) " + securityCode);
+        List<GeneralUserProfile> generalUserProfile = UniDB.searchByQuery("SELECT g FROM GeneralUserProfile g WHERE g.verificationToken ='" + securityCode + "' ");
+        System.out.println("getUserDetailsFromGeneralUserProfile(String securityCode) " + !generalUserProfile.isEmpty());
+        if (!generalUserProfile.isEmpty()) {
+            gup = generalUserProfile.get(0);
             return generalUserProfile.get(0).getNic();
         }
         return "";
@@ -142,9 +160,8 @@ public class LoanCalculator implements Serializable {
 
     public void updateOfferManager(String nic) {
         Date date = new Date();
-        System.out.println("updateOfferManager");
+        System.out.println("updateOfferManager" + nic);
         List<LoanCustomer> loanCustomer = UniDB.searchByQuery("SELECT g FROM LoanCustomer g WHERE g.nic='" + nic + "'");
-        System.out.println("nic " + LoanRequestForm.getNic());
         if (!loanCustomer.isEmpty()) {
             System.out.println("loanCustomer.isEmpty() " + loanCustomer.isEmpty());
             List<OfferManager> offerManager = UniDB.searchByQuery("SELECT g FROM OfferManager g WHERE g.loanCustomerId.id='" + loanCustomer.get(0).getId() + "' AND g.loanOfferId.id='1'");
@@ -164,7 +181,11 @@ public class LoanCalculator implements Serializable {
 
     public void saveLoanDetails() {
         FacesMessage msg;
-        if (expectedLoanAmount != 0) {
+        RepaymentPeriod r = (RepaymentPeriod) UniDB.find(Integer.parseInt(repayementPeriod), RepaymentPeriod.class);
+
+        Double loanAmount = (monthlyinstallement * Double.valueOf(r.getPeriod()));
+
+        if (expectedLoanAmount != 0 && (expectedLoanAmount == loanAmount)) {
             if (monthlyinstallement >= 20000) {
                 if (repayementPeriod != null && !repayementPeriod.equals("0")) {
                     if ((grossIncome != 0) && (monthlyinstallement < grossIncome)) {
@@ -174,11 +195,32 @@ public class LoanCalculator implements Serializable {
                                 try {
                                     Date date = new Date();
 
-                                    Member1 member = LoanRequestForm.getMember();
+                                    Member1 member = null;
+                                    if (LoanRequestForm.getMember() != null) {
+                                        System.out.println("A");
+                                        member = LoanRequestForm.getMember();
+                                    } else {
+                                        System.out.println("B else");
+                                        System.out.println("gup.getId " + gup.getId());
+                                        List<Member1> results = UniDB.searchByQuery("SELECT g FROM Member1 g WHERE g.generalUserProfileId.id='" + gup.getId() + "' ");
+                                        if (results != null && !results.isEmpty()) {
+                                            member = (Member1) results.get(0);
+                                        }
+                                    }
 
                                     int branchId = 0;
 
-                                    MemberBankAccounts memberBankAccounts = LoanRequestForm.getMemberBankAccounts();
+                                    MemberBankAccounts memberBankAccounts = null;
+
+                                    if (LoanRequestForm.getMemberBankAccounts() != null) {
+                                        memberBankAccounts = LoanRequestForm.getMemberBankAccounts();
+                                    } else {
+                                        System.out.println("gup.getId " + gup.getId());
+                                        List<MemberBankAccounts> results = UniDB.searchByQuery("SELECT g FROM MemberBankAccounts g WHERE g.memberId.id='" + member.getId() + "' ");
+                                        if (results != null && !results.isEmpty()) {
+                                            memberBankAccounts = (MemberBankAccounts) results.get(0);
+                                        }
+                                    }
 
                                     LoanApplicantGurantor loanApplicantGurantor = new LoanApplicantGurantor();
                                     loanApplicantGurantor.setDate(date);
@@ -199,12 +241,21 @@ public class LoanCalculator implements Serializable {
 
 //                                    String verification_token = Security.encrypt(loanid);
                                     String verification_token = Filteration.getFilteredSHA256HashedPassword(System.currentTimeMillis() + "" + member.getId());
-
                                     newLoan.setVerificationToke(verification_token);
                                     UniDB.create(newLoan);
+
                                     System.out.println("branch id a" + branchId);
+
                                     if (branchId == 0) {
-                                        branchId = LoanRequestForm.getBranchId();
+                                        if (LoanRequestForm.getBranchId() != 0) {
+                                            branchId = LoanRequestForm.getBranchId();
+                                        } else {
+                                            System.out.println("gup.getId " + gup.getId());
+                                            List<MaterializedStudentLoanEligibleStudentTable> mt = UniDB.searchByQuery("SELECT g FROM MaterializedStudentLoanEligibleStudentTable g WHERE g.nic='" + gup.getNic() + "' ");
+
+                                            List<OrganizationBranches> orgList = UniDB.searchByQuery("SELECT g FROM OrganizationBranches g WHERE g.name LIKE '%" + mt.get(0).getBranchName() + "%'");
+                                            branchId = orgList.get(0).getId();
+                                        }
                                         System.out.println("branch id b" + branchId);
                                     }
 
@@ -229,8 +280,7 @@ public class LoanCalculator implements Serializable {
 
                                     Date dateTwo = new Date();
                                     System.out.println("updateOfferManager");
-                                    List<LoanCustomer> loanCustomer = UniDB.searchByQuery("SELECT g FROM LoanCustomer g WHERE g.nic='" + LoanRequestForm.getNic() + "'");
-                                    System.out.println("nic " + LoanRequestForm.getNic());
+                                    List<LoanCustomer> loanCustomer = UniDB.searchByQuery("SELECT g FROM LoanCustomer g WHERE g.nic='" + gup.getNic() + "'");
                                     if (!loanCustomer.isEmpty()) {
                                         System.out.println("loanCustomer.isEmpty() " + loanCustomer.isEmpty());
                                         List<OfferManager> offerManager = UniDB.searchByQuery("SELECT g FROM OfferManager g WHERE g.loanCustomerId.id='" + loanCustomer.get(0).getId() + "' AND g.loanOfferId.id='1'");
@@ -286,7 +336,7 @@ public class LoanCalculator implements Serializable {
             }
         } else {
             displayLoanAmount = true;
-            msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "Please Enter the Expected Loan Amount ");
+            msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "Please Enter the Expected Loan Amount Correctly");
             FacesContext.getCurrentInstance().addMessage("", msg);
         }
     }
@@ -313,7 +363,7 @@ public class LoanCalculator implements Serializable {
             System.out.println("repayementPeriod " + repayementPeriod);
             if (this.expectedLoanAmount != 0 && this.expectedLoanAmount > 0) {
                 loanAmount = this.expectedLoanAmount;
-                System.out.println("loan amount");
+                System.out.println("loan amount " + loanAmount);
             }
             if (this.repayementPeriod != null && !this.repayementPeriod.equals("0")) {
                 List<RepaymentPeriod> repaymentPeriods = UniDB.searchByQuery("SELECT g FROM RepaymentPeriod g WHERE g.id='" + repayementPeriod + "'");

@@ -42,7 +42,7 @@
                         </div>
                         <p:dataTable widgetVar="customersDT" var="customer" value="#{emailSendingBean.studentLoanExpecitngStudentList}" reflow="true"
                                      selection="#{dataTableDemoView.selectedCustomers}" rowIndexVar="index"
-                                     paginator="true" rows="10" paginatorPosition="bottom" rowSelectMode="add">
+                                     paginator="true" rows="10" paginatorPosition="top" rowSelectMode="add">
                             <f:facet name="header">
                                 <div class="customers-table-header">
                                     <span style="font-weight: bold">Students</span>
@@ -60,7 +60,7 @@
                                 <p:selectBooleanCheckbox value="#{customer.studentSelected}" />
                             </p:column>
 
-                            <p:column headerText="" sortBy="#{customer.nic}" filterBy="#{customer.nic}" style="width: 10%">
+                            <p:column headerText="NIC" sortBy="#{customer.nic}" filterBy="#{customer.nic}" style="width: 10%">
                                 <h:outputText value="#{customer.nic}" />
                             </p:column>
                             <p:column headerText="Name" sortBy="#{customer.studentName}" filterBy="#{customer.studentName}">

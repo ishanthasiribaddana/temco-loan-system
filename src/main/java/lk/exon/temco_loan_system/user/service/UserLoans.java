@@ -15,15 +15,10 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import lk.exon.temco_loan_system.common.ComPath;
 import lk.exon.temco_loan_system.common.UniDBLocal;
 import lk.exon.temco_loan_system.entity.GeneralUserProfile;
@@ -33,7 +28,6 @@ import lk.exon.temco_loan_system.entity.LoanApplicantGurantor;
 import lk.exon.temco_loan_system.entity.LoanManager;
 import lk.exon.temco_loan_system.entity.LoanStatusManager;
 import lk.exon.temco_loan_system.entity.Member1;
-import lk.exon.temco_loan_system.service.EmailUnsubscribe;
 import org.primefaces.model.file.UploadedFile;
 
 /**
@@ -360,10 +354,6 @@ public class UserLoans implements Serializable {
                 }
             }
         }
-    }
-
-    private void getUserDetailsFromGeneralUserProfile(String securityCode) {
-
     }
 
     public class UsereLoansDetails {

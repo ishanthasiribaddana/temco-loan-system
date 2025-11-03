@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>lk.exon</groupId>
     <artifactId>temco_loan_system</artifactId>
-    <version>1.6</version>
+    <version>1.7</version>
     <packaging>war</packaging>
     <name>temco_loan_system-1.0</name>
     <properties>

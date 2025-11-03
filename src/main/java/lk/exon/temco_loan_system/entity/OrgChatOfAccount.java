@@ -5,7 +5,6 @@
 package lk.exon.temco_loan_system.entity;
 
 import jakarta.persistence.Basic;
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -13,23 +12,21 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.NamedQueries;
 import jakarta.persistence.NamedQuery;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.io.Serializable;
-import java.util.Collection;
 
 /**
  *
  * @author USER
  */
 @Entity
-@Table(name = "intake")
+@Table(name = "org_chat_of_account")
 @NamedQueries({
-    @NamedQuery(name = "Intake.findAll", query = "SELECT i FROM Intake i"),
-    @NamedQuery(name = "Intake.findById", query = "SELECT i FROM Intake i WHERE i.id = :id"),
-    @NamedQuery(name = "Intake.findByIntakeId", query = "SELECT i FROM Intake i WHERE i.intakeId = :intakeId"),
-    @NamedQuery(name = "Intake.findByName", query = "SELECT i FROM Intake i WHERE i.name = :name")})
-public class Intake implements Serializable {
+    @NamedQuery(name = "OrgChatOfAccount.findAll", query = "SELECT o FROM OrgChatOfAccount o"),
+    @NamedQuery(name = "OrgChatOfAccount.findById", query = "SELECT o FROM OrgChatOfAccount o WHERE o.id = :id"),
+    @NamedQuery(name = "OrgChatOfAccount.findByIsActive", query = "SELECT o FROM OrgChatOfAccount o WHERE o.isActive = :isActive"),
+    @NamedQuery(name = "OrgChatOfAccount.findByCode", query = "SELECT o FROM OrgChatOfAccount o WHERE o.code = :code")})
+public class OrgChatOfAccount implements Serializable {
 
     private static final long serialVersionUID = 1L;
     @Id
@@ -37,17 +34,15 @@ public class Intake implements Serializable {
     @Basic(optional = false)
     @Column(name = "id")
     private Integer id;
-    @Column(name = "intake_id")
-    private Integer intakeId;
-    @Column(name = "name")
-    private String name;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "intakeId")
-    private Collection<IntakeManager> intakeManagerCollection;
+    @Column(name = "is_active")
+    private Integer isActive;
+    @Column(name = "code")
+    private String code;
 
-    public Intake() {
+    public OrgChatOfAccount() {
     }
 
-    public Intake(Integer id) {
+    public OrgChatOfAccount(Integer id) {
         this.id = id;
     }
 
@@ -59,28 +54,20 @@ public class Intake implements Serializable {
         this.id = id;
     }
 
-    public Integer getIntakeId() {
-        return intakeId;
+    public Integer getIsActive() {
+        return isActive;
     }
 
-    public void setIntakeId(Integer intakeId) {
-        this.intakeId = intakeId;
+    public void setIsActive(Integer isActive) {
+        this.isActive = isActive;
     }
 
-    public String getName() {
-        return name;
+    public String getCode() {
+        return code;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public Collection<IntakeManager> getIntakeManagerCollection() {
-        return intakeManagerCollection;
-    }
-
-    public void setIntakeManagerCollection(Collection<IntakeManager> intakeManagerCollection) {
-        this.intakeManagerCollection = intakeManagerCollection;
+    public void setCode(String code) {
+        this.code = code;
     }
 
     @Override
@@ -93,10 +80,10 @@ public class Intake implements Serializable {
     @Override
     public boolean equals(Object object) {
         // TODO: Warning - this method won't work in the case the id fields are not set
-        if (!(object instanceof Intake)) {
+        if (!(object instanceof OrgChatOfAccount)) {
             return false;
         }
-        Intake other = (Intake) object;
+        OrgChatOfAccount other = (OrgChatOfAccount) object;
         if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
             return false;
         }
@@ -105,7 +92,7 @@ public class Intake implements Serializable {
 
     @Override
     public String toString() {
-        return "lk.exon.temco_loan_system.entity.Intake[ id=" + id + " ]";
+        return "lk.exon.temco_loan_system.entity.OrgChatOfAccount[ id=" + id + " ]";
     }
     
 }

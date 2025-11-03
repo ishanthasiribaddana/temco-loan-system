@@ -142,36 +142,52 @@
                             </p:commandButton>
                         </div>
 
-                        <p:dataTable id="productsTable" var="loan" value="#{loanDashboard.loans}" reflow="true"
-                                     paginatorPosition="bottom"
-                                     rowIndexVar="index" paginator="true" rows="100">
-                            <p:column style="width: 2%" exportable="false">
-                                <h:outputText value="#{index + 1}"/>
+
+                        <p:dataTable id="loansTable" widgetVar="CustomerDT" var="loan" value="#{loanDashboard.loans}" reflow="true"
+                                     selection="#{dataTableDemoView.selectedCustomers}" rowIndexVar="index"
+                                     paginator="true" rows="100" paginatorPosition="top" rowSelectMode="add" 
+                                     filteredValue="#{loanDashboard.filteredLoans}">
+
+                            <f:facet name="header">
+                                <div class="customers-table-header">
+                                    <span style="font-weight: bold">Enter NIC : </span>
+                                    <span class="ui-input-icon-left filter-container">
+                                        <i class="pi pi-search"/>
+                                        <p:inputText id="globalFilter" value="#{loanDashboard.globalFilter}" 
+                                                     placeholder="Enter NIC . . . . ">
+                                            <!-- Use the dataTable's ID instead of widgetVar -->
+                                            <p:ajax event="keyup" update="loansTable" listener="#{loanDashboard.filterLoans}"/>
+                                        </p:inputText>  
+                                    </span>
+                                </div>
+                            </f:facet>
+
+                            <p:column headerText="" style="width: 2%">
+                                <h:outputText value="#{index + 1}" />
                             </p:column>
-                            <p:column headerText="NIC" sortBy="#{loan.assoNo}" 
-                                      exportValue="#{loan.assoNo}">
-                                <h:outputText value="#{loan.assoNo}"/>
+
+                            <p:column headerText="NIC" style="width: 10%">
+                                <h:outputText value="#{loan.assoNo}" />
                             </p:column>
-                            <p:column headerText="Name" sortBy="#{loan.name}">
-                                <h:outputText value="#{loan.name}"/>
+                            <p:column headerText="Name" style="width: 15%">
+                                <h:outputText value="#{loan.name}" />
                             </p:column>
-                            <p:column headerText="Loan Amount" sortBy="#{loan.loanAmount}">
-                                <h:outputText value="#{loan.loanAmount}">
-                                    <f:convertNumber currencySymbol="LKR" type="currency"/>
-                                </h:outputText>
+                            <p:column headerText="Loan Amount">
+                                <h:outputText style="vertical-align: middle; margin-left: .5rem" value="#{loan.loanAmount}" />
                             </p:column>
-                            <p:column headerText="Monthly Installment" sortBy="#{loan.loanAmount}">
-                                <h:outputText value="#{loan.loanMangerObj.loanManagerId.monthlyInstallement}">
-                                    <f:convertNumber currencySymbol="LKR" type="currency"/>
-                                </h:outputText>
+                            <p:column headerText="Monthly Installment">
+                                <h:outputText style="vertical-align: middle; margin-left: .5rem" value="#{loan.loanMangerObj.loanManagerId.monthlyInstallement}" />
                             </p:column>
-                            <p:column headerText="Time Period" sortBy="#{loan.loanAmount}">
-                                <h:outputText value="#{loan.loanMangerObj.loanManagerId.repaymentPeriodId.period}"/>
+                            <p:column headerText="Time Period" >
+                                <h:outputText value="#{loan.loanMangerObj.loanManagerId.repaymentPeriodId.period}" />
                             </p:column>
-                            <p:column headerText="Pay Order Status" sortBy="#{loan.payOrderStatus}">
+                            <p:column headerText="Loan Applied Date" >
+                                <h:outputText value="#{loan.payOrderDate}" />
+                            </p:column>
+                            <p:column headerText="Loan Status">
                                 <h:outputText value="#{loan.payOrderStatus}" />
                             </p:column>
-                            <p:column headerText="Pay Order Date" sortBy="#{loan.payOrderDate}">
+                            <p:column headerText="Status Date" >
                                 <h:outputText value="#{loan.payOrderDate}" />
                             </p:column>
                             <p:column headerText="" exportable="false">

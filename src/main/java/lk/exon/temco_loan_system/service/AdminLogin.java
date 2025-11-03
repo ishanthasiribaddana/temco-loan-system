@@ -58,8 +58,9 @@ public class AdminLogin implements Serializable {
             if (username != null && password != null) {
                 System.out.println("username " + username);
                 if (password != null) {
-                    System.out.println("username " + password);
-
+//                    System.out.println("username " + password);
+//                    String encryptpassword = Security.encrypt(password);
+//                    System.out.println("encryptpassword " + encryptpassword);
                     String quary = "SELECT u FROM UserLoginGroup u WHERE u.userLoginId.username='" + username + "'";
                     System.out.println(quary);
                     List<UserLoginGroup> ul_list = uni.searchByQuery(quary);

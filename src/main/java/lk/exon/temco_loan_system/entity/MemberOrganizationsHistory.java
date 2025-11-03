@@ -42,7 +42,7 @@ public class MemberOrganizationsHistory implements Serializable {
     @Column(name = "date")
     @Temporal(TemporalType.DATE)
     private Date date;
-    @Column(name = "isActive")
+    @Column(name = "is_active")
     private Short isActive;
     @JoinColumn(name = "general_organization_profile_id", referencedColumnName = "id")
     @ManyToOne(optional = false)

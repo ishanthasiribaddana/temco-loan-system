@@ -36,7 +36,8 @@ import java.util.Date;
     @NamedQuery(name = "Member1.findByRegisteredDate", query = "SELECT m FROM Member1 m WHERE m.registeredDate = :registeredDate"),
     @NamedQuery(name = "Member1.findByKpiValue", query = "SELECT m FROM Member1 m WHERE m.kpiValue = :kpiValue"),
     @NamedQuery(name = "Member1.findByAvailableFund", query = "SELECT m FROM Member1 m WHERE m.availableFund = :availableFund"),
-    @NamedQuery(name = "Member1.findByLastPaymentDate", query = "SELECT m FROM Member1 m WHERE m.lastPaymentDate = :lastPaymentDate")})
+    @NamedQuery(name = "Member1.findByLastPaymentDate", query = "SELECT m FROM Member1 m WHERE m.lastPaymentDate = :lastPaymentDate"),
+    @NamedQuery(name = "Member1.findByUpdatedAt", query = "SELECT m FROM Member1 m WHERE m.updatedAt = :updatedAt")})
 public class Member1 implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -58,6 +59,9 @@ public class Member1 implements Serializable {
     @Column(name = "last_payment_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date lastPaymentDate;
+    @Column(name = "updated_at")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date updatedAt;
     @OneToMany(mappedBy = "memberId")
     private Collection<Supplier> supplierCollection;
     @OneToMany(mappedBy = "memberId")
@@ -69,9 +73,9 @@ public class Member1 implements Serializable {
     @JoinColumn(name = "general_user_profile_id", referencedColumnName = "id")
     @ManyToOne(optional = false)
     private GeneralUserProfile generalUserProfileId;
-    @OneToMany(mappedBy = "interduceeMemberId")
-    private Collection<MemberHasMember> memberHasMemberCollection;
     @OneToMany(mappedBy = "interducerMemberId")
+    private Collection<MemberHasMember> memberHasMemberCollection;
+    @OneToMany(mappedBy = "interduceeMemberId")
     private Collection<MemberHasMember> memberHasMemberCollection1;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "memberId")
     private Collection<Nominess> nominessCollection;
@@ -139,6 +143,14 @@ public class Member1 implements Serializable {
 
     public void setLastPaymentDate(Date lastPaymentDate) {
         this.lastPaymentDate = lastPaymentDate;
+    }
+
+    public Date getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(Date updatedAt) {
+        this.updatedAt = updatedAt;
     }
 
     public Collection<Supplier> getSupplierCollection() {

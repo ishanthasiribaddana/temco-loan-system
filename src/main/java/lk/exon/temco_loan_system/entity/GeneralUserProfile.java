@@ -46,6 +46,7 @@ import java.util.Date;
     @NamedQuery(name = "GeneralUserProfile.findByAddress3", query = "SELECT g FROM GeneralUserProfile g WHERE g.address3 = :address3"),
     @NamedQuery(name = "GeneralUserProfile.findByDate", query = "SELECT g FROM GeneralUserProfile g WHERE g.date = :date"),
     @NamedQuery(name = "GeneralUserProfile.findByProfileCreatedDate", query = "SELECT g FROM GeneralUserProfile g WHERE g.profileCreatedDate = :profileCreatedDate"),
+    @NamedQuery(name = "GeneralUserProfile.findByUpdatedAt", query = "SELECT g FROM GeneralUserProfile g WHERE g.updatedAt = :updatedAt"),
     @NamedQuery(name = "GeneralUserProfile.findByDob", query = "SELECT g FROM GeneralUserProfile g WHERE g.dob = :dob"),
     @NamedQuery(name = "GeneralUserProfile.findByOfficePhoneNo", query = "SELECT g FROM GeneralUserProfile g WHERE g.officePhoneNo = :officePhoneNo"),
     @NamedQuery(name = "GeneralUserProfile.findBySignature", query = "SELECT g FROM GeneralUserProfile g WHERE g.signature = :signature"),
@@ -91,6 +92,9 @@ public class GeneralUserProfile implements Serializable {
     @Column(name = "profile_created_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date profileCreatedDate;
+    @Column(name = "updated_at")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date updatedAt;
     @Column(name = "dob")
     @Temporal(TemporalType.DATE)
     private Date dob;
@@ -104,7 +108,7 @@ public class GeneralUserProfile implements Serializable {
     @Basic(optional = false)
     @Column(name = "verification_token")
     private String verificationToken;
-    @Column(name = "isActive")
+    @Column(name = "is_active")
     private Short isActive;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "generalUserProfileId")
     private Collection<Supplier> supplierCollection;
@@ -118,9 +122,9 @@ public class GeneralUserProfile implements Serializable {
     private Collection<Employee> employeeCollection;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "generalUserProfileId")
     private Collection<UserRoleManagement> userRoleManagementCollection;
-    @OneToMany(mappedBy = "generalUserProfileCreatedBy")
-    private Collection<Settings> settingsCollection;
     @OneToMany(mappedBy = "generalUserProfileUpdatedBy")
+    private Collection<Settings> settingsCollection;
+    @OneToMany(mappedBy = "generalUserProfileCreatedBy")
     private Collection<Settings> settingsCollection1;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "generalUserProfileId")
     private Collection<SpotMember> spotMemberCollection;
@@ -280,6 +284,14 @@ public class GeneralUserProfile implements Serializable {
 
     public void setProfileCreatedDate(Date profileCreatedDate) {
         this.profileCreatedDate = profileCreatedDate;
+    }
+
+    public Date getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(Date updatedAt) {
+        this.updatedAt = updatedAt;
     }
 
     public Date getDob() {

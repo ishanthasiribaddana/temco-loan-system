@@ -114,6 +114,7 @@ public class LoanCalculator implements Serializable {
             updateOfferManager(LoanRequestForm.getNic());
             getUserDetailsFromNIC(LoanRequestForm.getNic());
             dueCourseFee = LoanRequestForm.getDueCourseFee();
+            expectedLoanAmount = LoanRequestForm.getDueCourseFee();
         } else {
             System.out.println("initialize else");
             FacesContext facesContext = FacesContext.getCurrentInstance();
@@ -185,7 +186,7 @@ public class LoanCalculator implements Serializable {
 
         Double loanAmount = (monthlyinstallement * Double.valueOf(r.getPeriod()));
 
-        if (expectedLoanAmount != 0 && (expectedLoanAmount == loanAmount)) {
+        if (expectedLoanAmount != 0) {
             if (monthlyinstallement >= 20000) {
                 if (repayementPeriod != null && !repayementPeriod.equals("0")) {
                     if ((grossIncome != 0) && (monthlyinstallement < grossIncome)) {
@@ -254,7 +255,9 @@ public class LoanCalculator implements Serializable {
                                             List<MaterializedStudentLoanEligibleStudentTable> mt = UniDB.searchByQuery("SELECT g FROM MaterializedStudentLoanEligibleStudentTable g WHERE g.nic='" + gup.getNic() + "' ");
 
                                             List<OrganizationBranches> orgList = UniDB.searchByQuery("SELECT g FROM OrganizationBranches g WHERE g.name LIKE '%" + mt.get(0).getBranchName() + "%'");
-                                            branchId = orgList.get(0).getId();
+                                            if (orgList.size() > 0) {
+                                                branchId = orgList.get(0).getId();
+                                            }
                                         }
                                         System.out.println("branch id b" + branchId);
                                     }

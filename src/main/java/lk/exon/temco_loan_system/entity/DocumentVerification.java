@@ -29,7 +29,8 @@ import java.util.Date;
 @NamedQueries({
     @NamedQuery(name = "DocumentVerification.findAll", query = "SELECT d FROM DocumentVerification d"),
     @NamedQuery(name = "DocumentVerification.findById", query = "SELECT d FROM DocumentVerification d WHERE d.id = :id"),
-    @NamedQuery(name = "DocumentVerification.findByVerifiedDate", query = "SELECT d FROM DocumentVerification d WHERE d.verifiedDate = :verifiedDate")})
+    @NamedQuery(name = "DocumentVerification.findByVerifiedDate", query = "SELECT d FROM DocumentVerification d WHERE d.verifiedDate = :verifiedDate"),
+    @NamedQuery(name = "DocumentVerification.findByUpdatedAt", query = "SELECT d FROM DocumentVerification d WHERE d.updatedAt = :updatedAt")})
 public class DocumentVerification implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -41,6 +42,9 @@ public class DocumentVerification implements Serializable {
     @Column(name = "verified_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date verifiedDate;
+    @Column(name = "updated_at")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date updatedAt;
     @JoinColumn(name = "universal_user_document_id", referencedColumnName = "id")
     @ManyToOne(optional = false)
     private UniversalUserDocument universalUserDocumentId;
@@ -66,6 +70,14 @@ public class DocumentVerification implements Serializable {
 
     public void setVerifiedDate(Date verifiedDate) {
         this.verifiedDate = verifiedDate;
+    }
+
+    public Date getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(Date updatedAt) {
+        this.updatedAt = updatedAt;
     }
 
     public UniversalUserDocument getUniversalUserDocumentId() {

@@ -45,7 +45,7 @@ public class LoanDocumentsScheduler implements Serializable {
     @Column(name = "submission_date")
     @Temporal(TemporalType.DATE)
     private Date submissionDate;
-    @Column(name = "isSubmitted")
+    @Column(name = "is_submitted")
     private Short isSubmitted;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "loanDocumentsSchedulerId")
     private Collection<LoanDocumentStatusManager> loanDocumentStatusManagerCollection;

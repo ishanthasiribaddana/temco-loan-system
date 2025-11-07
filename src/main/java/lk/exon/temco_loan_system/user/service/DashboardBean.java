@@ -123,14 +123,16 @@ public class DashboardBean implements Serializable {
             System.out.println("member_list " + member_list.size());
             if (!member_list.isEmpty()) {
                 List<LoanApplicantGurantor> loan_applicant_gurantor = uniDB.searchByQuery("SELECT g FROM LoanApplicantGurantor g WHERE g.memberId.id='" + member_list.get(0).getId() + "' ");
-                System.out.println("member_list " + loan_applicant_gurantor.size());
+                System.out.println("loan_applicant_gurantor " + loan_applicant_gurantor.size());
                 if (!loan_applicant_gurantor.isEmpty()) {
                     List<LoanManager> loan_manager = uniDB.searchByQueryLimit("SELECT g FROM LoanManager g WHERE g.loanApplicantAndGurantorsId.id='" + loan_applicant_gurantor.get(0).getId() + "' ORDER BY g.date DESC ", 1);
 
                     if (!loan_manager.isEmpty()) {
                         urlViewForApplyLoan = false;
                         System.out.println("loan_manager " + loan_manager.size());
+                        System.out.println("Loan id " + loan_manager.get(0).getId());
                         List<LoanStatusManager> loan_status_managers = uniDB.searchByQueryLimit("SELECT g FROM LoanStatusManager g WHERE g.loanManagerId.id='" + loan_manager.get(0).getId() + "' ORDER BY g.date DESC ", 1);
+                        System.out.println("loan_status_managers " + loan_status_managers.size());
                         if (!loan_status_managers.isEmpty()) {
 
                             if (loan_status_managers.get(0).getLoanStatusId().getId() > 1) {

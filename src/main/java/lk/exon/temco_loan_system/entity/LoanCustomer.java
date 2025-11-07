@@ -75,11 +75,10 @@ public class LoanCustomer implements Serializable {
     private String addressLine3;
     @Column(name = "verification_token")
     private String verificationToken;
-    @Basic(optional = false)
-    @Column(name = "isSubscribe")
-    private short isSubscribe;
+    @Column(name = "is_subscribe")
+    private Short isSubscribe;
     @JoinColumn(name = "gender_id", referencedColumnName = "id")
-    @ManyToOne(optional = false)
+    @ManyToOne
     private Gender genderId;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "loanCustomerId")
     private Collection<MobileNo> mobileNoCollection;
@@ -87,6 +86,8 @@ public class LoanCustomer implements Serializable {
     private Collection<OfferManager> offerManagerCollection;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "loanCustomerId")
     private Collection<BranchManager> branchManagerCollection;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "loanCustomerId")
+    private Collection<StudentDue> studentDueCollection;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "loanCustomerId")
     private Collection<ScholarshipManager> scholarshipManagerCollection;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "loanCustomerId")
@@ -97,11 +98,6 @@ public class LoanCustomer implements Serializable {
 
     public LoanCustomer(Integer id) {
         this.id = id;
-    }
-
-    public LoanCustomer(Integer id, short isSubscribe) {
-        this.id = id;
-        this.isSubscribe = isSubscribe;
     }
 
     public Integer getId() {
@@ -200,11 +196,11 @@ public class LoanCustomer implements Serializable {
         this.verificationToken = verificationToken;
     }
 
-    public short getIsSubscribe() {
+    public Short getIsSubscribe() {
         return isSubscribe;
     }
 
-    public void setIsSubscribe(short isSubscribe) {
+    public void setIsSubscribe(Short isSubscribe) {
         this.isSubscribe = isSubscribe;
     }
 
@@ -238,6 +234,14 @@ public class LoanCustomer implements Serializable {
 
     public void setBranchManagerCollection(Collection<BranchManager> branchManagerCollection) {
         this.branchManagerCollection = branchManagerCollection;
+    }
+
+    public Collection<StudentDue> getStudentDueCollection() {
+        return studentDueCollection;
+    }
+
+    public void setStudentDueCollection(Collection<StudentDue> studentDueCollection) {
+        this.studentDueCollection = studentDueCollection;
     }
 
     public Collection<ScholarshipManager> getScholarshipManagerCollection() {

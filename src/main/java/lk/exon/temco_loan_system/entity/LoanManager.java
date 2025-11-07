@@ -37,6 +37,7 @@ import java.util.Date;
     @NamedQuery(name = "LoanManager.findByTotalInterest", query = "SELECT l FROM LoanManager l WHERE l.totalInterest = :totalInterest"),
     @NamedQuery(name = "LoanManager.findByMonthlyInstallement", query = "SELECT l FROM LoanManager l WHERE l.monthlyInstallement = :monthlyInstallement"),
     @NamedQuery(name = "LoanManager.findByDate", query = "SELECT l FROM LoanManager l WHERE l.date = :date"),
+    @NamedQuery(name = "LoanManager.findByUpdatedAt", query = "SELECT l FROM LoanManager l WHERE l.updatedAt = :updatedAt"),
     @NamedQuery(name = "LoanManager.findByVerificationToke", query = "SELECT l FROM LoanManager l WHERE l.verificationToke = :verificationToke")})
 public class LoanManager implements Serializable {
 
@@ -60,11 +61,16 @@ public class LoanManager implements Serializable {
     @Column(name = "date")
     @Temporal(TemporalType.DATE)
     private Date date;
+    @Column(name = "updated_at")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date updatedAt;
     @Basic(optional = false)
     @Column(name = "verification_toke")
     private String verificationToke;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "loanManagerId")
     private Collection<InterestManager> interestManagerCollection;
+    @OneToMany(mappedBy = "loanManagerId")
+    private Collection<StudentDue> studentDueCollection;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "loanManagerId")
     private Collection<LoanStatusManager> loanStatusManagerCollection;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "loanManagerId")
@@ -150,6 +156,14 @@ public class LoanManager implements Serializable {
         this.date = date;
     }
 
+    public Date getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(Date updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
     public String getVerificationToke() {
         return verificationToke;
     }
@@ -164,6 +178,14 @@ public class LoanManager implements Serializable {
 
     public void setInterestManagerCollection(Collection<InterestManager> interestManagerCollection) {
         this.interestManagerCollection = interestManagerCollection;
+    }
+
+    public Collection<StudentDue> getStudentDueCollection() {
+        return studentDueCollection;
+    }
+
+    public void setStudentDueCollection(Collection<StudentDue> studentDueCollection) {
+        this.studentDueCollection = studentDueCollection;
     }
 
     public Collection<LoanStatusManager> getLoanStatusManagerCollection() {

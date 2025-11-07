@@ -426,10 +426,12 @@ public class LoanRequestForm implements Serializable {
 
     public boolean userAlreadyHaveALoan(String nic) {
         List<GeneralUserProfile> gupExist = UniDB.searchByQuery("SELECT g FROM GeneralUserProfile g WHERE g.nic='" + nic + "'");
+        System.out.println("gup exist " + (gupExist.size() > 0));
         if (gupExist.size() > 0) {
             List<Member1> existmember = UniDB.searchByQuery("SELECT g FROM Member1 g WHERE g.generalUserProfileId.id='" + gupExist.get(0).getId() + "' ");
+            System.out.println("existmember " + (existmember.size() > 0));
             if (existmember.size() > 0) {
-                List<MemberBankAccounts> memberBankAccountsList = UniDB.searchByQuery("SELECT g FROM MemberBankAccounts g WHERE g.memberId.id='" + member.getId() + "'");
+                List<MemberBankAccounts> memberBankAccountsList = UniDB.searchByQuery("SELECT g FROM MemberBankAccounts g WHERE g.memberId.id='" + existmember.get(0).getId() + "'");
                 if (memberBankAccountsList.size() > 0) {
                     for (MemberBankAccounts memberBankAccountsObj : memberBankAccountsList) {
                         List<LoanManager> memberLoans = UniDB.searchByQuery("SELECT g FROM LoanManager g WHERE g.memberBankAccountsId.id='" + memberBankAccountsObj.getId() + "'");

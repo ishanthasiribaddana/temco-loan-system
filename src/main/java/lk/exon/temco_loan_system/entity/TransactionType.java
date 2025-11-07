@@ -40,6 +40,8 @@ public class TransactionType implements Serializable {
     private String type;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "transactionTypeId")
     private Collection<BankStatement> bankStatementCollection;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "transactionTypeId")
+    private Collection<GeneralJournalEntry> generalJournalEntryCollection;
 
     public TransactionType() {
     }
@@ -70,6 +72,14 @@ public class TransactionType implements Serializable {
 
     public void setBankStatementCollection(Collection<BankStatement> bankStatementCollection) {
         this.bankStatementCollection = bankStatementCollection;
+    }
+
+    public Collection<GeneralJournalEntry> getGeneralJournalEntryCollection() {
+        return generalJournalEntryCollection;
+    }
+
+    public void setGeneralJournalEntryCollection(Collection<GeneralJournalEntry> generalJournalEntryCollection) {
+        this.generalJournalEntryCollection = generalJournalEntryCollection;
     }
 
     @Override

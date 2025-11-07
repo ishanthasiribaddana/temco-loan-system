@@ -107,5 +107,5 @@ public class IntakeManager implements Serializable {
     public String toString() {
         return "lk.exon.temco_loan_system.entity.IntakeManager[ id=" + id + " ]";
     }
-
+    
 }

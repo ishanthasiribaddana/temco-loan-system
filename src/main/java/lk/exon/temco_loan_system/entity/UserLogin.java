@@ -18,8 +18,11 @@ import jakarta.persistence.NamedQueries;
 import jakarta.persistence.NamedQuery;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.Date;
 
 /**
  *
@@ -34,7 +37,9 @@ import java.util.Collection;
     @NamedQuery(name = "UserLogin.findByPassword", query = "SELECT u FROM UserLogin u WHERE u.password = :password"),
     @NamedQuery(name = "UserLogin.findByIsActive", query = "SELECT u FROM UserLogin u WHERE u.isActive = :isActive"),
     @NamedQuery(name = "UserLogin.findByMaxLoginAttempt", query = "SELECT u FROM UserLogin u WHERE u.maxLoginAttempt = :maxLoginAttempt"),
-    @NamedQuery(name = "UserLogin.findByCountAttempt", query = "SELECT u FROM UserLogin u WHERE u.countAttempt = :countAttempt")})
+    @NamedQuery(name = "UserLogin.findByCountAttempt", query = "SELECT u FROM UserLogin u WHERE u.countAttempt = :countAttempt"),
+    @NamedQuery(name = "UserLogin.findByUpdatedAt", query = "SELECT u FROM UserLogin u WHERE u.updatedAt = :updatedAt"),
+    @NamedQuery(name = "UserLogin.findByLastLoginAt", query = "SELECT u FROM UserLogin u WHERE u.lastLoginAt = :lastLoginAt")})
 public class UserLogin implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -53,6 +58,12 @@ public class UserLogin implements Serializable {
     private Integer maxLoginAttempt;
     @Column(name = "count_attempt")
     private Integer countAttempt;
+    @Column(name = "updated_at")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date updatedAt;
+    @Column(name = "last_login_at")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date lastLoginAt;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "userLoginId")
     private Collection<UserLoginHasSystemInterface> userLoginHasSystemInterfaceCollection;
     @JoinColumns({
@@ -129,6 +140,22 @@ public class UserLogin implements Serializable {
 
     public void setCountAttempt(Integer countAttempt) {
         this.countAttempt = countAttempt;
+    }
+
+    public Date getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(Date updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+    public Date getLastLoginAt() {
+        return lastLoginAt;
+    }
+
+    public void setLastLoginAt(Date lastLoginAt) {
+        this.lastLoginAt = lastLoginAt;
     }
 
     public Collection<UserLoginHasSystemInterface> getUserLoginHasSystemInterfaceCollection() {

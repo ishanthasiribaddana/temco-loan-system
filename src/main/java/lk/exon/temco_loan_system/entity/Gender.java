@@ -5,7 +5,6 @@
 package lk.exon.temco_loan_system.entity;
 
 import jakarta.persistence.Basic;
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -38,7 +37,7 @@ public class Gender implements Serializable {
     private Integer id;
     @Column(name = "name")
     private String name;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "genderId")
+    @OneToMany(mappedBy = "genderId")
     private Collection<LoanCustomer> loanCustomerCollection;
     @OneToMany(mappedBy = "genderId")
     private Collection<GeneralUserProfile> generalUserProfileCollection;

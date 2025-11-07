@@ -39,6 +39,7 @@ import java.util.Date;
     @NamedQuery(name = "BankAccount.findByCreatedDate", query = "SELECT b FROM BankAccount b WHERE b.createdDate = :createdDate"),
     @NamedQuery(name = "BankAccount.findByIsActive", query = "SELECT b FROM BankAccount b WHERE b.isActive = :isActive"),
     @NamedQuery(name = "BankAccount.findByLastUpdateDate", query = "SELECT b FROM BankAccount b WHERE b.lastUpdateDate = :lastUpdateDate"),
+    @NamedQuery(name = "BankAccount.findByUpdatedAt", query = "SELECT b FROM BankAccount b WHERE b.updatedAt = :updatedAt"),
     @NamedQuery(name = "BankAccount.findByIsDefault", query = "SELECT b FROM BankAccount b WHERE b.isDefault = :isDefault")})
 public class BankAccount implements Serializable {
 
@@ -64,6 +65,9 @@ public class BankAccount implements Serializable {
     @Column(name = "last_update_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date lastUpdateDate;
+    @Column(name = "updated_at")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date updatedAt;
     @Column(name = "is_default")
     private Short isDefault;
     @JoinColumn(name = "branch_of_the_bank_id", referencedColumnName = "id")
@@ -147,6 +151,14 @@ public class BankAccount implements Serializable {
 
     public void setLastUpdateDate(Date lastUpdateDate) {
         this.lastUpdateDate = lastUpdateDate;
+    }
+
+    public Date getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(Date updatedAt) {
+        this.updatedAt = updatedAt;
     }
 
     public Short getIsDefault() {

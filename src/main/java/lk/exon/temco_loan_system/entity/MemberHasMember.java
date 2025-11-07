@@ -41,12 +41,12 @@ public class MemberHasMember implements Serializable {
     @Column(name = "date_intro")
     @Temporal(TemporalType.TIMESTAMP)
     private Date dateIntro;
-    @JoinColumn(name = "interducee_member_id", referencedColumnName = "id")
-    @ManyToOne
-    private Member1 interduceeMemberId;
     @JoinColumn(name = "interducer_member_id", referencedColumnName = "id")
     @ManyToOne
     private Member1 interducerMemberId;
+    @JoinColumn(name = "interducee_member_id", referencedColumnName = "id")
+    @ManyToOne
+    private Member1 interduceeMemberId;
 
     public MemberHasMember() {
     }
@@ -71,20 +71,20 @@ public class MemberHasMember implements Serializable {
         this.dateIntro = dateIntro;
     }
 
-    public Member1 getInterduceeMemberId() {
-        return interduceeMemberId;
-    }
-
-    public void setInterduceeMemberId(Member1 interduceeMemberId) {
-        this.interduceeMemberId = interduceeMemberId;
-    }
-
     public Member1 getInterducerMemberId() {
         return interducerMemberId;
     }
 
     public void setInterducerMemberId(Member1 interducerMemberId) {
         this.interducerMemberId = interducerMemberId;
+    }
+
+    public Member1 getInterduceeMemberId() {
+        return interduceeMemberId;
+    }
+
+    public void setInterduceeMemberId(Member1 interduceeMemberId) {
+        this.interduceeMemberId = interduceeMemberId;
     }
 
     @Override

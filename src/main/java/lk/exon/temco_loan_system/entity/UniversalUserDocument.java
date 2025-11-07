@@ -47,14 +47,13 @@ public class UniversalUserDocument implements Serializable {
     @Column(name = "created_timestamp")
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdTimestamp;
-    @Column(name = "isVerified")
+    @Column(name = "is_verified")
     private Short isVerified;
     @Lob
     @Column(name = "file_url")
     private String fileUrl;
-    @Basic(optional = false)
-    @Column(name = "isActive")
-    private short isActive;
+    @Column(name = "is_active")
+    private Short isActive;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "universalUserDocumentId")
     private Collection<LoanDocumentStatusManager> loanDocumentStatusManagerCollection;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "universalUserDocumentId")
@@ -84,11 +83,6 @@ public class UniversalUserDocument implements Serializable {
 
     public UniversalUserDocument(Integer id) {
         this.id = id;
-    }
-
-    public UniversalUserDocument(Integer id, short isActive) {
-        this.id = id;
-        this.isActive = isActive;
     }
 
     public Integer getId() {
@@ -123,11 +117,11 @@ public class UniversalUserDocument implements Serializable {
         this.fileUrl = fileUrl;
     }
 
-    public short getIsActive() {
+    public Short getIsActive() {
         return isActive;
     }
 
-    public void setIsActive(short isActive) {
+    public void setIsActive(Short isActive) {
         this.isActive = isActive;
     }
 

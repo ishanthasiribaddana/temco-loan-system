@@ -5,7 +5,6 @@
 package lk.exon.temco_loan_system.entity;
 
 import jakarta.persistence.Basic;
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -13,23 +12,22 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.NamedQueries;
 import jakarta.persistence.NamedQuery;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.io.Serializable;
-import java.util.Collection;
 
 /**
  *
  * @author USER
  */
 @Entity
-@Table(name = "intake")
+@Table(name = "chart_of_account")
 @NamedQueries({
-    @NamedQuery(name = "Intake.findAll", query = "SELECT i FROM Intake i"),
-    @NamedQuery(name = "Intake.findById", query = "SELECT i FROM Intake i WHERE i.id = :id"),
-    @NamedQuery(name = "Intake.findByIntakeId", query = "SELECT i FROM Intake i WHERE i.intakeId = :intakeId"),
-    @NamedQuery(name = "Intake.findByName", query = "SELECT i FROM Intake i WHERE i.name = :name")})
-public class Intake implements Serializable {
+    @NamedQuery(name = "ChartOfAccount.findAll", query = "SELECT c FROM ChartOfAccount c"),
+    @NamedQuery(name = "ChartOfAccount.findById", query = "SELECT c FROM ChartOfAccount c WHERE c.id = :id"),
+    @NamedQuery(name = "ChartOfAccount.findByAccountName", query = "SELECT c FROM ChartOfAccount c WHERE c.accountName = :accountName"),
+    @NamedQuery(name = "ChartOfAccount.findByCode", query = "SELECT c FROM ChartOfAccount c WHERE c.code = :code"),
+    @NamedQuery(name = "ChartOfAccount.findByIsActive", query = "SELECT c FROM ChartOfAccount c WHERE c.isActive = :isActive")})
+public class ChartOfAccount implements Serializable {
 
     private static final long serialVersionUID = 1L;
     @Id
@@ -37,17 +35,17 @@ public class Intake implements Serializable {
     @Basic(optional = false)
     @Column(name = "id")
     private Integer id;
-    @Column(name = "intake_id")
-    private Integer intakeId;
-    @Column(name = "name")
-    private String name;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "intakeId")
-    private Collection<IntakeManager> intakeManagerCollection;
+    @Column(name = "account_name")
+    private String accountName;
+    @Column(name = "code")
+    private String code;
+    @Column(name = "is_active")
+    private Integer isActive;
 
-    public Intake() {
+    public ChartOfAccount() {
     }
 
-    public Intake(Integer id) {
+    public ChartOfAccount(Integer id) {
         this.id = id;
     }
 
@@ -59,28 +57,28 @@ public class Intake implements Serializable {
         this.id = id;
     }
 
-    public Integer getIntakeId() {
-        return intakeId;
+    public String getAccountName() {
+        return accountName;
     }
 
-    public void setIntakeId(Integer intakeId) {
-        this.intakeId = intakeId;
+    public void setAccountName(String accountName) {
+        this.accountName = accountName;
     }
 
-    public String getName() {
-        return name;
+    public String getCode() {
+        return code;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setCode(String code) {
+        this.code = code;
     }
 
-    public Collection<IntakeManager> getIntakeManagerCollection() {
-        return intakeManagerCollection;
+    public Integer getIsActive() {
+        return isActive;
     }
 
-    public void setIntakeManagerCollection(Collection<IntakeManager> intakeManagerCollection) {
-        this.intakeManagerCollection = intakeManagerCollection;
+    public void setIsActive(Integer isActive) {
+        this.isActive = isActive;
     }
 
     @Override
@@ -93,10 +91,10 @@ public class Intake implements Serializable {
     @Override
     public boolean equals(Object object) {
         // TODO: Warning - this method won't work in the case the id fields are not set
-        if (!(object instanceof Intake)) {
+        if (!(object instanceof ChartOfAccount)) {
             return false;
         }
-        Intake other = (Intake) object;
+        ChartOfAccount other = (ChartOfAccount) object;
         if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
             return false;
         }
@@ -105,7 +103,7 @@ public class Intake implements Serializable {
 
     @Override
     public String toString() {
-        return "lk.exon.temco_loan_system.entity.Intake[ id=" + id + " ]";
+        return "lk.exon.temco_loan_system.entity.ChartOfAccount[ id=" + id + " ]";
     }
     
 }

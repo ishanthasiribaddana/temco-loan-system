@@ -35,7 +35,8 @@ import java.util.Date;
     @NamedQuery(name = "Voucher.findAll", query = "SELECT v FROM Voucher v"),
     @NamedQuery(name = "Voucher.findById", query = "SELECT v FROM Voucher v WHERE v.id = :id"),
     @NamedQuery(name = "Voucher.findByAmount", query = "SELECT v FROM Voucher v WHERE v.amount = :amount"),
-    @NamedQuery(name = "Voucher.findByDate", query = "SELECT v FROM Voucher v WHERE v.date = :date")})
+    @NamedQuery(name = "Voucher.findByDate", query = "SELECT v FROM Voucher v WHERE v.date = :date"),
+    @NamedQuery(name = "Voucher.findByUpdatedAt", query = "SELECT v FROM Voucher v WHERE v.updatedAt = :updatedAt")})
 public class Voucher implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -50,6 +51,9 @@ public class Voucher implements Serializable {
     @Column(name = "date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date date;
+    @Column(name = "updated_at")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date updatedAt;
     @Lob
     @Column(name = "is_active")
     private byte[] isActive;
@@ -113,6 +117,14 @@ public class Voucher implements Serializable {
 
     public void setDate(Date date) {
         this.date = date;
+    }
+
+    public Date getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(Date updatedAt) {
+        this.updatedAt = updatedAt;
     }
 
     public byte[] getIsActive() {

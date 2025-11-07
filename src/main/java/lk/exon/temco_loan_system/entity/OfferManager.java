@@ -45,7 +45,7 @@ public class OfferManager implements Serializable {
     @Column(name = "date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date date;
-    @Column(name = "isAccepted")
+    @Column(name = "is_accepted")
     private Short isAccepted;
     @JoinColumn(name = "loan_customer_id", referencedColumnName = "id")
     @ManyToOne(optional = false)

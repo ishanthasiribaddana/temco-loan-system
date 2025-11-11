@@ -101,4 +101,14 @@ public class UniDB implements UniDBLocal {
         return em.createQuery(query).setMaxResults(limit).getResultList();
     }
 
+    @Override
+    public List<Object> searchByQuery(String query, String parameterOne, String parameterTwo, String parameterThree, String parameterFour) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public List<Object> searchByQuery(String query, String parameterOne, String parameterTwo) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
 }

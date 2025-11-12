@@ -108,8 +108,9 @@ public class GeneralUserProfile implements Serializable {
     @Basic(optional = false)
     @Column(name = "verification_token")
     private String verificationToken;
+    @Basic(optional = false)
     @Column(name = "is_active")
-    private Short isActive;
+    private short isActive;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "generalUserProfileId")
     private Collection<Supplier> supplierCollection;
     @OneToMany(mappedBy = "generalUserProfile")
@@ -160,10 +161,11 @@ public class GeneralUserProfile implements Serializable {
         this.id = id;
     }
 
-    public GeneralUserProfile(Integer id, String nic, String verificationToken) {
+    public GeneralUserProfile(Integer id, String nic, String verificationToken, short isActive) {
         this.id = id;
         this.nic = nic;
         this.verificationToken = verificationToken;
+        this.isActive = isActive;
     }
 
     public Integer getId() {
@@ -334,11 +336,11 @@ public class GeneralUserProfile implements Serializable {
         this.verificationToken = verificationToken;
     }
 
-    public Short getIsActive() {
+    public short getIsActive() {
         return isActive;
     }
 
-    public void setIsActive(Short isActive) {
+    public void setIsActive(short isActive) {
         this.isActive = isActive;
     }
 

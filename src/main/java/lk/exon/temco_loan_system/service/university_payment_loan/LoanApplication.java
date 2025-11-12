@@ -2,7 +2,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/J2EE/EJB40/StatelessEjbClass.java to edit this template
  */
-package lk.exon.temco_loan_system.service;
+package lk.exon.temco_loan_system.service.university_payment_loan;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.ejb.EJB;
@@ -14,9 +14,6 @@ import jakarta.faces.model.SelectItem;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -24,10 +21,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import lk.exon.temco.filteration.Filteration;
-import lk.exon.temco.security.Security;
 import lk.exon.temco.templates.LoanRequestPortalEmail;
 import lk.exon.temco.tools.NewMailSender;
 import lk.exon.temco_loan_system.common.ComLib;
@@ -51,6 +45,7 @@ import lk.exon.temco_loan_system.entity.OrganizationBranches;
 import lk.exon.temco_loan_system.entity.Penalty;
 import lk.exon.temco_loan_system.entity.RepaymentPeriod;
 import lk.exon.temco_loan_system.entity.ResponseStatus;
+import lk.exon.temco_loan_system.service.university_payment_loan.PersonalDetailsRegistration;
 
 /**
  *
@@ -67,8 +62,8 @@ public class LoanApplication implements Serializable {
     double correctMonthlyInstallment = 0.00;
     boolean correctMonthlyInstallmentBoolean = false;
     private double expectedLoanAmount = 0.00;
-    private double monthlyinstallement = 24000.00;
-    private String repayementPeriod;
+    private double monthlyinstallement = 0.00;
+    private String repayementPeriod = "5";
     private double grossIncome;
     private double interestRate = 6;
     private int actualLoanTenture;
@@ -90,8 +85,11 @@ public class LoanApplication implements Serializable {
 
     String userNic = "";
 
+    private final Double usdToLkr = 305.00;
+    private final Double gbpToLkr = 402.00;
+
     @Inject
-    LoanRequestForm LoanRequestForm;
+    PersonalDetailsRegistration personalRegistrationForm;
 
     @EJB
     private UniDBLocal UniDB;
@@ -108,13 +106,13 @@ public class LoanApplication implements Serializable {
     private void intializeMethod() {
         System.out.println("intializeMethod");
 
-        if (LoanRequestForm.getNic() != null) {
-            System.out.println("LoanRequestForm.getNic() " + LoanRequestForm.getNic());
+        if (personalRegistrationForm.getNic() != null) {
+            System.out.println("LoanRequestForm.getNic() " + personalRegistrationForm.getNic());
             System.out.println("loan calculator initialize if");
-            updateOfferManager(LoanRequestForm.getNic());
-            getUserDetailsFromNIC(LoanRequestForm.getNic());
-            dueCourseFee = LoanRequestForm.getDueCourseFee();
-            expectedLoanAmount = LoanRequestForm.getDueCourseFee();
+            updateOfferManager(personalRegistrationForm.getNic());
+            getUserDetailsFromNIC(personalRegistrationForm.getNic());
+            calculateTotalLoanAmount(personalRegistrationForm.getMaterializedObj());
+            calulateLoan();
         } else {
             System.out.println("initialize else");
             FacesContext facesContext = FacesContext.getCurrentInstance();
@@ -129,7 +127,7 @@ public class LoanApplication implements Serializable {
             List<MaterializedStudentLoanEligibleStudentTable> mt = UniDB.searchByQuery("SELECT g FROM MaterializedStudentLoanEligibleStudentTable g WHERE g.nic='" + userNic + "' ");
 
             if (!mt.isEmpty()) {
-                dueCourseFee = mt.get(0).getTotalDue();
+                calculateTotalLoanAmount(personalRegistrationForm.getMaterializedObj());
             }
 
         }
@@ -182,164 +180,138 @@ public class LoanApplication implements Serializable {
 
     public void saveLoanDetails() {
         FacesMessage msg;
-        RepaymentPeriod r = (RepaymentPeriod) UniDB.find(Integer.parseInt(repayementPeriod), RepaymentPeriod.class);
 
-        Double loanAmount = (monthlyinstallement * Double.valueOf(r.getPeriod()));
+        if ((grossIncome != 0) && (monthlyinstallement < grossIncome)) {
+            System.out.println("employement type selected");
+            if (checkbox) {
+                try {
+                    Date date = new Date();
 
-        if (expectedLoanAmount != 0) {
-            if (monthlyinstallement >= 20000) {
-                if (repayementPeriod != null && !repayementPeriod.equals("0")) {
-                    if ((grossIncome != 0) && (monthlyinstallement < grossIncome)) {
-                        System.out.println("employement type selected");
-                        if (loanCalculated) {
-                            if (checkbox) {
-                                try {
-                                    Date date = new Date();
+                    Member1 member = null;
+                    if (personalRegistrationForm.getMember() != null) {
+                        System.out.println("A");
+                        member = personalRegistrationForm.getMember();
+                    } else {
+                        System.out.println("B else");
+                        System.out.println("gup.getId " + gup.getId());
+                        List<Member1> results = UniDB.searchByQuery("SELECT g FROM Member1 g WHERE g.generalUserProfileId.id='" + gup.getId() + "' ");
+                        if (results != null && !results.isEmpty()) {
+                            member = (Member1) results.get(0);
+                        }
+                    }
 
-                                    Member1 member = null;
-                                    if (LoanRequestForm.getMember() != null) {
-                                        System.out.println("A");
-                                        member = LoanRequestForm.getMember();
-                                    } else {
-                                        System.out.println("B else");
-                                        System.out.println("gup.getId " + gup.getId());
-                                        List<Member1> results = UniDB.searchByQuery("SELECT g FROM Member1 g WHERE g.generalUserProfileId.id='" + gup.getId() + "' ");
-                                        if (results != null && !results.isEmpty()) {
-                                            member = (Member1) results.get(0);
-                                        }
-                                    }
+                    int branchId = 0;
 
-                                    int branchId = 0;
+                    MemberBankAccounts memberBankAccounts = null;
 
-                                    MemberBankAccounts memberBankAccounts = null;
+                    if (personalRegistrationForm.getMemberBankAccounts() != null) {
+                        memberBankAccounts = personalRegistrationForm.getMemberBankAccounts();
+                    } else {
+                        System.out.println("gup.getId " + gup.getId());
+                        List<MemberBankAccounts> results = UniDB.searchByQuery("SELECT g FROM MemberBankAccounts g WHERE g.memberId.id='" + member.getId() + "' ");
+                        if (results != null && !results.isEmpty()) {
+                            memberBankAccounts = (MemberBankAccounts) results.get(0);
+                        }
+                    }
 
-                                    if (LoanRequestForm.getMemberBankAccounts() != null) {
-                                        memberBankAccounts = LoanRequestForm.getMemberBankAccounts();
-                                    } else {
-                                        System.out.println("gup.getId " + gup.getId());
-                                        List<MemberBankAccounts> results = UniDB.searchByQuery("SELECT g FROM MemberBankAccounts g WHERE g.memberId.id='" + member.getId() + "' ");
-                                        if (results != null && !results.isEmpty()) {
-                                            memberBankAccounts = (MemberBankAccounts) results.get(0);
-                                        }
-                                    }
-
-                                    LoanApplicantGurantor loanApplicantGurantor = new LoanApplicantGurantor();
-                                    loanApplicantGurantor.setDate(date);
-                                    loanApplicantGurantor.setMemberId(member);
-                                    UniDB.create(loanApplicantGurantor);
+                    LoanApplicantGurantor loanApplicantGurantor = new LoanApplicantGurantor();
+                    loanApplicantGurantor.setDate(date);
+                    loanApplicantGurantor.setMemberId(member);
+                    UniDB.create(loanApplicantGurantor);
 //                                                                            String loanid = generateRefernceId(member.getMembershipNo());
-                                    String loanid = memberBankAccounts.getAccountNo();
 
-                                    LoanManager newLoan = new LoanManager();
-                                    newLoan.setReferenceId(generateReferenceId());
-                                    newLoan.setLoanCapitalAmount(expectedLoanAmount);
-                                    newLoan.setMonthlyInstallement(Double.parseDouble(actualMonthlyInstallement));
-                                    newLoan.setDate(date);
-                                    newLoan.setRepaymentPeriodId((RepaymentPeriod) UniDB.find(Integer.parseInt(repayementPeriod), RepaymentPeriod.class));
-                                    newLoan.setLoanApplicantAndGurantorsId(loanApplicantGurantor);
-                                    newLoan.setPenaltyId((Penalty) UniDB.find(1, Penalty.class));
-                                    newLoan.setMemberBankAccountsId(memberBankAccounts);
+                    LoanManager newLoan = new LoanManager();
+                    newLoan.setReferenceId(generateReferenceId());
+                    newLoan.setLoanCapitalAmount(expectedLoanAmount);
+                    newLoan.setMonthlyInstallement(Double.parseDouble(actualMonthlyInstallement));
+                    newLoan.setDate(date);
+                    newLoan.setRepaymentPeriodId((RepaymentPeriod) UniDB.find(Integer.parseInt(repayementPeriod), RepaymentPeriod.class));
+                    newLoan.setLoanApplicantAndGurantorsId(loanApplicantGurantor);
+                    newLoan.setPenaltyId((Penalty) UniDB.find(1, Penalty.class));
+                    newLoan.setMemberBankAccountsId(memberBankAccounts);
 
 //                                    String verification_token = Security.encrypt(loanid);
-                                    String verification_token = Filteration.getFilteredSHA256HashedPassword(System.currentTimeMillis() + "" + member.getId());
-                                    newLoan.setVerificationToke(verification_token);
-                                    UniDB.create(newLoan);
+                    String verification_token = Filteration.getFilteredSHA256HashedPassword(System.currentTimeMillis() + "" + member.getId());
+                    newLoan.setVerificationToke(verification_token);
+                    UniDB.create(newLoan);
 
-                                    System.out.println("branch id a" + branchId);
+                    System.out.println("branch id a" + branchId);
 
-                                    if (branchId == 0) {
-                                        if (LoanRequestForm.getBranchId() != 0) {
-                                            branchId = LoanRequestForm.getBranchId();
-                                        } else {
-                                            System.out.println("gup.getId " + gup.getId());
-                                            List<MaterializedStudentLoanEligibleStudentTable> mt = UniDB.searchByQuery("SELECT g FROM MaterializedStudentLoanEligibleStudentTable g WHERE g.nic='" + gup.getNic() + "' ");
-
-                                            List<OrganizationBranches> orgList = UniDB.searchByQuery("SELECT g FROM OrganizationBranches g WHERE g.name LIKE '%" + mt.get(0).getBranchName() + "%'");
-                                            if (orgList.size() > 0) {
-                                                branchId = orgList.get(0).getId();
-                                            }
-                                        }
-                                        System.out.println("branch id b" + branchId);
-                                    }
-
-                                    LoanApplicantHasBranch loanApplicantHasBranch = new LoanApplicantHasBranch();
-                                    loanApplicantHasBranch.setLoanApplicantGurantorId(loanApplicantGurantor);
-                                    loanApplicantHasBranch.setLoanManagerId(newLoan);
-                                    System.out.println("branch id c" + branchId);
-                                    loanApplicantHasBranch.setOrganizationBranchesId((OrganizationBranches) UniDB.find(branchId, OrganizationBranches.class));
-                                    UniDB.create(loanApplicantHasBranch);
-
-                                    LoanStatusManager loanStatusManager = new LoanStatusManager();
-                                    loanStatusManager.setDate(date);
-                                    loanStatusManager.setLoanStatusId((LoanStatus) UniDB.find(1, LoanStatus.class));
-                                    loanStatusManager.setLoanManagerId(newLoan);
-                                    UniDB.create(loanStatusManager);
-
-                                    InterestManager im = new InterestManager();
-                                    im.setLoanid((Loan) UniDB.find(1, Loan.class));
-                                    im.setLoanInterestRateId((LoanInterestRate) UniDB.find(13, LoanInterestRate.class));
-                                    im.setLoanManagerId(newLoan);
-                                    UniDB.create(im);
-
-                                    Date dateTwo = new Date();
-                                    System.out.println("updateOfferManager");
-                                    List<LoanCustomer> loanCustomer = UniDB.searchByQuery("SELECT g FROM LoanCustomer g WHERE g.nic='" + gup.getNic() + "'");
-                                    if (!loanCustomer.isEmpty()) {
-                                        System.out.println("loanCustomer.isEmpty() " + loanCustomer.isEmpty());
-                                        List<OfferManager> offerManager = UniDB.searchByQuery("SELECT g FROM OfferManager g WHERE g.loanCustomerId.id='" + loanCustomer.get(0).getId() + "' AND g.loanOfferId.id='1'");
-                                        System.out.println("offerManager.isEmpty() " + offerManager.isEmpty());
-                                        if (!offerManager.isEmpty()) {
-                                            List<CustomerResponseHistory> crhList = UniDB.searchByQuery("SELECT g FROM CustomerResponseHistory g WHERE g.offerManagerId.id='" + offerManager.get(0).getId() + "' AND g.responseStatusId.id='8'");
-                                            if (crhList.isEmpty()) {
-                                                CustomerResponseHistory crh = new CustomerResponseHistory();
-                                                crh.setDate(dateTwo);
-                                                crh.setOfferManagerId(offerManager.get(0));
-                                                crh.setResponseStatusId((ResponseStatus) UniDB.find(8, ResponseStatus.class));
-                                                UniDB.create(crh);
-                                            }
-                                        }
-                                    }
-
-                                    msg = new FacesMessage(FacesMessage.SEVERITY_INFO, "Success ! ! !", "Details Saved Successful.Please check your email");
-                                    FacesContext.getCurrentInstance().getExternalContext().getFlash().setKeepMessages(true);
-                                    FacesContext.getCurrentInstance().addMessage("", msg);
-
-                                    sendPortalEmail(member.getGeneralUserProfileId().getFirstName() + " " + member.getGeneralUserProfileId().getLastName(), member.getGeneralUserProfileId().getEmail());
-
-                                    System.out.println("saved successfull");
-                                    FacesContext facesContext = FacesContext.getCurrentInstance();
-                                    ExternalContext externalContext = facesContext.getExternalContext();
-                                    externalContext.redirect(externalContext.getRequestContextPath() + "/view/details-submission-success.xhtml");
-                                    facesContext.responseComplete();
-
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                }
-                            } else {
-                                msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "Please check the checkbox that Agreeing terms and conditions");
-                                FacesContext.getCurrentInstance().addMessage("", msg);
-                            }
+                    if (branchId == 0) {
+                        if (personalRegistrationForm.getBranchId() != 0) {
+                            branchId = personalRegistrationForm.getBranchId();
                         } else {
-                            msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "Before Submit the Loan application please calculate the requested loan with expected monthly installment");
-                            FacesContext.getCurrentInstance().addMessage("", msg);
+                            System.out.println("gup.getId " + gup.getId());
+                            System.out.println("gup.getNic() " + gup.getNic());
+                            List<MaterializedStudentLoanEligibleStudentTable> mt = UniDB.searchByQuery("SELECT g FROM MaterializedStudentLoanEligibleStudentTable g WHERE g.nic='" + gup.getNic() + "' ");
+                            System.out.println("mt size " + mt.size());
+                            List<OrganizationBranches> orgList = UniDB.searchByQuery("SELECT g FROM OrganizationBranches g WHERE g.name LIKE '%" + mt.get(0).getBranchName() + "%'");
+                            if (orgList.size() > 0) {
+                                branchId = orgList.get(0).getId();
+                                System.out.println("branch id " + branchId);
+                            }
                         }
-                    } else {
-                        msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, "Invalid Guarantors Gross Income", "Guarantors income can not be 0.00 and need to be larger than entered monthly installment");
-                        FacesContext.getCurrentInstance().addMessage("", msg);
+                        System.out.println("branch id b" + branchId);
                     }
-                } else {
-                    displayLoanTenture = true;
-                    msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "Please Select the Loan Tenture of the loan");
+
+                    LoanApplicantHasBranch loanApplicantHasBranch = new LoanApplicantHasBranch();
+                    loanApplicantHasBranch.setLoanApplicantGurantorId(loanApplicantGurantor);
+                    loanApplicantHasBranch.setLoanManagerId(newLoan);
+                    System.out.println("branch id c" + branchId);
+                    loanApplicantHasBranch.setOrganizationBranchesId((OrganizationBranches) UniDB.find(branchId, OrganizationBranches.class));
+                    UniDB.create(loanApplicantHasBranch);
+
+                    LoanStatusManager loanStatusManager = new LoanStatusManager();
+                    loanStatusManager.setDate(date);
+                    loanStatusManager.setLoanStatusId((LoanStatus) UniDB.find(1, LoanStatus.class));
+                    loanStatusManager.setLoanManagerId(newLoan);
+                    UniDB.create(loanStatusManager);
+
+                    InterestManager im = new InterestManager();
+                    im.setLoanid((Loan) UniDB.find(2, Loan.class));
+                    im.setLoanInterestRateId((LoanInterestRate) UniDB.find(14, LoanInterestRate.class));
+                    im.setLoanManagerId(newLoan);
+                    UniDB.create(im);
+
+                    Date dateTwo = new Date();
+                    System.out.println("updateOfferManager");
+                    List<LoanCustomer> loanCustomer = UniDB.searchByQuery("SELECT g FROM LoanCustomer g WHERE g.nic='" + gup.getNic() + "'");
+                    if (!loanCustomer.isEmpty()) {
+                        System.out.println("loanCustomer.isEmpty() " + loanCustomer.isEmpty());
+                        List<OfferManager> offerManager = UniDB.searchByQuery("SELECT g FROM OfferManager g WHERE g.loanCustomerId.id='" + loanCustomer.get(0).getId() + "' AND g.loanOfferId.id='1'");
+                        System.out.println("offerManager.isEmpty() " + offerManager.isEmpty());
+                        if (!offerManager.isEmpty()) {
+                            List<CustomerResponseHistory> crhList = UniDB.searchByQuery("SELECT g FROM CustomerResponseHistory g WHERE g.offerManagerId.id='" + offerManager.get(0).getId() + "' AND g.responseStatusId.id='8'");
+                            if (crhList.isEmpty()) {
+                                CustomerResponseHistory crh = new CustomerResponseHistory();
+                                crh.setDate(dateTwo);
+                                crh.setOfferManagerId(offerManager.get(0));
+                                crh.setResponseStatusId((ResponseStatus) UniDB.find(8, ResponseStatus.class));
+                                UniDB.create(crh);
+                            }
+                        }
+                    }
+
+                    msg = new FacesMessage(FacesMessage.SEVERITY_INFO, "Success ! ! !", "Details Saved Successful.Please check your email");
+                    FacesContext.getCurrentInstance().getExternalContext().getFlash().setKeepMessages(true);
                     FacesContext.getCurrentInstance().addMessage("", msg);
+
+                                sendPortalEmail(member.getGeneralUserProfileId().getFirstName() + " " + member.getGeneralUserProfileId().getLastName(), member.getGeneralUserProfileId().getEmail());
+                    System.out.println("saved successfull");
+                    FacesContext facesContext = FacesContext.getCurrentInstance();
+                    ExternalContext externalContext = facesContext.getExternalContext();
+                    externalContext.redirect(externalContext.getRequestContextPath() + "/view/details-submission-success.xhtml");
+                    facesContext.responseComplete();
+
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             } else {
-                displaymonthlyInstallment = true;
-                msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "Minimum Monthly Installement you can pay is Rs.20,000");
+                msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "Please check the checkbox that Agreeing terms and conditions");
                 FacesContext.getCurrentInstance().addMessage("", msg);
             }
         } else {
-            displayLoanAmount = true;
-            msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "Please Enter the Expected Loan Amount Correctly");
+            msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, "Invalid Guarantors Gross Income", "Guarantors income can not be 0.00 and need to be larger than entered monthly installment");
             FacesContext.getCurrentInstance().addMessage("", msg);
         }
     }
@@ -354,55 +326,87 @@ public class LoanApplication implements Serializable {
     public void calulateLoan() {
         FacesMessage msg;
         System.out.println("calculateMonthlyInstallementIsLessThanGuarantorsIncome() " + calculateMonthlyInstallementIsLessThanGuarantorsIncome());
-        if (calculateMonthlyInstallementIsLessThanGuarantorsIncome()) {
+        double monthly_installement = calculateMonthlyInstallment(expectedLoanAmount, interestRate, 12);
+        loanStrucure.clear();
+        System.out.println("loan");
+        double loanAmount = 0.0;
+        int installmentPeriod = 0;
+        double interest_rate = 0.0;
+
+        System.out.println("expectedLoanAmount " + expectedLoanAmount);
+        System.out.println("repayementPeriod " + repayementPeriod);
+        if (this.expectedLoanAmount != 0 && this.expectedLoanAmount > 0) {
+            loanAmount = this.expectedLoanAmount;
+            System.out.println("loan amount " + loanAmount);
+        }
+
+        List<RepaymentPeriod> repaymentPeriods = UniDB.searchByQuery("SELECT g FROM RepaymentPeriod g WHERE g.id='" + repayementPeriod + "'");
+        installmentPeriod = Integer.parseInt(repaymentPeriods.get(0).getPeriod());
+        System.out.println("period");
+
+        if (interest_rate != 0.0) {
+            interest_rate = this.interestRate;
+        }
+
+        if (loanAmount == 0.0) {
+            msg = new FacesMessage(FacesMessage.SEVERITY_WARN, "Loan Amount Empty or Invalid!", "");
+            FacesContext.getCurrentInstance().addMessage(null, msg);
+        } else if (installmentPeriod == 0) {
+            msg = new FacesMessage(FacesMessage.SEVERITY_WARN, "Please Select a Repayment Period  !", "");
+            FacesContext.getCurrentInstance().addMessage(null, msg);
+        } else if (monthly_installement == 0) {
+            msg = new FacesMessage(FacesMessage.SEVERITY_WARN, "Please Enter a Monthly Installement  !", "");
+            FacesContext.getCurrentInstance().addMessage(null, msg);
+        } else {
+            System.out.println("loan cal");
             loanStrucure.clear();
-            System.out.println("loan");
-            double loanAmount = 0.0;
-            int installmentPeriod = 0;
-            double interest_rate = 0.0;
-            double monthly_installement = 0.0;
 
-            System.out.println("expectedLoanAmount " + expectedLoanAmount);
-            System.out.println("repayementPeriod " + repayementPeriod);
-            if (this.expectedLoanAmount != 0 && this.expectedLoanAmount > 0) {
-                loanAmount = this.expectedLoanAmount;
-                System.out.println("loan amount " + loanAmount);
-            }
-            if (this.repayementPeriod != null && !this.repayementPeriod.equals("0")) {
-                List<RepaymentPeriod> repaymentPeriods = UniDB.searchByQuery("SELECT g FROM RepaymentPeriod g WHERE g.id='" + repayementPeriod + "'");
-                installmentPeriod = Integer.parseInt(repaymentPeriods.get(0).getPeriod());
-                System.out.println("period");
-            }
-            if (interest_rate != 0.0) {
-                interest_rate = this.interestRate;
-            }
-            if (this.monthlyinstallement != 0 && this.monthlyinstallement > 0) {
-                monthly_installement = this.monthlyinstallement;
-                System.out.println("monthly");
-            }
+            Date date = new Date();
+            String dt = ComLib.getDate(date);
+            String[] dateArray = dt.split("-");
+            int year = Integer.parseInt(dateArray[0]);
+            int month = Integer.parseInt(dateArray[1]);
 
-            if (correctMonthlyInstallmentBoolean) {
-                monthly_installement = correctMonthlyInstallment;
-            }
-
-            if (loanAmount == 0.0) {
-                msg = new FacesMessage(FacesMessage.SEVERITY_WARN, "Loan Amount Empty or Invalid!", "");
-                FacesContext.getCurrentInstance().addMessage(null, msg);
-            } else if (installmentPeriod == 0) {
-                msg = new FacesMessage(FacesMessage.SEVERITY_WARN, "Please Select a Repayment Period  !", "");
-                FacesContext.getCurrentInstance().addMessage(null, msg);
-            } else if (monthly_installement == 0) {
-                msg = new FacesMessage(FacesMessage.SEVERITY_WARN, "Please Enter a Monthly Installement  !", "");
-                FacesContext.getCurrentInstance().addMessage(null, msg);
+            if (month == 12) {
+                month = 1;
+                year++;
             } else {
-                System.out.println("loan cal");
-                loanStrucure.clear();
+                month++;
+            }
 
-                Date date = new Date();
-                String dt = ComLib.getDate(date);
-                String[] dateArray = dt.split("-");
-                int year = Integer.parseInt(dateArray[0]);
-                int month = Integer.parseInt(dateArray[1]);
+            double val = interestRate / 100;
+            double rate = val / 12;
+
+            double totalInterestPaid = 0.0;
+            double paidCapital = 0.0;
+            double totalPayment = 0.0;
+            double openingBalance = loanAmount;
+            int months = 0;
+
+            while (openingBalance > 0 && months < installmentPeriod) {
+                String lastDay = ComLib.getDate(ComLib.getLastDaYOfMonthFromMonth(year, month));
+                lastDay = lastDay.substring(0, 7) + "-25";
+
+                double interest = openingBalance * rate;
+                totalInterestPaid += interest;
+
+                double monthlyPayment = monthly_installement;
+                if (openingBalance + interest < monthly_installement) {
+                    monthlyPayment = openingBalance + interest;
+                }
+
+                totalPayment += monthlyPayment;
+                double principalAmount = monthlyPayment - interest;
+                paidCapital += principalAmount;
+
+                getLoanStrucure().add(new LoanCalculatorRecords(
+                        months + 1, lastDay, openingBalance,
+                        principalAmount, interest, totalInterestPaid,
+                        monthlyPayment, paidCapital, totalPayment
+                ));
+
+                openingBalance -= principalAmount;
+                months++;
 
                 if (month == 12) {
                     month = 1;
@@ -410,72 +414,27 @@ public class LoanApplication implements Serializable {
                 } else {
                     month++;
                 }
-
-                double val = interestRate / 100;
-                double rate = val / 12;
-
-                double totalInterestPaid = 0.0;
-                double paidCapital = 0.0;
-                double totalPayment = 0.0;
-                double openingBalance = loanAmount;
-                int months = 0;
-
-                while (openingBalance > 0 && months < installmentPeriod) {
-                    String lastDay = ComLib.getDate(ComLib.getLastDaYOfMonthFromMonth(year, month));
-                    lastDay = lastDay.substring(0, 7) + "-25";
-
-                    double interest = openingBalance * rate;
-                    totalInterestPaid += interest;
-
-                    double monthlyPayment = monthly_installement;
-                    if (openingBalance + interest < monthly_installement) {
-                        monthlyPayment = openingBalance + interest;
-                    }
-
-                    totalPayment += monthlyPayment;
-                    double principalAmount = monthlyPayment - interest;
-                    paidCapital += principalAmount;
-
-                    getLoanStrucure().add(new LoanCalculatorRecords(
-                            months + 1, lastDay, openingBalance,
-                            principalAmount, interest, totalInterestPaid,
-                            monthlyPayment, paidCapital, totalPayment
-                    ));
-
-                    openingBalance -= principalAmount;
-                    months++;
-
-                    if (month == 12) {
-                        month = 1;
-                        year++;
-                    } else {
-                        month++;
-                    }
-                }
-                actualMonth = months;
-                DecimalFormat decimalFormat = new DecimalFormat("#.00");
-                String formattedNumber = decimalFormat.format(monthly_installement);
-                actualMonthlyInstallement = formattedNumber;
-                if (openingBalance > 0 && !correctMonthlyInstallmentBoolean) {
-                    error_message = "Invalid installment period: The given period is not enough to repay the loan.So we have calulated the matching monthly installement for selected loan tenture";
-
-                    msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", error_message);
-                    FacesContext.getCurrentInstance().addMessage("", msg);
-                    System.out.println("Invalid installment period: The given period is not enough to repay the loan.");
-                    // Calculate the correct monthly installment
-                    System.out.println("installmentPeriod " + installmentPeriod);
-                    correctMonthlyInstallment = calculateMonthlyInstallment(loanAmount, interestRate, installmentPeriod);
-                    correctMonthlyInstallmentBoolean = true;
-                    System.out.println("Correct Monthly Installment to repay the loan in " + installmentPeriod + " months: " + correctMonthlyInstallment);
-                    // Recalculate loan structure with correct monthly installment
-                    calulateLoan();
-
-                }
-                setActualLoanDetails();
             }
-        } else {
-            msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, "The entered monthly installement is exceeding 60%", "");
-            FacesContext.getCurrentInstance().addMessage("", msg);
+            actualMonth = months;
+            DecimalFormat decimalFormat = new DecimalFormat("#.00");
+            String formattedNumber = decimalFormat.format(monthly_installement);
+            actualMonthlyInstallement = formattedNumber;
+//            if (openingBalance > 0 && !correctMonthlyInstallmentBoolean) {
+//                error_message = "Invalid installment period: The given period is not enough to repay the loan.So we have calulated the matching monthly installement for selected loan tenture";
+//
+//                msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", error_message);
+//                FacesContext.getCurrentInstance().addMessage("", msg);
+//                System.out.println("Invalid installment period: The given period is not enough to repay the loan.");
+//                // Calculate the correct monthly installment
+//                System.out.println("installmentPeriod " + installmentPeriod);
+//                correctMonthlyInstallment = calculateMonthlyInstallment(loanAmount, interestRate, installmentPeriod);
+//                correctMonthlyInstallmentBoolean = true;
+//                System.out.println("Correct Monthly Installment to repay the loan in " + installmentPeriod + " months: " + correctMonthlyInstallment);
+//                // Recalculate loan structure with correct monthly installment
+//                calulateLoan();
+//
+//            }
+//            setActualLoanDetails();
         }
     }
 
@@ -533,10 +492,90 @@ public class LoanApplication implements Serializable {
 
     public void repaymentPeriod() {
         getRepaymentPeriodList().clear();
-        List<RepaymentPeriod> repaymentPeriods = UniDB.searchByQuery("SELECT g FROM RepaymentPeriod g WHERE g.loanid.id='1' AND g.isActive='1'");
+        List<RepaymentPeriod> repaymentPeriods = UniDB.searchByQuery("SELECT g FROM RepaymentPeriod g WHERE g.loanid.id='2' AND g.isActive='1'");
         getRepaymentPeriodList().add(new SelectItem("", "Select"));
         for (RepaymentPeriod repaymentPeriodObj : repaymentPeriods) {
             getRepaymentPeriodList().add(new SelectItem(repaymentPeriodObj.getId().toString(), repaymentPeriodObj.getPeriod()));
+        }
+    }
+
+//    this method calculate total Loan amount by converting international course dues to LKE and adding Service charge
+    private void calculateTotalLoanAmount(List<MaterializedStudentLoanEligibleStudentTable> materializedObj) {
+        try {
+            String internationalAwardingBodyDiplomaCurrency = materializedObj.get(0).getInternationalAwardingBodyDiplomaCurrency();
+            Double internationalAwardingBodyDiplomaDue = materializedObj.get(0).getInternationalAwardingBodyDiplomaDue();
+
+            String internationalAwardingBodyHigherDiplomaCurrency = materializedObj.get(0).getInternationalAwardingBodyHigherDiplomaCurrency();
+            Double internationalAwardingBodyHigherDiplomaDue = materializedObj.get(0).getInternationalAwardingBodyHigherDiplomaDue();
+
+            String internationalUniversityCurrency = materializedObj.get(0).getInternationalUniversityCurrency();
+            Double internationalUniversityDue = materializedObj.get(0).getInternationalUniversityDue();
+
+            Double serviceChargesPercentage = materializedObj.get(0).getServiceChargesPresentage();
+
+            Double diplomaValue = 0.00;
+            Double higherDiplomaValue = 0.00;
+            Double universityPayment = 0.00;
+
+            if (internationalAwardingBodyDiplomaCurrency.equals("GBP")) {
+
+                diplomaValue = internationalAwardingBodyDiplomaDue * gbpToLkr;
+                System.out.println("diplomaValue gbpToLkr " + diplomaValue);
+            } else if (internationalAwardingBodyDiplomaCurrency.equals("USD")) {
+
+                diplomaValue = internationalAwardingBodyDiplomaDue * usdToLkr;
+                System.out.println("diplomaValue usdToLkr " + diplomaValue);
+
+            } else if (internationalAwardingBodyDiplomaCurrency.equals("LKR")) {
+
+                diplomaValue = internationalAwardingBodyDiplomaDue;
+                System.out.println("diplomaValue Lkr " + diplomaValue);
+            }
+
+            if (internationalAwardingBodyHigherDiplomaCurrency.equals("GBP")) {
+
+                higherDiplomaValue = internationalAwardingBodyHigherDiplomaDue * gbpToLkr;
+                System.out.println("higherDiplomaValue Lkr " + higherDiplomaValue);
+            } else if (internationalAwardingBodyHigherDiplomaCurrency.equals("USD")) {
+
+                higherDiplomaValue = internationalAwardingBodyHigherDiplomaDue * usdToLkr;
+                System.out.println("higherDiplomaValue Lkr " + higherDiplomaValue);
+            } else if (internationalAwardingBodyHigherDiplomaCurrency.equals("LKR")) {
+
+                higherDiplomaValue = internationalAwardingBodyHigherDiplomaDue;
+                System.out.println("higherDiplomaValue Lkr " + higherDiplomaValue);
+            }
+
+            if (internationalUniversityCurrency.equals("GBP")) {
+
+                universityPayment = internationalUniversityDue * gbpToLkr;
+                System.out.println("universityPayment Lkr " + universityPayment);
+            } else if (internationalUniversityCurrency.equals("USD")) {
+
+                universityPayment = internationalUniversityDue * usdToLkr;
+                System.out.println("universityPayment Lkr " + universityPayment);
+            } else if (internationalUniversityCurrency.equals("LKR")) {
+
+                universityPayment = internationalUniversityDue;
+                System.out.println("universityPayment Lkr " + universityPayment);
+            }
+
+            Double totalLoanAmount = diplomaValue + higherDiplomaValue + universityPayment;
+
+            System.out.println("totalLoanAmount Lkr " + totalLoanAmount);
+
+            Double serviceFee = (totalLoanAmount / 100) * serviceChargesPercentage;
+
+            System.out.println("serviceFee Lkr " + serviceFee);
+
+            dueCourseFee = totalLoanAmount + serviceFee;
+
+            System.out.println("dueCourseFee Lkr " + dueCourseFee);
+
+            expectedLoanAmount = dueCourseFee;
+
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 

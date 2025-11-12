@@ -162,6 +162,8 @@ public class PersonalDetailsRegistration implements Serializable {
     private final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyyMMdd");
     private final AtomicInteger COUNTER = new AtomicInteger(0);
 
+    private List<MaterializedStudentLoanEligibleStudentTable> materializedObj;
+
     private String error_message;
 
     private String securityCode;
@@ -196,8 +198,9 @@ public class PersonalDetailsRegistration implements Serializable {
 
         if (securityCode != null) {
             System.out.println("in if");
-            getUserDetailsFromMaterializeTable(securityCode);
 
+            getUserDetailsFromMaterializeTable(securityCode);
+            
             if (userAlreadyHaveALoan(nic)) {
                 try {
                     ExternalContext externalContext = facesContext.getExternalContext();
@@ -319,6 +322,7 @@ public class PersonalDetailsRegistration implements Serializable {
             List<MaterializedStudentLoanEligibleStudentTable> mt = UniDB.searchByQuery("SELECT g FROM MaterializedStudentLoanEligibleStudentTable g WHERE g.verificationToken='" + securityCode + "' ");
             System.out.println("mt size " + mt.size());
             if (mt != null && !mt.isEmpty()) {
+                materializedObj = mt;
                 System.out.println("A1");
                 firstName = mt.get(0).getFirstName();
                 lastName = mt.get(0).getLastName();
@@ -614,7 +618,7 @@ public class PersonalDetailsRegistration implements Serializable {
                                                             System.out.println("saved successfull");
                                                             FacesContext facesContext = FacesContext.getCurrentInstance();
                                                             ExternalContext externalContext = facesContext.getExternalContext();
-                                                            externalContext.redirect(externalContext.getRequestContextPath() + "/tasks/loan-calculator.xhtml");
+                                                            externalContext.redirect(externalContext.getRequestContextPath() + "/tasks/university-due-payment/loan-application.xhtml");
                                                             facesContext.responseComplete();
                                                         } else {
                                                             msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "User has a pending loan application");
@@ -1830,6 +1834,14 @@ public class PersonalDetailsRegistration implements Serializable {
 
     public void setOrgBoolean(boolean orgBoolean) {
         this.orgBoolean = orgBoolean;
+    }
+
+    public List<MaterializedStudentLoanEligibleStudentTable> getMaterializedObj() {
+        return materializedObj;
+    }
+
+    public void setMaterializedObj(List<MaterializedStudentLoanEligibleStudentTable> materializedObj) {
+        this.materializedObj = materializedObj;
     }
 
 }

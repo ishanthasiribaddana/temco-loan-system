@@ -6,13 +6,9 @@ package Service;
 
 import jakarta.ejb.Stateless;
 import jakarta.ejb.EJB;
-import java.lang.reflect.Member;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 import lk.exon.temco.templates.OfferInformEmailTemplateOne;
 import lk.exon.temco.templates.UniversityLoanOfferEmail;
 import lk.exon.temco.tools.NewMailSender;
@@ -26,7 +22,6 @@ import lk.exon.temco_loan_system.entity.LoanApplicantGurantor;
 import lk.exon.temco_loan_system.entity.LoanCustomer;
 import lk.exon.temco_loan_system.entity.LoanManager;
 import lk.exon.temco_loan_system.entity.LoanOffer;
-import lk.exon.temco_loan_system.entity.LoanStatus;
 import lk.exon.temco_loan_system.entity.LoanStatusManager;
 import lk.exon.temco_loan_system.entity.MaterializedStudentLoanEligibleStudentTable;
 import lk.exon.temco_loan_system.entity.Member1;
@@ -68,7 +63,8 @@ public class OrgAccessService {
             String address1,
             String address2,
             String address3,
-            String profileCreatedDate) {
+            String profileCreatedDate,
+            String totalIntDue) {
         try {
 
             Date date = new Date();
@@ -104,6 +100,10 @@ public class OrgAccessService {
                 if (totalDue != null && !totalDue.isBlank()) {
                     newMslet.setTotalDue(Double.valueOf(totalDue));
                 }
+                if (totalDue != null && !totalDue.isBlank()) {
+                    newMslet.setInternationalUniversityDue(Double.valueOf(totalIntDue));
+                }
+                newMslet.setInternationalUniversityCurrency("LKR");
                 newMslet.setVerificationToken(verificationToken);
                 newMslet.setBranchName(branchName);
                 newMslet.setIntakeName(intakeName);
@@ -120,58 +120,46 @@ public class OrgAccessService {
                 uniDB.create(newMslet);
             } else {
                 System.out.println("A3");
-                boolean b = checkUserAlreadyInTheSystem(nic);
-                System.out.println("A4 " + b);
-                if (b) {
-                    mslet.get(0).setNic(nic);
-                    mslet.get(0).setGupId(Integer.valueOf(gup_id));
-                    mslet.get(0).setFirstName(firstName);
-                    mslet.get(0).setLastName(lastName);
-                    mslet.get(0).setEmail(email);
-                    mslet.get(0).setMobileNo(mobile_no);
+                mslet.get(0).setNic(nic);
+                mslet.get(0).setGupId(Integer.valueOf(gup_id));
+                mslet.get(0).setFirstName(firstName);
+                mslet.get(0).setLastName(lastName);
+                mslet.get(0).setEmail(email);
+                mslet.get(0).setMobileNo(mobile_no);
 
-                    if (address1 != null && !address1.isBlank()) {
-                        mslet.get(0).setAddressLine1(address1);
-                    }
-                    if (address2 != null && !address2.isBlank()) {
-                        mslet.get(0).setAddressLine2(address2);
-                    }
-                    if (address3 != null && !address3.isBlank()) {
-                        mslet.get(0).setAddressLine3(address3);
-                    }
-                    if (scholarship != null && !scholarship.isBlank()) {
-                        mslet.get(0).setScholarship(Double.valueOf(scholarship));
-                    }
-                    if (intakeId != null && !intakeId.isBlank()) {
-                        mslet.get(0).setIntakeId(Integer.valueOf(intakeId));
-                    }
-                    if (totalDue != null && !totalDue.isBlank()) {
-                        mslet.get(0).setTotalDue(Double.valueOf(totalDue));
-                    }
-
-                    mslet.get(0).setVerificationToken(verificationToken);
-                    mslet.get(0).setBranchName(branchName);;
-                    mslet.get(0).setIntakeName(intakeName);
-
-                    if (profileCreatedDate != null && !profileCreatedDate.trim().isEmpty()) {
-                        try {
-                            mslet.get(0).setProfileCreateDate(new SimpleDateFormat("yyyy-MM-dd").parse(profileCreatedDate));
-
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    }
-                    uniDB.update(mslet.get(0));
-                } else {
-                    String errorResponse = "{"
-                            + "\"status\": 500,"
-                            + "\"message\": \"Already Applied for Loan\","
-                            + "\"error\": \"Internal Server Error\""
-                            + "}";
-                    return jakarta.ws.rs.core.Response.status(jakarta.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR)
-                            .entity(errorResponse)
-                            .build();
+                if (address1 != null && !address1.isBlank()) {
+                    mslet.get(0).setAddressLine1(address1);
                 }
+                if (address2 != null && !address2.isBlank()) {
+                    mslet.get(0).setAddressLine2(address2);
+                }
+                if (address3 != null && !address3.isBlank()) {
+                    mslet.get(0).setAddressLine3(address3);
+                }
+                if (scholarship != null && !scholarship.isBlank()) {
+                    mslet.get(0).setScholarship(Double.valueOf(scholarship));
+                }
+                if (intakeId != null && !intakeId.isBlank()) {
+                    mslet.get(0).setIntakeId(Integer.valueOf(intakeId));
+                }
+                if (totalDue != null && !totalDue.isBlank()) {
+                    mslet.get(0).setTotalDue(Double.valueOf(totalDue));
+                }
+
+                mslet.get(0).setVerificationToken(verificationToken);
+                mslet.get(0).setBranchName(branchName);
+                mslet.get(0).setIntakeName(intakeName);
+                mslet.get(0).setInternationalUniversityDue(Double.valueOf(totalIntDue));
+
+                if (profileCreatedDate != null && !profileCreatedDate.trim().isEmpty()) {
+                    try {
+                        mslet.get(0).setProfileCreateDate(new SimpleDateFormat("yyyy-MM-dd").parse(profileCreatedDate));
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+                uniDB.update(mslet.get(0));
             }
 
             List<LoanCustomer> msle = uniDB.searchByQuery("Select g FROM LoanCustomer g WHERE g.nic='" + nic + "'");
@@ -297,15 +285,17 @@ public class OrgAccessService {
     public boolean checkUserAlreadyInTheSystem(String nic) {
         List<GeneralUserProfile> gup = uniDB.searchByQuery("SELECT g FROM GeneralUserProfile g WHERE g.nic='" + nic + "'");
         if (!gup.isEmpty()) {
-            List<Member1> member = uniDB.searchByQuery("SELECT g FROM Member g WHERE g.generalUserProfileId.id='" + gup.get(0).getId() + "'");
+            List<Member1> member = uniDB.searchByQuery("SELECT g FROM Member1 g WHERE g.generalUserProfileId.id='" + gup.get(0).getId() + "'");
             if (!member.isEmpty()) {
                 List<LoanApplicantGurantor> lag = uniDB.searchByQuery("SELECT g FROM LoanApplicantGurantor g WHERE g.memberId.id='" + member.get(0).getId() + "'");
                 if (!lag.isEmpty()) {
                     for (LoanApplicantGurantor l : lag) {
-                        List<LoanManager> lm = uniDB.searchByQuery("SELECT g from LoanManager g WHERE g.loanApplicantAndGurantorsId,id='" + l.getId() + "'");
-                        if (!lm.isEmpty()) {
+                        List<LoanManager> lm = uniDB.searchByQuery("SELECT g from LoanManager g WHERE g.loanApplicantAndGurantorsId.id='" + l.getId() + "'");
+                        if (lm != null && !lm.isEmpty()) {
                             List<LoanStatusManager> lsm = uniDB.searchByQuery("SELECT g FROM LoanStatusManager g WHERE g.loanManagerId.id='" + lm + "' AND g.loanStatusId.id='6'");
                             return lsm.isEmpty();
+                        } else {
+                            return true;
                         }
                     }
                 }
@@ -451,7 +441,7 @@ public class OrgAccessService {
                     mslet.get(0).setInternationalUniversityDue(Double.valueOf(internationalUniversityDue));
                     mslet.get(0).setInternationalUniversityCurrency(internationalUniversityCurrency);
                     mslet.get(0).setServiceChargesPresentage(Double.valueOf(serviceChargesPresentage));
-                   
+
                     if (profileCreatedDate != null && !profileCreatedDate.trim().isEmpty()) {
                         try {
                             mslet.get(0).setProfileCreateDate(new SimpleDateFormat("yyyy-MM-dd").parse(profileCreatedDate));

@@ -90,7 +90,7 @@
         <extension>svg#fontawesomeregular</extension>
         <mime-type>image/svg+xml</mime-type>
     </mime-mapping>
-    
+
     <!--    <security-constraint>
         <web-resource-collection>
             <web-resource-name>AllowedAccess</web-resource-name>
@@ -98,6 +98,7 @@
         </web-resource-collection>
          No auth-constraint here, making it publicly accessible 
     </security-constraint>-->
+
 
     <error-page>
         <error-code>500</error-code>

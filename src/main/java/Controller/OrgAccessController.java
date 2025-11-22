@@ -46,7 +46,8 @@ public class OrgAccessController {
             @FormParam("address1") String address1,
             @FormParam("address2") String address2,
             @FormParam("address3") String address3,
-            @FormParam("profileCreatedDate") String profileCreatedDate) {
+            @FormParam("profileCreatedDate") String profileCreatedDate,
+            @FormParam("totalIntDue") String totalIntDue) {
         System.out.println("request gotted");
         return orgAccessService.sendLoanOfferEmailTo(
                 nic,
@@ -64,7 +65,8 @@ public class OrgAccessController {
                 address1,
                 address2,
                 address3,
-                profileCreatedDate);
+                profileCreatedDate,
+                totalIntDue);
     }
 
 //    Sending Loan Email from java insitute
@@ -88,7 +90,8 @@ public class OrgAccessController {
             @FormParam("address1") String address1,
             @FormParam("address2") String address2,
             @FormParam("address3") String address3,
-            @FormParam("profileCreatedDate") String profileCreatedDate) {
+            @FormParam("profileCreatedDate") String profileCreatedDate,
+            @FormParam("totalIntDue") String totalIntDue) {
         System.out.println("request gotted");
         return orgAccessService.sendLoanOfferEmailTo(
                 nic,
@@ -106,7 +109,8 @@ public class OrgAccessController {
                 address1,
                 address2,
                 address3,
-                profileCreatedDate);
+                profileCreatedDate,
+                totalIntDue);
     }
 
 //    International University Due Collecting Loan API

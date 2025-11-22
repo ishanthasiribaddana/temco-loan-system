@@ -36,6 +36,7 @@ import lk.exon.temco_loan_system.entity.GeneralOrganizationProfile;
 import lk.exon.temco_loan_system.entity.GeneralUserProfile;
 import lk.exon.temco_loan_system.entity.GnDivision;
 import lk.exon.temco_loan_system.entity.GopHasMember;
+import lk.exon.temco_loan_system.entity.InterestManager;
 import lk.exon.temco_loan_system.entity.LoanCustomer;
 import lk.exon.temco_loan_system.entity.LoanManager;
 import lk.exon.temco_loan_system.entity.LoanOffer;
@@ -200,7 +201,7 @@ public class PersonalDetailsRegistration implements Serializable {
             System.out.println("in if");
 
             getUserDetailsFromMaterializeTable(securityCode);
-            
+
             if (userAlreadyHaveALoan(nic)) {
                 try {
                     ExternalContext externalContext = facesContext.getExternalContext();
@@ -440,6 +441,18 @@ public class PersonalDetailsRegistration implements Serializable {
                                     + "' AND g.loanStatusId.id IN ('1', '2', '3', '4', '5') AND g.date = ("
                                     + "SELECT MAX(gs.date) FROM LoanStatusManager gs WHERE gs.loanManagerId.id = '" + memberLoan.getId() + "')"
                             );
+
+                            if (status.size() > 0) {
+                                List<InterestManager> interestManagers = UniDB.searchByQuery("SELECT g FROM InterestManager g WHERE g.loanManagerId.id='" + status.get(0).getLoanManagerId().getId() + "' ");
+                                if (interestManagers.size() > 0) {
+                                    if (interestManagers.get(0).getLoanid().getId() == 2) {
+                                        return false;
+                                    } else {
+                                        return true;
+                                    }
+                                }
+                            }
+
                             return (status.size() > 0);
                         }
                     }
@@ -546,7 +559,17 @@ public class PersonalDetailsRegistration implements Serializable {
                                                                             + "' AND g.loanStatusId.id IN ('1', '2', '3', '4', '5') AND g.date = ("
                                                                             + "SELECT MAX(gs.date) FROM LoanStatusManager gs WHERE gs.loanManagerId.id = '" + memberLoan.getId() + "')"
                                                                     );
-                                                                    g = status.isEmpty();
+
+                                                                    if (status.size() > 0) {
+                                                                        List<InterestManager> interestManagers = UniDB.searchByQuery("SELECT g FROM InterestManager g WHERE g.loanManagerId.id='" + status.get(0).getLoanManagerId().getId() + "' ");
+                                                                        if (interestManagers.size() > 0) {
+                                                                            if (interestManagers.get(0).getLoanid().getId() == 2) {
+                                                                                g = false;
+                                                                            } else {
+                                                                                g = true;
+                                                                            }
+                                                                        }
+                                                                    }
                                                                 }
                                                             }
                                                         }

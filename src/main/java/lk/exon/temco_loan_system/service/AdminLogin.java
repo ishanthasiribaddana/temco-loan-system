@@ -93,7 +93,7 @@ public class AdminLogin implements Serializable {
                                 FacesContext facesContext = FacesContext.getCurrentInstance();
                                 ExternalContext externalContext = facesContext.getExternalContext();
                                 externalContext.getSessionMap().put("adminUser", ulg);
-                                externalContext.redirect(externalContext.getRequestContextPath() + "/admin/view/dashboard.xhtml");
+                                externalContext.redirect(externalContext.getRequestContextPath() + "/admin/view/thirasara-loan.xhtml");
                                 facesContext.responseComplete();
 
                             }

@@ -11,7 +11,7 @@
     </ui:define>
     <ui:define name="content">
         <div class="col-12" style="text-align: center">
-            <h2>Student Loans Overview Report</h2>
+            <h2>Thirasara Loans Overview Report</h2>
         </div>
         <div class="grid dashboard" >
             <div class="col-12 md:col-6 lg:col-3">
@@ -129,14 +129,14 @@
                         <div class="p-mb-3">
                             <p:commandButton value="Export to PDF" icon="pi pi-file-pdf" 
                                              ajax="false" style="margin-left: 10px;">
-                                <p:dataExporter type="pdf" target="productsTable" 
+                                <p:dataExporter type="pdf" target="loansTable" 
                                                 fileName="loans" pageOnly="true"
                                                 preProcessor="#{loanDashboard.preProcessPDF}"/>
                             </p:commandButton>
 
                             <p:commandButton value="Export to XLSX" icon="pi pi-file-excel" 
                                              ajax="false" style="margin-left: 10px;">
-                                <p:dataExporter type="xlsx" target="productsTable" 
+                                <p:dataExporter type="xlsx" target="loansTable" 
                                                 fileName="loans" pageOnly="true"
                                                 postProcessor="#{loanDashboard.postProcessXLSX}"/>
                             </p:commandButton>
@@ -164,6 +164,10 @@
 
                             <p:column headerText="" style="width: 2%">
                                 <h:outputText value="#{index + 1}" />
+                            </p:column>
+
+                            <p:column headerText="Loan No:" style="width: 10%">
+                                <h:outputText value="#{loan.loanId}" />
                             </p:column>
 
                             <p:column headerText="NIC" style="width: 10%">

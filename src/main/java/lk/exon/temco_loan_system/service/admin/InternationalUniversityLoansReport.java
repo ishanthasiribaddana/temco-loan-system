@@ -2,13 +2,13 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/J2EE/EJB40/StatelessEjbClass.java to edit this template
  */
-package lk.exon.temco_loan_system.service;
+package lk.exon.temco_loan_system.service.admin;
 
 import com.lowagie.text.Document;
 import com.lowagie.text.PageSize;
-import com.lowagie.text.Row;
 import jakarta.annotation.PostConstruct;
 import jakarta.ejb.EJB;
+import jakarta.ejb.Stateless;
 import jakarta.ejb.LocalBean;
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.FacesContext;
@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import lk.exon.temco.templates.AcceptanceEmail;
 import lk.exon.temco.templates.LoanApplicationRejectionEmail;
-import lk.exon.temco.tools.CustomPDFExporter;
 import lk.exon.temco.tools.NewMailSender;
 import lk.exon.temco_loan_system.common.ComMethods;
 import lk.exon.temco_loan_system.common.ComPath;
@@ -41,16 +40,12 @@ import lk.exon.temco_loan_system.entity.StatusCommentManager;
 import lk.exon.temco_loan_system.entity.UniversalUserDocument;
 import lk.exon.temco_loan_system.entity.Weeks;
 import lk.exon.temco_loan_system.entity.WeeksScheduler;
-import org.apache.poi.hssf.usermodel.HSSFCellStyle;
-import org.apache.poi.hssf.usermodel.HSSFDataFormat;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.DataFormat;
+import static org.apache.poi.ss.usermodel.CellType.BOOLEAN;
+import static org.apache.poi.ss.usermodel.CellType.FORMULA;
+import static org.apache.poi.ss.usermodel.CellType.NUMERIC;
+import static org.apache.poi.ss.usermodel.CellType.STRING;
 import org.apache.poi.ss.usermodel.DateUtil;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFDataFormat;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -62,7 +57,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
  */
 @Named
 @ViewScoped
-public class LoanDashboard implements Serializable {
+public class InternationalUniversityLoansReport implements Serializable {
 
     private List<Loan> loans = new ArrayList<>();
     private List<SelectItem> commentType;
@@ -136,10 +131,10 @@ public class LoanDashboard implements Serializable {
 
             List<InterestManager> interestManagerList = uniDB.searchByQuery(
                     "SELECT im FROM InterestManager im "
-                    + "WHERE im.loanid.id='1' "
+                    + "WHERE im.loanid.id='2' "
                     + "AND im.id IN ("
                     + "SELECT MAX(im2.id) FROM InterestManager im2 "
-                    + "WHERE im2.loanid.id='1' "
+                    + "WHERE im2.loanid.id='2' "
                     + "GROUP BY im2.loanManagerId.loanApplicantAndGurantorsId.memberId.id"
                     + ") "
                     + "ORDER BY im.id DESC"

@@ -43,22 +43,22 @@ import lk.exon.temco_loan_system.entity.Status;
 @Named
 @ViewScoped
 public class EmailSendingBean implements Serializable {
-    
+
     private int count;
-    
+
     private String selectedIntake;
-    
+
     private List<LoanExpectingStudents> studentLoanExpecitngStudentList;
     private List<SelectItem> studentsIntakeList;
-    
+
     private boolean selected = true;
-    
+
     String firstHalf;
     String secondHalf;
-    
+
     @EJB
     private UniDBLocal uniDB;
-    
+
     @PostConstruct
     public void init() {
         selectedIntake = "0";
@@ -66,11 +66,11 @@ public class EmailSendingBean implements Serializable {
         loadLoanExpectingStudentsToTheTable();
         loadIntakes();
     }
-    
+
     public void searchStudentsByNameNicAndEmail() {
-        
+
     }
-    
+
     public void loadSelectedIntakeStudents() {
         System.out.println("a");
         if (!selectedIntake.equals("0")) {
@@ -84,7 +84,10 @@ public class EmailSendingBean implements Serializable {
                 System.out.println("e");
                 for (MaterializedStudentLoanEligibleStudentTable msle_Object : msle) {
                     System.out.println("f");
-                    studentLoanExpecitngStudentList.add(new LoanExpectingStudents(msle_Object.getNic(), msle_Object.getFirstName() + " " + msle_Object.getLastName(), msle_Object.getEmail(), msle_Object.getMobileNo(), msle_Object.getTotalDue(), false, msle_Object.getVerificationToken(), msle_Object.getIntakeName()));
+                    studentLoanExpecitngStudentList.add(new LoanExpectingStudents(msle_Object.getNic(), msle_Object.getFirstName() + " " + msle_Object.getLastName(), msle_Object.getEmail(), msle_Object.getMobileNo(), msle_Object.getTotalDue(), (msle_Object.getInternationalUniversityDue() == null
+                            || msle_Object.getInternationalUniversityDue().toString().isEmpty())
+                            ? "N/A"
+                            : msle_Object.getInternationalUniversityDue().toString(), false, msle_Object.getVerificationToken(), msle_Object.getIntakeName()));
 
 //                    List<LoanCustomer> loanCustomerList = uniDB.searchByQuery("SELECT g FROM LoanCustomer g WHERE g.nic='" + msle_Object.getNic() + "' ");
 //                    if (loanCustomerList.isEmpty()) {
@@ -97,9 +100,9 @@ public class EmailSendingBean implements Serializable {
             loadLoanExpectingStudentsToTheTable();
         }
     }
-    
+
     public void loadIntakes() {
-        
+
         studentsIntakeList = new ArrayList<>();
         studentsIntakeList.add(new SelectItem("0", "Select"));
         List<MaterializedStudentLoanEligibleStudentTable> intakes = uniDB.searchByQuery("SELECT g FROM MaterializedStudentLoanEligibleStudentTable g GROUP BY g.intakeId ORDER BY g.intakeId ASC");
@@ -113,22 +116,25 @@ public class EmailSendingBean implements Serializable {
             }
         }
     }
-    
+
     public void loadLoanExpectingStudentsToTheTable() {
         List<MaterializedStudentLoanEligibleStudentTable> msle = uniDB.searchByQuery("Select g FROM MaterializedStudentLoanEligibleStudentTable g");
-        
+
         if (!msle.isEmpty()) {
             studentLoanExpecitngStudentList = new ArrayList<>();
             System.out.println("msle " + msle.size());
             for (MaterializedStudentLoanEligibleStudentTable msle_Object : msle) {
-                studentLoanExpecitngStudentList.add(new LoanExpectingStudents(msle_Object.getNic(), msle_Object.getFirstName() + " " + msle_Object.getLastName(), msle_Object.getEmail(), msle_Object.getMobileNo(), msle_Object.getTotalDue(), false, msle_Object.getVerificationToken(), msle_Object.getIntakeName()));
+                studentLoanExpecitngStudentList.add(new LoanExpectingStudents(msle_Object.getNic(), msle_Object.getFirstName() + " " + msle_Object.getLastName(), msle_Object.getEmail(), msle_Object.getMobileNo(), msle_Object.getTotalDue(), (msle_Object.getInternationalUniversityDue() == null
+                        || msle_Object.getInternationalUniversityDue().toString().isEmpty())
+                        ? "N/A"
+                        : msle_Object.getInternationalUniversityDue().toString(), false, msle_Object.getVerificationToken(), msle_Object.getIntakeName()));
             }
         }
-        
+
     }
-    
+
     public void sendEmails() throws Exception {
-        
+
         FacesMessage msg = null;
         System.out.println("student is selected a " + selected);
         if (count > 0) {
@@ -137,9 +143,9 @@ public class EmailSendingBean implements Serializable {
                     System.out.println("i " + studentLoanExpecitngStudentList.get(i).studentName);
                     List<LoanCustomer> loanCustomerList = uniDB.searchByQuery("SELECT g FROM LoanCustomer g WHERE g.nic='" + studentLoanExpecitngStudentList.get(i).nic + "' ");
                     if (loanCustomerList != null && loanCustomerList.isEmpty()) {
-                        
+
                         Date date = new Date();
-                        
+
                         List<MaterializedStudentLoanEligibleStudentTable> msle = uniDB.searchByQuery("Select g FROM MaterializedStudentLoanEligibleStudentTable g WHERE g.nic='" + studentLoanExpecitngStudentList.get(i).nic + "'");
                         LoanCustomer loanCustomer = new LoanCustomer();
                         loanCustomer.setGupId(msle.get(0).getGupId());
@@ -153,27 +159,27 @@ public class EmailSendingBean implements Serializable {
                         loanCustomer.setAddressLine2(msle.get(0).getAddressLine2());
                         loanCustomer.setAddressLine3(msle.get(0).getAddressLine3());
                         loanCustomer.setVerificationToken(msle.get(0).getVerificationToken());
-                        
+
                         List<Gender> gender = uniDB.searchByQuery("SELECT g FROM Gender g WHERE g.name LIKE '%" + msle.get(0).getGenderType() + "%'");
                         loanCustomer.setGenderId(gender.get(0));
                         loanCustomer.setIsSubscribe(Short.decode("1"));
                         uniDB.create(loanCustomer);
-                        
+
                         MobileNo mobileNo = new MobileNo();
                         mobileNo.setMobileNo(msle.get(0).getMobileNo());
                         mobileNo.setPriorityId((Priority) uniDB.find(1, Priority.class));
                         mobileNo.setLoanCustomerId(loanCustomer);
                         uniDB.create(mobileNo);
-                        
+
                         double category = msle.get(0).getScholarship();
                         List<ScholarshipCatergory> scholarshipCatergory = uniDB.searchByQuery("SELECT g FROM ScholarshipCatergory g WHERE g.catergory=" + category);
-                        
+
                         ScholarshipManager manager = new ScholarshipManager();
                         manager.setLoanCustomerId(loanCustomer);
                         manager.setScholarshipCatergoryId(scholarshipCatergory.get(0));
-                        
+
                         uniDB.create(manager);
-                        
+
                         List<OrganizationBranches> orgList = uniDB.searchByQuery("SELECT g FROM OrganizationBranches g WHERE g.name LIKE '%" + msle.get(0).getBranchName() + "%'");
                         System.out.println("a");
                         if (!orgList.isEmpty()) {
@@ -185,7 +191,7 @@ public class EmailSendingBean implements Serializable {
                         }
                         System.out.println("c");
                         System.out.println("msle.get(0).getIntakeName() " + msle.get(0).getIntakeName());
-                        
+
                         List<Intake> intakes;
                         if (msle.get(0).getIntakeName().contains("Registered") || msle.get(0).getIntakeName().contains("NP")) {
                             SplitText(msle.get(0).getIntakeName());
@@ -193,17 +199,17 @@ public class EmailSendingBean implements Serializable {
                         } else {
                             intakes = uniDB.searchByQuery("SELECT g FROM Intake g WHERE g.name like '%" + msle.get(0).getIntakeName() + "%'");
                         }
-                        
+
                         if (intakes.isEmpty()) {
                             Intake intake = new Intake();
                             intake.setId(msle.get(0).getIntakeId());
                             intake.setName(firstHalf);
                             uniDB.create(intake);
-                            
+
                             IntakeManager intakeManager = new IntakeManager();
                             intakeManager.setIntakeId(intake);
                             intakeManager.setLoanCustomerId(loanCustomer);
-                            
+
                             if (secondHalf != null && secondHalf.equals("Registered")) {
                                 intakeManager.setStatusid((Status) uniDB.find(1, Status.class));
                             } else if (secondHalf != null && secondHalf.equals("NP")) {
@@ -211,13 +217,13 @@ public class EmailSendingBean implements Serializable {
                             } else if (secondHalf == null) {
                                 intakeManager.setStatusid((Status) uniDB.find(3, Status.class));
                             }
-                            
+
                             uniDB.create(intakeManager);
                         } else {
                             IntakeManager intakeManager = new IntakeManager();
                             intakeManager.setIntakeId(intakes.get(0));
                             intakeManager.setLoanCustomerId(loanCustomer);
-                            
+
                             if (secondHalf != null && secondHalf.equals("Registered")) {
                                 intakeManager.setStatusid((Status) uniDB.find(1, Status.class));
                             } else if (secondHalf != null && secondHalf.equals("NP")) {
@@ -225,23 +231,23 @@ public class EmailSendingBean implements Serializable {
                             } else if (secondHalf == null) {
                                 intakeManager.setStatusid((Status) uniDB.find(3, Status.class));
                             }
-                            
+
                             uniDB.create(intakeManager);
                         }
-                        
+
                         OfferManager offerManager = new OfferManager();
                         offerManager.setDate(date);
                         offerManager.setIsAccepted(Short.decode("0"));
                         offerManager.setLoanCustomerId(loanCustomer);
                         offerManager.setLoanOfferId((LoanOffer) uniDB.find(1, LoanOffer.class));
                         uniDB.create(offerManager);
-                        
+
                         CustomerResponseHistory responseHistory = new CustomerResponseHistory();
                         responseHistory.setDate(date);
                         responseHistory.setOfferManagerId(offerManager);
                         responseHistory.setResponseStatusId((ResponseStatus) uniDB.find(1, ResponseStatus.class));
                         uniDB.create(responseHistory);
-                        
+
                         boolean b = new NewMailSender().sendMailtrapEmail(studentLoanExpecitngStudentList.get(i).getEmail(), "Secure Your Future with Low-Interest Student Loans from TEMCO Bank and Java Institute", new OfferInformEmailTemplateOne().emailTemplate(studentLoanExpecitngStudentList.get(i).studentName, studentLoanExpecitngStudentList.get(i).verificationToken));
 //                    boolean b = new NewMailSender().sendM("tryabeywardane@gmail.com", "Secure Your Future with Low-Interest Student Loans from TEMCO Bank and Java Institute", new OfferInformEmailTemplateOne().emailTemplate(studentLoanExpecitngStudentList.get(i).studentName, studentLoanExpecitngStudentList.get(i).verificationToken));
 
@@ -252,7 +258,7 @@ public class EmailSendingBean implements Serializable {
                             msg = new FacesMessage(FacesMessage.SEVERITY_INFO, "Error", "Email Send Failed to " + msle.get(0).getFirstName() + " " + msle.get(0).getLastName() + "");
                             FacesContext.getCurrentInstance().addMessage("", msg);
                         }
-                        
+
                     }
                 }
             } else {
@@ -282,7 +288,7 @@ public class EmailSendingBean implements Serializable {
                     loanCustomer.setAddressLine3(msle.get(0).getAddressLine3());
                     loanCustomer.setVerificationToken(msle.get(0).getVerificationToken());
                     System.out.println("Gender" + msle.get(0).getGenderType());
-                    
+
                     List<Gender> gender = uniDB.searchByQuery("SELECT g FROM Gender g WHERE g.name LIKE '%" + msle.get(0).getGenderType() + "%'");
                     System.out.println("gender " + !gender.isEmpty());
                     if (!gender.isEmpty()) {
@@ -291,21 +297,21 @@ public class EmailSendingBean implements Serializable {
                     }
                     loanCustomer.setIsSubscribe(Short.decode("1"));
                     uniDB.create(loanCustomer);
-                    
+
                     MobileNo mobileNo = new MobileNo();
                     mobileNo.setMobileNo(msle.get(0).getMobileNo());
                     mobileNo.setPriorityId((Priority) uniDB.find(1, Priority.class));
                     mobileNo.setLoanCustomerId(loanCustomer);
                     uniDB.create(mobileNo);
-                    
+
                     double category = msle.get(0).getScholarship();
                     List<ScholarshipCatergory> scholarshipCatergory = uniDB.searchByQuery("SELECT g FROM ScholarshipCatergory g WHERE g.catergory=" + category);
-                    
+
                     ScholarshipManager manager = new ScholarshipManager();
                     manager.setLoanCustomerId(loanCustomer);
                     manager.setScholarshipCatergoryId(scholarshipCatergory.get(0));
                     uniDB.create(manager);
-                    
+
                     List<OrganizationBranches> orgList = uniDB.searchByQuery("SELECT g FROM OrganizationBranches g WHERE g.name LIKE '%" + msle.get(0).getBranchName() + "%'");
                     System.out.println("a");
                     if (!orgList.isEmpty()) {
@@ -318,7 +324,7 @@ public class EmailSendingBean implements Serializable {
                     System.out.println("c");
                     System.out.println("msle.get(0).getIntakeName() " + msle.get(0).getIntakeId());
                     System.out.println("msle.get(0).getIntakeName() " + msle.get(0).getIntakeName());
-                    
+
                     List<Intake> intakes = uniDB.searchByQuery("SELECT g FROM Intake g WHERE g.intakeId= '" + msle.get(0).getIntakeId() + "'");
                     System.out.println("intake id from intake table" + intakes.get(0).getIntakeId() + " " + intakes.get(0).getName());
                     if (intakes.isEmpty()) {
@@ -326,11 +332,11 @@ public class EmailSendingBean implements Serializable {
                         intake.setIntakeId(msle.get(0).getIntakeId());
                         intake.setName(msle.get(0).getIntakeName());
                         uniDB.create(intake);
-                        
+
                         IntakeManager intakeManager = new IntakeManager();
                         intakeManager.setIntakeId(intake);
                         intakeManager.setLoanCustomerId(loanCustomer);
-                        
+
                         if (secondHalf != null && secondHalf.equals("Registered")) {
                             intakeManager.setStatusid((Status) uniDB.find(1, Status.class));
                         } else if (secondHalf != null && secondHalf.equals("NP")) {
@@ -338,14 +344,14 @@ public class EmailSendingBean implements Serializable {
                         } else if (secondHalf == null) {
                             intakeManager.setStatusid((Status) uniDB.find(3, Status.class));
                         }
-                        
+
                         uniDB.create(intakeManager);
                     } else {
                         IntakeManager intakeManager = new IntakeManager();
                         Intake i = intakes.get(0);
                         intakeManager.setIntakeId(i);
                         intakeManager.setLoanCustomerId(loanCustomer);
-                        
+
                         if (secondHalf != null && secondHalf.equals("Registered")) {
                             intakeManager.setStatusid((Status) uniDB.find(1, Status.class));
                         } else if (secondHalf != null && secondHalf.equals("NP")) {
@@ -353,23 +359,23 @@ public class EmailSendingBean implements Serializable {
                         } else if (secondHalf == null) {
                             intakeManager.setStatusid((Status) uniDB.find(3, Status.class));
                         }
-                        
+
                         uniDB.create(intakeManager);
                     }
-                    
+
                     OfferManager offerManager = new OfferManager();
                     offerManager.setDate(date);
                     offerManager.setIsAccepted(Short.decode("0"));
                     offerManager.setLoanCustomerId(loanCustomer);
                     offerManager.setLoanOfferId((LoanOffer) uniDB.find(1, LoanOffer.class));
                     uniDB.create(offerManager);
-                    
+
                     CustomerResponseHistory responseHistory = new CustomerResponseHistory();
                     responseHistory.setDate(date);
                     responseHistory.setOfferManagerId(offerManager);
                     responseHistory.setResponseStatusId((ResponseStatus) uniDB.find(1, ResponseStatus.class));
                     uniDB.create(responseHistory);
-                    
+
                     boolean b = new NewMailSender().sendMailtrapEmail(loanExpectingStudents.email, "Secure Your Future with Low-Interest Student Loans from TEMCO Bank and Java Institute", new OfferInformEmailTemplateOne().emailTemplate(loanExpectingStudents.studentName, loanExpectingStudents.verificationToken));
 //                    boolean b = new NewMailSender().sendM("tryabeywardane@gmail.com", "Secure Your Future with Low-Interest Student Loans from TEMCO Bank and Java Institute", new OfferInformEmailTemplateOne().emailTemplate(studentLoanExpecitngStudentList.get(i).studentName, studentLoanExpecitngStudentList.get(i).verificationToken));
 
@@ -388,9 +394,9 @@ public class EmailSendingBean implements Serializable {
         }
         count = 0;
     }
-    
+
     public void SplitText(String text) {
-        
+
         if (text.contains(" - Registered")) {
             String[] parts = text.split(" - Registered");
             firstHalf = parts[0].trim();
@@ -405,125 +411,135 @@ public class EmailSendingBean implements Serializable {
         System.out.println("firstHalf split " + firstHalf);
         System.out.println("secondHalf split " + secondHalf);
     }
-    
+
     public class LoanExpectingStudents implements Serializable {
-        
+
         private String nic;
         private String studentName;
         private String email;
         private String mobileNo;
         private double totalDue;
+        private String totalintunipaymentdue;
         private boolean studentSelected;
         private String verificationToken;
         private String intake;
-        
-        public LoanExpectingStudents(String nic, String studentName, String email, String mobileNo, double totalDue, boolean studentSelected, String verificationToken, String intake) {
+
+        public LoanExpectingStudents(String nic, String studentName, String email, String mobileNo, double totalDue, String totalintunipaymentdue, boolean studentSelected, String verificationToken, String intake) {
             this.nic = nic;
             this.studentName = studentName;
             this.email = email;
             this.mobileNo = mobileNo;
             this.totalDue = totalDue;
+            this.totalintunipaymentdue = totalintunipaymentdue;
             this.studentSelected = studentSelected;
             this.verificationToken = verificationToken;
             this.intake = intake;
         }
-        
+
         public String getNic() {
             return nic;
         }
-        
+
         public void setNic(String nic) {
             this.nic = nic;
         }
-        
+
         public String getStudentName() {
             return studentName;
         }
-        
+
         public void setStudentName(String studentName) {
             this.studentName = studentName;
         }
-        
+
         public String getEmail() {
             return email;
         }
-        
+
         public void setEmail(String email) {
             this.email = email;
         }
-        
+
         public String getMobileNo() {
             return mobileNo;
         }
-        
+
         public void setMobileNo(String mobileNo) {
             this.mobileNo = mobileNo;
         }
-        
+
         public double getTotalDue() {
             return totalDue;
         }
-        
+
         public void setTotalDue(double totalDue) {
             this.totalDue = totalDue;
         }
-        
+
+        public String getTotalintunipaymentdue() {
+            return totalintunipaymentdue;
+        }
+
+        public void setTotalintunipaymentdue(String totalintunipaymentdue) {
+            this.totalintunipaymentdue = totalintunipaymentdue;
+        }
+
         public boolean isStudentSelected() {
             return studentSelected;
         }
-        
+
         public void setStudentSelected(boolean studentSelected) {
             this.studentSelected = studentSelected;
         }
-        
+
         public String getVerificationToken() {
             return verificationToken;
         }
-        
+
         public void setVerificationToken(String verificationToken) {
             this.verificationToken = verificationToken;
         }
-        
+
         public String getIntake() {
             return intake;
         }
-        
+
         public void setIntake(String intake) {
             this.intake = intake;
         }
-        
+
     }
-    
+
     public List<LoanExpectingStudents> getStudentLoanExpecitngStudentList() {
         return studentLoanExpecitngStudentList;
     }
-    
+
     public void setStudentLoanExpecitngStudentList(List<LoanExpectingStudents> studentLoanExpecitngStudentList) {
         this.studentLoanExpecitngStudentList = studentLoanExpecitngStudentList;
     }
-    
+
     public int getCount() {
         return count;
     }
-    
+
     public void setCount(int count) {
         this.count = count;
     }
-    
+
     public List<SelectItem> getStudentsIntakeList() {
         return studentsIntakeList;
     }
-    
+
     public void setStudentsIntakeList(List<SelectItem> studentsIntakeList) {
         this.studentsIntakeList = studentsIntakeList;
     }
-    
+
     public String getSelectedIntake() {
         return selectedIntake;
     }
-    
+
     public void setSelectedIntake(String selectedIntake) {
         this.selectedIntake = selectedIntake;
     }
-    
+
 }

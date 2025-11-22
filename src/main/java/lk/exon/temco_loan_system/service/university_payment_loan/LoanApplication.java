@@ -110,7 +110,10 @@ public class LoanApplication implements Serializable {
             System.out.println("LoanRequestForm.getNic() " + personalRegistrationForm.getNic());
             System.out.println("loan calculator initialize if");
             updateOfferManager(personalRegistrationForm.getNic());
+            System.out.println("A1");
             getUserDetailsFromNIC(personalRegistrationForm.getNic());
+            System.out.println("A2");
+            System.out.println("personalRegistrationForm.getMaterializedObj() " + (personalRegistrationForm.getMaterializedObj() != null));
             calculateTotalLoanAmount(personalRegistrationForm.getMaterializedObj());
             calulateLoan();
         } else {
@@ -296,7 +299,7 @@ public class LoanApplication implements Serializable {
                     FacesContext.getCurrentInstance().getExternalContext().getFlash().setKeepMessages(true);
                     FacesContext.getCurrentInstance().addMessage("", msg);
 
-                                sendPortalEmail(member.getGeneralUserProfileId().getFirstName() + " " + member.getGeneralUserProfileId().getLastName(), member.getGeneralUserProfileId().getEmail());
+                    sendPortalEmail(member.getGeneralUserProfileId().getFirstName() + " " + member.getGeneralUserProfileId().getLastName(), member.getGeneralUserProfileId().getEmail());
                     System.out.println("saved successfull");
                     FacesContext facesContext = FacesContext.getCurrentInstance();
                     ExternalContext externalContext = facesContext.getExternalContext();
@@ -502,65 +505,80 @@ public class LoanApplication implements Serializable {
 //    this method calculate total Loan amount by converting international course dues to LKE and adding Service charge
     private void calculateTotalLoanAmount(List<MaterializedStudentLoanEligibleStudentTable> materializedObj) {
         try {
+            System.out.println("A");
             String internationalAwardingBodyDiplomaCurrency = materializedObj.get(0).getInternationalAwardingBodyDiplomaCurrency();
             Double internationalAwardingBodyDiplomaDue = materializedObj.get(0).getInternationalAwardingBodyDiplomaDue();
+            System.out.println("internationalAwardingBodyDiplomaDue " + internationalAwardingBodyDiplomaDue);
 
             String internationalAwardingBodyHigherDiplomaCurrency = materializedObj.get(0).getInternationalAwardingBodyHigherDiplomaCurrency();
             Double internationalAwardingBodyHigherDiplomaDue = materializedObj.get(0).getInternationalAwardingBodyHigherDiplomaDue();
-
+            System.out.println("internationalAwardingBodyHigherDiplomaDue " + internationalAwardingBodyHigherDiplomaDue);
             String internationalUniversityCurrency = materializedObj.get(0).getInternationalUniversityCurrency();
+
             Double internationalUniversityDue = materializedObj.get(0).getInternationalUniversityDue();
+            System.out.println("internationalUniversityDue " + internationalUniversityDue);
 
-            Double serviceChargesPercentage = materializedObj.get(0).getServiceChargesPresentage();
-
+//            Double serviceChargesPercentage = materializedObj.get(0).getServiceChargesPresentage();
+            Double serviceChargesPercentage = 10.0;
+            System.out.println("serviceChargesPercentage " + serviceChargesPercentage);
             Double diplomaValue = 0.00;
             Double higherDiplomaValue = 0.00;
             Double universityPayment = 0.00;
 
-            if (internationalAwardingBodyDiplomaCurrency.equals("GBP")) {
+            if (internationalAwardingBodyDiplomaCurrency != null && internationalAwardingBodyDiplomaCurrency.equals("GBP")) {
 
                 diplomaValue = internationalAwardingBodyDiplomaDue * gbpToLkr;
                 System.out.println("diplomaValue gbpToLkr " + diplomaValue);
-            } else if (internationalAwardingBodyDiplomaCurrency.equals("USD")) {
+            } else if (internationalAwardingBodyDiplomaCurrency != null && internationalAwardingBodyDiplomaCurrency.equals("USD")) {
 
                 diplomaValue = internationalAwardingBodyDiplomaDue * usdToLkr;
                 System.out.println("diplomaValue usdToLkr " + diplomaValue);
 
-            } else if (internationalAwardingBodyDiplomaCurrency.equals("LKR")) {
+            } else if (internationalAwardingBodyDiplomaCurrency != null && internationalAwardingBodyDiplomaCurrency.equals("LKR")) {
 
                 diplomaValue = internationalAwardingBodyDiplomaDue;
                 System.out.println("diplomaValue Lkr " + diplomaValue);
             }
 
-            if (internationalAwardingBodyHigherDiplomaCurrency.equals("GBP")) {
+            if (internationalAwardingBodyHigherDiplomaCurrency != null && internationalAwardingBodyHigherDiplomaCurrency.equals("GBP")) {
 
                 higherDiplomaValue = internationalAwardingBodyHigherDiplomaDue * gbpToLkr;
                 System.out.println("higherDiplomaValue Lkr " + higherDiplomaValue);
-            } else if (internationalAwardingBodyHigherDiplomaCurrency.equals("USD")) {
+            } else if (internationalAwardingBodyHigherDiplomaCurrency != null && internationalAwardingBodyHigherDiplomaCurrency.equals("USD")) {
 
                 higherDiplomaValue = internationalAwardingBodyHigherDiplomaDue * usdToLkr;
                 System.out.println("higherDiplomaValue Lkr " + higherDiplomaValue);
-            } else if (internationalAwardingBodyHigherDiplomaCurrency.equals("LKR")) {
+            } else if (internationalAwardingBodyHigherDiplomaCurrency != null && internationalAwardingBodyHigherDiplomaCurrency.equals("LKR")) {
 
                 higherDiplomaValue = internationalAwardingBodyHigherDiplomaDue;
                 System.out.println("higherDiplomaValue Lkr " + higherDiplomaValue);
             }
 
-            if (internationalUniversityCurrency.equals("GBP")) {
+            if (internationalUniversityCurrency != null && internationalUniversityCurrency.equals("GBP")) {
 
                 universityPayment = internationalUniversityDue * gbpToLkr;
                 System.out.println("universityPayment Lkr " + universityPayment);
-            } else if (internationalUniversityCurrency.equals("USD")) {
+            } else if (internationalUniversityCurrency != null && internationalUniversityCurrency.equals("USD")) {
 
                 universityPayment = internationalUniversityDue * usdToLkr;
                 System.out.println("universityPayment Lkr " + universityPayment);
-            } else if (internationalUniversityCurrency.equals("LKR")) {
+            } else if (internationalUniversityCurrency != null && internationalUniversityCurrency.equals("LKR")) {
 
                 universityPayment = internationalUniversityDue;
                 System.out.println("universityPayment Lkr " + universityPayment);
             }
 
-            Double totalLoanAmount = diplomaValue + higherDiplomaValue + universityPayment;
+            if (internationalUniversityCurrency != null && internationalUniversityCurrency.equals("LKR")) {
+
+                universityPayment = internationalUniversityDue;
+                System.out.println("universityPayment Lkr " + universityPayment);
+            }
+
+            System.out.println("diplomaValue " + diplomaValue);
+            System.out.println("higherDiplomaValue " + higherDiplomaValue);
+            System.out.println("universityPayment " + universityPayment);
+
+            Double totalLoanAmount = internationalUniversityDue;
 
             System.out.println("totalLoanAmount Lkr " + totalLoanAmount);
 

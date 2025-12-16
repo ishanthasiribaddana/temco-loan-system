@@ -37,12 +37,12 @@ public class GeneralJournalEntryManager implements Serializable {
     private Integer id;
     @Column(name = "is_active")
     private Integer isActive;
-    @JoinColumn(name = "general_journal_entry_sub", referencedColumnName = "id")
-    @ManyToOne(optional = false)
-    private GeneralJournalEntry generalJournalEntrySub;
-    @JoinColumn(name = "general_journal_entry_id_main", referencedColumnName = "id")
+    @JoinColumn(name = "general_journal_entry_id_main", referencedColumnName = "general_journal_entry_id")
     @ManyToOne(optional = false)
     private GeneralJournalEntry generalJournalEntryIdMain;
+    @JoinColumn(name = "general_journal_entry_sub", referencedColumnName = "general_journal_entry_id")
+    @ManyToOne(optional = false)
+    private GeneralJournalEntry generalJournalEntrySub;
 
     public GeneralJournalEntryManager() {
     }
@@ -67,20 +67,20 @@ public class GeneralJournalEntryManager implements Serializable {
         this.isActive = isActive;
     }
 
-    public GeneralJournalEntry getGeneralJournalEntrySub() {
-        return generalJournalEntrySub;
-    }
-
-    public void setGeneralJournalEntrySub(GeneralJournalEntry generalJournalEntrySub) {
-        this.generalJournalEntrySub = generalJournalEntrySub;
-    }
-
     public GeneralJournalEntry getGeneralJournalEntryIdMain() {
         return generalJournalEntryIdMain;
     }
 
     public void setGeneralJournalEntryIdMain(GeneralJournalEntry generalJournalEntryIdMain) {
         this.generalJournalEntryIdMain = generalJournalEntryIdMain;
+    }
+
+    public GeneralJournalEntry getGeneralJournalEntrySub() {
+        return generalJournalEntrySub;
+    }
+
+    public void setGeneralJournalEntrySub(GeneralJournalEntry generalJournalEntrySub) {
+        this.generalJournalEntrySub = generalJournalEntrySub;
     }
 
     @Override

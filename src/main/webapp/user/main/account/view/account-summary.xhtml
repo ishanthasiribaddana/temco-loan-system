@@ -42,7 +42,7 @@
                                     <div class="field col-6">
                                         <p:outputLabel style="font-weight: bolder">Account No : </p:outputLabel>
                                         <div>
-                                            <p:outputLabel>000000000</p:outputLabel>
+                                            <p:outputLabel>#{accountSummary.memberLoanAccount.accountNo}</p:outputLabel>
                                         </div>
                                     </div>
                                 </h:panelGroup>
@@ -66,7 +66,7 @@
                                     <div class="field col-6">
                                         <p:outputLabel style="font-weight: bolder">Account Type : </p:outputLabel>
                                         <div>
-                                            <p:outputLabel>Thirsara Student Loan</p:outputLabel>
+                                            <p:outputLabel>#{accountSummary.memberLoanAccount.accountTypeId.type}</p:outputLabel>
                                         </div>
                                     </div>
                                 </h:panelGroup>

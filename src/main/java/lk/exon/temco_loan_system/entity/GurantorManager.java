@@ -42,12 +42,12 @@ public class GurantorManager implements Serializable {
     @JoinColumn(name = "gurantor_count_id", referencedColumnName = "id")
     @ManyToOne(optional = false)
     private GurantorCount gurantorCountId;
-    @JoinColumn(name = "loan_applicant_and_gurantors_id", referencedColumnName = "id")
-    @ManyToOne(optional = false)
-    private LoanApplicantGurantor loanApplicantAndGurantorsId;
     @JoinColumn(name = "loan_applicant_id", referencedColumnName = "id")
     @ManyToOne(optional = false)
     private LoanApplicantGurantor loanApplicantId;
+    @JoinColumn(name = "loan_applicant_and_gurantors_id", referencedColumnName = "id")
+    @ManyToOne(optional = false)
+    private LoanApplicantGurantor loanApplicantAndGurantorsId;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "gurantorManagerId")
     private Collection<GuarantorDocuments> guarantorDocumentsCollection;
 
@@ -82,20 +82,20 @@ public class GurantorManager implements Serializable {
         this.gurantorCountId = gurantorCountId;
     }
 
-    public LoanApplicantGurantor getLoanApplicantAndGurantorsId() {
-        return loanApplicantAndGurantorsId;
-    }
-
-    public void setLoanApplicantAndGurantorsId(LoanApplicantGurantor loanApplicantAndGurantorsId) {
-        this.loanApplicantAndGurantorsId = loanApplicantAndGurantorsId;
-    }
-
     public LoanApplicantGurantor getLoanApplicantId() {
         return loanApplicantId;
     }
 
     public void setLoanApplicantId(LoanApplicantGurantor loanApplicantId) {
         this.loanApplicantId = loanApplicantId;
+    }
+
+    public LoanApplicantGurantor getLoanApplicantAndGurantorsId() {
+        return loanApplicantAndGurantorsId;
+    }
+
+    public void setLoanApplicantAndGurantorsId(LoanApplicantGurantor loanApplicantAndGurantorsId) {
+        this.loanApplicantAndGurantorsId = loanApplicantAndGurantorsId;
     }
 
     public Collection<GuarantorDocuments> getGuarantorDocumentsCollection() {

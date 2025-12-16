@@ -66,7 +66,7 @@ public class LoginSession implements Serializable {
     @JoinColumn(name = "user_login_group_id", referencedColumnName = "id")
     @ManyToOne
     private UserLoginGroup userLoginGroupId;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "loginSession")
+    @OneToMany(mappedBy = "loginSession")
     private Collection<Voucher> voucherCollection;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "loginSessionId")
     private Collection<VoucherApprovalManager> voucherApprovalManagerCollection;

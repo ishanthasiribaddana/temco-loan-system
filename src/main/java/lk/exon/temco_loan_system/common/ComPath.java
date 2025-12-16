@@ -13,6 +13,8 @@ public class ComPath {
     public static final String LOGIN_URL = "https://api.javainstitute.edu.lk/TemcoStudntLogin";
 
     public static String basePath = "/root/temodocs/studentloansdocs/gurantordetails";
+//    public static String depositsSlipsPath = "/root/temodocs/studentloansdocs/depositslips";
+    public static String depositsSlipsPath = "F:/temco-bank-application-2024-07-08/imagesdepositslips";
     public static String promissoryNoteSubmittingUrl = "https://web.javainstitute.org/web-portal/PayOrder";
 //    public static String basePath = "/root/testing/studentloansdocs/gurantordetails";
 

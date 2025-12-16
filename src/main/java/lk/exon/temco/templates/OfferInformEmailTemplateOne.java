@@ -21,6 +21,7 @@ public class OfferInformEmailTemplateOne {
 
         try {
             String path = "https://lending.temcobank.com/tasks/loan-request-form.xhtml?en=" + securityToken;
+//            String path = "https://lending.temcobank.com/view/loan-selection.xhtml?en=" + securityToken;
             String emailServiceUnsubscriptionService = "https://lending.temcobank.com/view/email-service-unsubscription.xhtml?en=" + securityToken;
             template = "<!DOCTYPE html>\n"
                     + "<html lang=\"en\">\n"

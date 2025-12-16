@@ -44,9 +44,9 @@ public class LoanApplicantGurantor implements Serializable {
     @Column(name = "date")
     @Temporal(TemporalType.DATE)
     private Date date;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "loanApplicantAndGurantorsId")
-    private Collection<GurantorManager> gurantorManagerCollection;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "loanApplicantId")
+    private Collection<GurantorManager> gurantorManagerCollection;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "loanApplicantAndGurantorsId")
     private Collection<GurantorManager> gurantorManagerCollection1;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "loanApplicantGurantorId")
     private Collection<PaySheet> paySheetCollection;

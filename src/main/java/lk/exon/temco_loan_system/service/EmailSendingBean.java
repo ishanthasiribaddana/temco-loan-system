@@ -13,6 +13,7 @@ import jakarta.faces.model.SelectItem;
 import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Named;
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -82,12 +83,19 @@ public class EmailSendingBean implements Serializable {
                 studentLoanExpecitngStudentList = new ArrayList<>();
                 System.out.println("msle " + msle.size());
                 System.out.println("e");
+
+                SimpleDateFormat smp = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+
                 for (MaterializedStudentLoanEligibleStudentTable msle_Object : msle) {
+                    String formattedDateAndTime = "N/A";
+                    if (msle_Object.getTransferDate() != null) {
+                        formattedDateAndTime = smp.format(msle_Object.getTransferDate());
+                    }
                     System.out.println("f");
                     studentLoanExpecitngStudentList.add(new LoanExpectingStudents(msle_Object.getNic(), msle_Object.getFirstName() + " " + msle_Object.getLastName(), msle_Object.getEmail(), msle_Object.getMobileNo(), msle_Object.getTotalDue(), (msle_Object.getInternationalUniversityDue() == null
                             || msle_Object.getInternationalUniversityDue().toString().isEmpty())
                             ? "N/A"
-                            : msle_Object.getInternationalUniversityDue().toString(), false, msle_Object.getVerificationToken(), msle_Object.getIntakeName()));
+                            : msle_Object.getInternationalUniversityDue().toString(), false, msle_Object.getVerificationToken(), msle_Object.getIntakeName(), formattedDateAndTime));
 
 //                    List<LoanCustomer> loanCustomerList = uniDB.searchByQuery("SELECT g FROM LoanCustomer g WHERE g.nic='" + msle_Object.getNic() + "' ");
 //                    if (loanCustomerList.isEmpty()) {
@@ -123,11 +131,17 @@ public class EmailSendingBean implements Serializable {
         if (!msle.isEmpty()) {
             studentLoanExpecitngStudentList = new ArrayList<>();
             System.out.println("msle " + msle.size());
+            SimpleDateFormat smp = new SimpleDateFormat("yyyy-MM-dd HH:mm");
             for (MaterializedStudentLoanEligibleStudentTable msle_Object : msle) {
+                String formattedDateAndTime = "N/A";
+                if (msle_Object.getTransferDate() != null) {
+                    formattedDateAndTime = smp.format(msle_Object.getTransferDate());
+                }
+
                 studentLoanExpecitngStudentList.add(new LoanExpectingStudents(msle_Object.getNic(), msle_Object.getFirstName() + " " + msle_Object.getLastName(), msle_Object.getEmail(), msle_Object.getMobileNo(), msle_Object.getTotalDue(), (msle_Object.getInternationalUniversityDue() == null
                         || msle_Object.getInternationalUniversityDue().toString().isEmpty())
                         ? "N/A"
-                        : msle_Object.getInternationalUniversityDue().toString(), false, msle_Object.getVerificationToken(), msle_Object.getIntakeName()));
+                        : msle_Object.getInternationalUniversityDue().toString(), false, msle_Object.getVerificationToken(), msle_Object.getIntakeName(), formattedDateAndTime));
             }
         }
 
@@ -423,8 +437,9 @@ public class EmailSendingBean implements Serializable {
         private boolean studentSelected;
         private String verificationToken;
         private String intake;
+        private String transferDate;
 
-        public LoanExpectingStudents(String nic, String studentName, String email, String mobileNo, double totalDue, String totalintunipaymentdue, boolean studentSelected, String verificationToken, String intake) {
+        public LoanExpectingStudents(String nic, String studentName, String email, String mobileNo, double totalDue, String totalintunipaymentdue, boolean studentSelected, String verificationToken, String intake, String transferDate) {
             this.nic = nic;
             this.studentName = studentName;
             this.email = email;
@@ -434,6 +449,7 @@ public class EmailSendingBean implements Serializable {
             this.studentSelected = studentSelected;
             this.verificationToken = verificationToken;
             this.intake = intake;
+            this.transferDate = transferDate;
         }
 
         public String getNic() {
@@ -506,6 +522,14 @@ public class EmailSendingBean implements Serializable {
 
         public void setIntake(String intake) {
             this.intake = intake;
+        }
+
+        public String getTransferDate() {
+            return transferDate;
+        }
+
+        public void setTransferDate(String transferDate) {
+            this.transferDate = transferDate;
         }
 
     }

@@ -245,11 +245,11 @@ public class DashboardBean implements Serializable {
                                                 List<UniversalUserDocument> uud = uniDB.searchByQuery("SELECT g FROM UniversalUserDocument g WHERE g.generalUserProfileId.id='" + gup_id + "'AND g.isActive='1'");
                                                 System.out.println("uud documents size " + uud.size());
                                                 if (!uud.isEmpty()) {
-                                                    sfrontNic = basePath + "/" + loanManagetToken + "/" + gurantorMemberNo + "/" + uud.get(2).getFileUrl();
+//                                                    sfrontNic = basePath + "/" + loanManagetToken + "/" + gurantorMemberNo + "/" + uud.get(2).getFileUrl();
 //                            ffrontNic = "F:/temco-bank-application-2024-07-08/nilupul copy/temco_loan_system-1.0/target/temco_loan_system-1.0/documents/loan_documents/student_loan/WKXvsjUCrFanU849qbJIbSdlyBQ3mZu8/2011320000000100/temcoln909d9035-41a9-4ee5-ad97-0c41010fa02520240924091318.png";
                                                     System.out.println("url 1 " + ffrontNic);
 
-                                                    secondBackNic = basePath + "/" + loanManagetToken + "/" + gurantorMemberNo + "/" + uud.get(3).getFileUrl();
+//                                                    secondBackNic = basePath + "/" + loanManagetToken + "/" + gurantorMemberNo + "/" + uud.get(3).getFileUrl();
                                                     System.out.println("url 2 " + firstBackNic);
                                                     i++;
                                                     System.out.println("i " + i);

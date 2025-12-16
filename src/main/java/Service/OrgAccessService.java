@@ -40,13 +40,13 @@ import lk.exon.temco_loan_system.entity.Status;
  */
 @Stateless
 public class OrgAccessService {
-
+    
     String firstHalf;
     String secondHalf;
-
+    
     @EJB
     private UniDBLocal uniDB;
-
+    
     public jakarta.ws.rs.core.Response sendLoanOfferEmailTo(
             String nic,
             String gup_id,
@@ -66,15 +66,15 @@ public class OrgAccessService {
             String profileCreatedDate,
             String totalIntDue) {
         try {
-
+            
             Date date = new Date();
-
+            
             List<MaterializedStudentLoanEligibleStudentTable> mslet = uniDB.searchByQuery("SELECT g FROM MaterializedStudentLoanEligibleStudentTable g WHERE g.nic='" + nic + "' ");
             System.out.println("mslet " + mslet.size());
             if (mslet.isEmpty()) {
                 System.out.println("A1");
                 MaterializedStudentLoanEligibleStudentTable newMslet = new MaterializedStudentLoanEligibleStudentTable();
-
+                
                 newMslet.setNic(nic);
                 newMslet.setGupId(Integer.valueOf(gup_id));
                 newMslet.setFirstName(firstName);
@@ -109,13 +109,14 @@ public class OrgAccessService {
                 newMslet.setIntakeName(intakeName);
                 System.out.println("A1.2");
                 if (profileCreatedDate != null && !profileCreatedDate.isBlank()) {
-
+                    
                     try {
                         newMslet.setProfileCreateDate(new SimpleDateFormat("yyyy-MM-dd").parse(profileCreatedDate));
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }
+                newMslet.setTransferDate(new Date());
                 System.out.println("A2");
                 uniDB.create(newMslet);
             } else {
@@ -126,7 +127,7 @@ public class OrgAccessService {
                 mslet.get(0).setLastName(lastName);
                 mslet.get(0).setEmail(email);
                 mslet.get(0).setMobileNo(mobile_no);
-
+                
                 if (address1 != null && !address1.isBlank()) {
                     mslet.get(0).setAddressLine1(address1);
                 }
@@ -145,23 +146,24 @@ public class OrgAccessService {
                 if (totalDue != null && !totalDue.isBlank()) {
                     mslet.get(0).setTotalDue(Double.valueOf(totalDue));
                 }
-
+                
                 mslet.get(0).setVerificationToken(verificationToken);
                 mslet.get(0).setBranchName(branchName);
                 mslet.get(0).setIntakeName(intakeName);
                 mslet.get(0).setInternationalUniversityDue(Double.valueOf(totalIntDue));
-
+                
                 if (profileCreatedDate != null && !profileCreatedDate.trim().isEmpty()) {
                     try {
                         mslet.get(0).setProfileCreateDate(new SimpleDateFormat("yyyy-MM-dd").parse(profileCreatedDate));
-
+                        
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }
+                mslet.get(0).setTransferDate(new Date());
                 uniDB.update(mslet.get(0));
             }
-
+            
             List<LoanCustomer> msle = uniDB.searchByQuery("Select g FROM LoanCustomer g WHERE g.nic='" + nic + "'");
             LoanCustomer loanCustomer = null;
             if (msle.isEmpty()) {
@@ -181,22 +183,22 @@ public class OrgAccessService {
             } else {
                 loanCustomer = msle.get(0);
             }
-
+            
             MobileNo mobileNo = new MobileNo();
             mobileNo.setMobileNo(mobile_no);
             mobileNo.setPriorityId((Priority) uniDB.find(1, Priority.class));
             mobileNo.setLoanCustomerId(loanCustomer);
             uniDB.update(mobileNo);
-
+            
             double category = Double.parseDouble(scholarship);
             List<ScholarshipCatergory> scholarshipCatergory = uniDB.searchByQuery("SELECT g FROM ScholarshipCatergory g WHERE g.catergory=" + category);
-
+            
             ScholarshipManager manager = new ScholarshipManager();
             manager.setLoanCustomerId(loanCustomer);
             manager.setScholarshipCatergoryId(scholarshipCatergory.get(0));
-
+            
             uniDB.create(manager);
-
+            
             List<OrganizationBranches> orgList = uniDB.searchByQuery("SELECT g FROM OrganizationBranches g WHERE g.name LIKE '%" + branchName + "%'");
             System.out.println("a");
             if (!orgList.isEmpty()) {
@@ -208,7 +210,7 @@ public class OrgAccessService {
             }
             System.out.println("c");
             System.out.println("msle.get(0).getIntakeName() " + intakeName);
-
+            
             List<Intake> intakes = uniDB.searchByQuery("SELECT g FROM Intake g WHERE g.intakeId= '" + intakeId + "'");
             Intake intake = null;
             if (intakes.isEmpty()) {
@@ -219,7 +221,7 @@ public class OrgAccessService {
             } else {
                 intake = intakes.get(0);
             }
-
+            
             IntakeManager intakeManager = new IntakeManager();
             intakeManager.setIntakeId(intake);
             intakeManager.setLoanCustomerId(loanCustomer);
@@ -233,20 +235,20 @@ public class OrgAccessService {
 //            }
 
             uniDB.create(intakeManager);
-
+            
             OfferManager offerManager = new OfferManager();
             offerManager.setDate(date);
             offerManager.setIsAccepted(Short.decode("0"));
             offerManager.setLoanCustomerId(loanCustomer);
             offerManager.setLoanOfferId((LoanOffer) uniDB.find(1, LoanOffer.class));
             uniDB.create(offerManager);
-
+            
             CustomerResponseHistory responseHistory = new CustomerResponseHistory();
             responseHistory.setDate(date);
             responseHistory.setOfferManagerId(offerManager);
             responseHistory.setResponseStatusId((ResponseStatus) uniDB.find(1, ResponseStatus.class));
             uniDB.create(responseHistory);
-
+            
             boolean b = new NewMailSender().sendM(email, "Secure Your Future with Low-Interest Student Loans from TEMCO Bank and Java Institute", new OfferInformEmailTemplateOne().emailTemplate(firstName + " " + lastName, verificationToken));
 //                    boolean b = new NewMailSender().sendM("tryabeywardane@gmail.com", "Secure Your Future with Low-Interest Student Loans from TEMCO Bank and Java Institute", new OfferInformEmailTemplateOne().emailTemplate(studentLoanExpecitngStudentList.get(i).studentName, studentLoanExpecitngStudentList.get(i).verificationToken));
 
@@ -255,7 +257,7 @@ public class OrgAccessService {
                         + "\"status\": 200,"
                         + "\"message\": \"email sent successfully\""
                         + "}";
-
+                
                 return jakarta.ws.rs.core.Response.status(jakarta.ws.rs.core.Response.Status.OK)
                         .entity(successResponse)
                         .build();
@@ -269,7 +271,7 @@ public class OrgAccessService {
                         .entity(errorResponse)
                         .build();
             }
-
+            
         } catch (NumberFormatException e) {
             String errorResponse = "{"
                     + "\"status\": 500,"
@@ -281,7 +283,7 @@ public class OrgAccessService {
                     .build();
         }
     }
-
+    
     public boolean checkUserAlreadyInTheSystem(String nic) {
         List<GeneralUserProfile> gup = uniDB.searchByQuery("SELECT g FROM GeneralUserProfile g WHERE g.nic='" + nic + "'");
         if (!gup.isEmpty()) {
@@ -300,13 +302,13 @@ public class OrgAccessService {
                     }
                 }
             }
-
+            
         }
         return true;
     }
-
+    
     public void SplitText(String text) {
-
+        
         if (text.contains(" - Registered")) {
             String[] parts = text.split(" - Registered");
             firstHalf = parts[0].trim();
@@ -321,7 +323,7 @@ public class OrgAccessService {
         System.out.println("firstHalf split " + firstHalf);
         System.out.println("secondHalf split " + secondHalf);
     }
-
+    
     public jakarta.ws.rs.core.Response sendInternationalUniversityLoanEmailTo(
             String nic,
             String gup_id,
@@ -349,15 +351,15 @@ public class OrgAccessService {
             String internationalUniversityCurrency,
             String serviceChargesPresentage) {
         try {
-
+            
             Date date = new Date();
-
+            
             List<MaterializedStudentLoanEligibleStudentTable> mslet = uniDB.searchByQuery("SELECT g FROM MaterializedStudentLoanEligibleStudentTable g WHERE g.nic='" + nic + "' ");
             System.out.println("mslet " + mslet.size());
             if (mslet.isEmpty()) {
                 System.out.println("A1");
                 MaterializedStudentLoanEligibleStudentTable newMslet = new MaterializedStudentLoanEligibleStudentTable();
-
+                
                 newMslet.setNic(nic);
                 newMslet.setGupId(Integer.valueOf(gup_id));
                 newMslet.setFirstName(firstName);
@@ -389,7 +391,7 @@ public class OrgAccessService {
                 newMslet.setPaymentOption(paymentOption);
                 System.out.println("A1.2");
                 if (profileCreatedDate != null && !profileCreatedDate.isBlank()) {
-
+                    
                     try {
                         newMslet.setProfileCreateDate(new SimpleDateFormat("yyyy-MM-dd").parse(profileCreatedDate));
                     } catch (Exception e) {
@@ -409,7 +411,7 @@ public class OrgAccessService {
                     mslet.get(0).setLastName(lastName);
                     mslet.get(0).setEmail(email);
                     mslet.get(0).setMobileNo(mobile_no);
-
+                    
                     if (address1 != null && !address1.isBlank()) {
                         mslet.get(0).setAddressLine1(address1);
                     }
@@ -428,7 +430,7 @@ public class OrgAccessService {
                     if (totalDue != null && !totalDue.isBlank()) {
                         mslet.get(0).setTotalDue(Double.valueOf(totalDue));
                     }
-
+                    
                     mslet.get(0).setVerificationToken(verificationToken);
                     mslet.get(0).setBranchName(branchName);
                     mslet.get(0).setIntakeName(intakeName);
@@ -441,11 +443,11 @@ public class OrgAccessService {
                     mslet.get(0).setInternationalUniversityDue(Double.valueOf(internationalUniversityDue));
                     mslet.get(0).setInternationalUniversityCurrency(internationalUniversityCurrency);
                     mslet.get(0).setServiceChargesPresentage(Double.valueOf(serviceChargesPresentage));
-
+                    
                     if (profileCreatedDate != null && !profileCreatedDate.trim().isEmpty()) {
                         try {
                             mslet.get(0).setProfileCreateDate(new SimpleDateFormat("yyyy-MM-dd").parse(profileCreatedDate));
-
+                            
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
@@ -462,7 +464,7 @@ public class OrgAccessService {
                             .build();
                 }
             }
-
+            
             List<LoanCustomer> msle = uniDB.searchByQuery("Select g FROM LoanCustomer g WHERE g.nic='" + nic + "'");
             LoanCustomer loanCustomer = null;
             if (msle.isEmpty()) {
@@ -482,22 +484,22 @@ public class OrgAccessService {
             } else {
                 loanCustomer = msle.get(0);
             }
-
+            
             MobileNo mobileNo = new MobileNo();
             mobileNo.setMobileNo(mobile_no);
             mobileNo.setPriorityId((Priority) uniDB.find(1, Priority.class));
             mobileNo.setLoanCustomerId(loanCustomer);
             uniDB.update(mobileNo);
-
+            
             double category = Double.parseDouble(scholarship);
             List<ScholarshipCatergory> scholarshipCatergory = uniDB.searchByQuery("SELECT g FROM ScholarshipCatergory g WHERE g.catergory=" + category);
-
+            
             ScholarshipManager manager = new ScholarshipManager();
             manager.setLoanCustomerId(loanCustomer);
             manager.setScholarshipCatergoryId(scholarshipCatergory.get(0));
-
+            
             uniDB.create(manager);
-
+            
             List<OrganizationBranches> orgList = uniDB.searchByQuery("SELECT g FROM OrganizationBranches g WHERE g.name LIKE '%" + branchName + "%'");
             System.out.println("a");
             if (!orgList.isEmpty()) {
@@ -509,7 +511,7 @@ public class OrgAccessService {
             }
             System.out.println("c");
             System.out.println("msle.get(0).getIntakeName() " + intakeName);
-
+            
             List<Intake> intakes = uniDB.searchByQuery("SELECT g FROM Intake g WHERE g.intakeId= '" + intakeId + "'");
             Intake intake = null;
             if (intakes.isEmpty()) {
@@ -520,7 +522,7 @@ public class OrgAccessService {
             } else {
                 intake = intakes.get(0);
             }
-
+            
             IntakeManager intakeManager = new IntakeManager();
             intakeManager.setIntakeId(intake);
             intakeManager.setLoanCustomerId(loanCustomer);
@@ -534,20 +536,20 @@ public class OrgAccessService {
 //            }
 
             uniDB.create(intakeManager);
-
+            
             OfferManager offerManager = new OfferManager();
             offerManager.setDate(date);
             offerManager.setIsAccepted(Short.decode("0"));
             offerManager.setLoanCustomerId(loanCustomer);
             offerManager.setLoanOfferId((LoanOffer) uniDB.find(1, LoanOffer.class));
             uniDB.create(offerManager);
-
+            
             CustomerResponseHistory responseHistory = new CustomerResponseHistory();
             responseHistory.setDate(date);
             responseHistory.setOfferManagerId(offerManager);
             responseHistory.setResponseStatusId((ResponseStatus) uniDB.find(1, ResponseStatus.class));
             uniDB.create(responseHistory);
-
+            
             boolean b = new NewMailSender().sendM(email, "Secure Your Future with Low-Interest Student Loans from TEMCO Bank and Java Institute", new UniversityLoanOfferEmail().emailTemplate(firstName + " " + lastName, verificationToken));
 //                    boolean b = new NewMailSender().sendM("tryabeywardane@gmail.com", "Secure Your Future with Low-Interest Student Loans from TEMCO Bank and Java Institute", new OfferInformEmailTemplateOne().emailTemplate(studentLoanExpecitngStudentList.get(i).studentName, studentLoanExpecitngStudentList.get(i).verificationToken));
 
@@ -556,7 +558,7 @@ public class OrgAccessService {
                         + "\"status\": 200,"
                         + "\"message\": \"email sent successfully\""
                         + "}";
-
+                
                 return jakarta.ws.rs.core.Response.status(jakarta.ws.rs.core.Response.Status.OK)
                         .entity(successResponse)
                         .build();
@@ -570,7 +572,7 @@ public class OrgAccessService {
                         .entity(errorResponse)
                         .build();
             }
-
+            
         } catch (NumberFormatException e) {
             String errorResponse = "{"
                     + "\"status\": 500,"
@@ -582,5 +584,5 @@ public class OrgAccessService {
                     .build();
         }
     }
-
+    
 }

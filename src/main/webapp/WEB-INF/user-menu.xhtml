@@ -14,17 +14,17 @@
                     <pa:menu widgetVar="AtlantisMenuWidget">
                         <p:menuitem id="m_formlayouttasksOne" value="Home" icon="pi pi-fw pi-id-card"
                                     outcome="/user/main/dashboard.xhtml?en=#{dashboardBean.userVerificationToken}"/>
-                                                <p:submenu id="m_tasks_componentsOne" label="Accounts" icon="pi pi-fw pi-star">
-                                                    <p:menuitem id="m_formlayouttasksTwo" value="Accounts Summary" icon="pi pi-fw pi-id-card"
-                                                                outcome="/user/main/account/view/account-summary.xhtml" />
-                                                </p:submenu>
+                        <p:submenu id="m_tasks_componentsOne" label="Accounts" icon="pi pi-fw pi-star">
+                            <p:menuitem id="m_formlayouttasksTwo" value="Accounts Summary" icon="pi pi-fw pi-id-card"
+                                        outcome="/user/main/account/view/account-summary.xhtml?en=#{dashboardBean.userVerificationToken}" />
+                        </p:submenu>
                         <p:submenu id="m_tasks_componentsTwo" label="Loans" icon="pi pi-fw pi-star">
                             <p:menuitem id="m_formlayouttasksthree" value="Loans" icon="pi pi-fw pi-id-card"
                                         outcome="/user/main/tasks/loan.xhtml?en=#{dashboardBean.userVerificationToken}" />
                         </p:submenu>
                         <p:submenu id="m_tasks_componentsThree" label="Documents Submission" icon="pi pi-fw pi-star">
                             <p:menuitem id="m_formlayouttasksfour" value="Deposits Submission" icon="pi pi-fw pi-id-card"
-                                        outcome="/user/main/tasks/deposits-submission.xhtml" />
+                                        outcome="/user/main/tasks/deposits-submission.xhtml?en=#{dashboardBean.userVerificationToken}" />
                         </p:submenu>
                     </pa:menu>
                 </h:form>

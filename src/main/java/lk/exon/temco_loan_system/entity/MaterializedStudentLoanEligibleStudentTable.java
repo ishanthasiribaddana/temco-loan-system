@@ -54,7 +54,8 @@ import java.util.Date;
     @NamedQuery(name = "MaterializedStudentLoanEligibleStudentTable.findByBranchName", query = "SELECT m FROM MaterializedStudentLoanEligibleStudentTable m WHERE m.branchName = :branchName"),
     @NamedQuery(name = "MaterializedStudentLoanEligibleStudentTable.findByIntakeId", query = "SELECT m FROM MaterializedStudentLoanEligibleStudentTable m WHERE m.intakeId = :intakeId"),
     @NamedQuery(name = "MaterializedStudentLoanEligibleStudentTable.findByIntakeName", query = "SELECT m FROM MaterializedStudentLoanEligibleStudentTable m WHERE m.intakeName = :intakeName"),
-    @NamedQuery(name = "MaterializedStudentLoanEligibleStudentTable.findByProfileCreateDate", query = "SELECT m FROM MaterializedStudentLoanEligibleStudentTable m WHERE m.profileCreateDate = :profileCreateDate")})
+    @NamedQuery(name = "MaterializedStudentLoanEligibleStudentTable.findByProfileCreateDate", query = "SELECT m FROM MaterializedStudentLoanEligibleStudentTable m WHERE m.profileCreateDate = :profileCreateDate"),
+    @NamedQuery(name = "MaterializedStudentLoanEligibleStudentTable.findByTransferDate", query = "SELECT m FROM MaterializedStudentLoanEligibleStudentTable m WHERE m.transferDate = :transferDate")})
 public class MaterializedStudentLoanEligibleStudentTable implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -122,6 +123,9 @@ public class MaterializedStudentLoanEligibleStudentTable implements Serializable
     @Column(name = "profile_create_date")
     @Temporal(TemporalType.DATE)
     private Date profileCreateDate;
+    @Column(name = "transfer_date")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date transferDate;
 
     public MaterializedStudentLoanEligibleStudentTable() {
     }
@@ -360,6 +364,14 @@ public class MaterializedStudentLoanEligibleStudentTable implements Serializable
 
     public void setProfileCreateDate(Date profileCreateDate) {
         this.profileCreateDate = profileCreateDate;
+    }
+
+    public Date getTransferDate() {
+        return transferDate;
+    }
+
+    public void setTransferDate(Date transferDate) {
+        this.transferDate = transferDate;
     }
 
     @Override

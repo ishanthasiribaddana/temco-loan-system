@@ -116,16 +116,20 @@ public class GeneralUserProfile implements Serializable {
     @OneToMany(mappedBy = "generalUserProfile")
     private Collection<UserLogin> userLoginCollection;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "generalUserProfileId")
+    private Collection<LoanCustomer> loanCustomerCollection;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "generalUserProfileId")
     private Collection<Member1> member1Collection;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "generalUserProfileId")
     private Collection<UniversalUserDocument> universalUserDocumentCollection;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "generalUserProfile")
+    private Collection<Voucher> voucherCollection;
     @OneToMany(mappedBy = "generalUserProfileId")
     private Collection<Employee> employeeCollection;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "generalUserProfileId")
     private Collection<UserRoleManagement> userRoleManagementCollection;
-    @OneToMany(mappedBy = "generalUserProfileUpdatedBy")
-    private Collection<Settings> settingsCollection;
     @OneToMany(mappedBy = "generalUserProfileCreatedBy")
+    private Collection<Settings> settingsCollection;
+    @OneToMany(mappedBy = "generalUserProfileUpdatedBy")
     private Collection<Settings> settingsCollection1;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "generalUserProfileId")
     private Collection<SpotMember> spotMemberCollection;
@@ -360,6 +364,14 @@ public class GeneralUserProfile implements Serializable {
         this.userLoginCollection = userLoginCollection;
     }
 
+    public Collection<LoanCustomer> getLoanCustomerCollection() {
+        return loanCustomerCollection;
+    }
+
+    public void setLoanCustomerCollection(Collection<LoanCustomer> loanCustomerCollection) {
+        this.loanCustomerCollection = loanCustomerCollection;
+    }
+
     public Collection<Member1> getMember1Collection() {
         return member1Collection;
     }
@@ -374,6 +386,14 @@ public class GeneralUserProfile implements Serializable {
 
     public void setUniversalUserDocumentCollection(Collection<UniversalUserDocument> universalUserDocumentCollection) {
         this.universalUserDocumentCollection = universalUserDocumentCollection;
+    }
+
+    public Collection<Voucher> getVoucherCollection() {
+        return voucherCollection;
+    }
+
+    public void setVoucherCollection(Collection<Voucher> voucherCollection) {
+        this.voucherCollection = voucherCollection;
     }
 
     public Collection<Employee> getEmployeeCollection() {

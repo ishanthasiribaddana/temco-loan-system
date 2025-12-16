@@ -6,8 +6,9 @@ package lk.exon.temco_loan_system.common;
 
 import jakarta.ejb.Local;
 import java.util.List;
-import lk.exon.temco_loan_system.entity.LoanCustomer;
-import lk.exon.temco_loan_system.entity.OfferManager;
+import java.util.Map;
+import lk.exon.temco_loan_system.entity.InterestManager;
+import lk.exon.temco_loan_system.entity.LoanStatusManager;
 
 /**
  *
@@ -35,4 +36,8 @@ public interface UniDBLocal {
     public List<Object> searchByQuery(String query, String parameterOne, String parameterTwo, String parameterThree, String parameterFour);
 
     public List<Object> searchByQuery(String query, String parameterOne, String parameterTwo);
+
+    public List<InterestManager> searchByQueryInterestManager(String query, Map<String, Object> kv);
+
+    public List<LoanStatusManager> searchByQueryLoanStatusManager(String query, Map<String, Object> kv);
 }

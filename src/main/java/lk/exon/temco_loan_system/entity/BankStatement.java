@@ -34,12 +34,12 @@ public class BankStatement implements Serializable {
     @Basic(optional = false)
     @Column(name = "id")
     private Integer id;
+    @JoinColumn(name = "transaction_type_id", referencedColumnName = "credit_or_debit_id")
+    @ManyToOne(optional = false)
+    private CreditOrDebit transactionTypeId;
     @JoinColumn(name = "member_bank_accounts_id", referencedColumnName = "id")
     @ManyToOne(optional = false)
     private MemberBankAccounts memberBankAccountsId;
-    @JoinColumn(name = "transaction_type_id", referencedColumnName = "id")
-    @ManyToOne(optional = false)
-    private TransactionType transactionTypeId;
 
     public BankStatement() {
     }
@@ -56,20 +56,20 @@ public class BankStatement implements Serializable {
         this.id = id;
     }
 
+    public CreditOrDebit getTransactionTypeId() {
+        return transactionTypeId;
+    }
+
+    public void setTransactionTypeId(CreditOrDebit transactionTypeId) {
+        this.transactionTypeId = transactionTypeId;
+    }
+
     public MemberBankAccounts getMemberBankAccountsId() {
         return memberBankAccountsId;
     }
 
     public void setMemberBankAccountsId(MemberBankAccounts memberBankAccountsId) {
         this.memberBankAccountsId = memberBankAccountsId;
-    }
-
-    public TransactionType getTransactionTypeId() {
-        return transactionTypeId;
-    }
-
-    public void setTransactionTypeId(TransactionType transactionTypeId) {
-        this.transactionTypeId = transactionTypeId;
     }
 
     @Override

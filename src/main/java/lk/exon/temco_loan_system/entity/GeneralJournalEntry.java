@@ -31,7 +31,7 @@ import java.util.Date;
 @Table(name = "general_journal_entry")
 @NamedQueries({
     @NamedQuery(name = "GeneralJournalEntry.findAll", query = "SELECT g FROM GeneralJournalEntry g"),
-    @NamedQuery(name = "GeneralJournalEntry.findById", query = "SELECT g FROM GeneralJournalEntry g WHERE g.id = :id"),
+    @NamedQuery(name = "GeneralJournalEntry.findByGeneralJournalEntryId", query = "SELECT g FROM GeneralJournalEntry g WHERE g.generalJournalEntryId = :generalJournalEntryId"),
     @NamedQuery(name = "GeneralJournalEntry.findByDescription", query = "SELECT g FROM GeneralJournalEntry g WHERE g.description = :description"),
     @NamedQuery(name = "GeneralJournalEntry.findByAmount", query = "SELECT g FROM GeneralJournalEntry g WHERE g.amount = :amount"),
     @NamedQuery(name = "GeneralJournalEntry.findByDate", query = "SELECT g FROM GeneralJournalEntry g WHERE g.date = :date"),
@@ -43,8 +43,8 @@ public class GeneralJournalEntry implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
-    @Column(name = "id")
-    private Integer id;
+    @Column(name = "general_journal_entry_id")
+    private Integer generalJournalEntryId;
     @Column(name = "description")
     private String description;
     @Basic(optional = false)
@@ -57,32 +57,34 @@ public class GeneralJournalEntry implements Serializable {
     private Integer isActive;
     @Column(name = "cheque_no")
     private String chequeNo;
-    @JoinColumn(name = "transaction_type_id", referencedColumnName = "id")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "generalJournalEntryGeneralJournalEntryId")
+    private Collection<JournalEntryProof> journalEntryProofCollection;
+    @JoinColumn(name = "credit_or_debit_id", referencedColumnName = "credit_or_debit_id")
     @ManyToOne(optional = false)
-    private TransactionType transactionTypeId;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "generalJournalEntrySub")
-    private Collection<GeneralJournalEntryManager> generalJournalEntryManagerCollection;
+    private CreditOrDebit creditOrDebitId;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "generalJournalEntryIdMain")
+    private Collection<GeneralJournalEntryManager> generalJournalEntryManagerCollection;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "generalJournalEntrySub")
     private Collection<GeneralJournalEntryManager> generalJournalEntryManagerCollection1;
 
     public GeneralJournalEntry() {
     }
 
-    public GeneralJournalEntry(Integer id) {
-        this.id = id;
+    public GeneralJournalEntry(Integer generalJournalEntryId) {
+        this.generalJournalEntryId = generalJournalEntryId;
     }
 
-    public GeneralJournalEntry(Integer id, double amount) {
-        this.id = id;
+    public GeneralJournalEntry(Integer generalJournalEntryId, double amount) {
+        this.generalJournalEntryId = generalJournalEntryId;
         this.amount = amount;
     }
 
-    public Integer getId() {
-        return id;
+    public Integer getGeneralJournalEntryId() {
+        return generalJournalEntryId;
     }
 
-    public void setId(Integer id) {
-        this.id = id;
+    public void setGeneralJournalEntryId(Integer generalJournalEntryId) {
+        this.generalJournalEntryId = generalJournalEntryId;
     }
 
     public String getDescription() {
@@ -125,12 +127,20 @@ public class GeneralJournalEntry implements Serializable {
         this.chequeNo = chequeNo;
     }
 
-    public TransactionType getTransactionTypeId() {
-        return transactionTypeId;
+    public Collection<JournalEntryProof> getJournalEntryProofCollection() {
+        return journalEntryProofCollection;
     }
 
-    public void setTransactionTypeId(TransactionType transactionTypeId) {
-        this.transactionTypeId = transactionTypeId;
+    public void setJournalEntryProofCollection(Collection<JournalEntryProof> journalEntryProofCollection) {
+        this.journalEntryProofCollection = journalEntryProofCollection;
+    }
+
+    public CreditOrDebit getCreditOrDebitId() {
+        return creditOrDebitId;
+    }
+
+    public void setCreditOrDebitId(CreditOrDebit creditOrDebitId) {
+        this.creditOrDebitId = creditOrDebitId;
     }
 
     public Collection<GeneralJournalEntryManager> getGeneralJournalEntryManagerCollection() {
@@ -152,7 +162,7 @@ public class GeneralJournalEntry implements Serializable {
     @Override
     public int hashCode() {
         int hash = 0;
-        hash += (id != null ? id.hashCode() : 0);
+        hash += (generalJournalEntryId != null ? generalJournalEntryId.hashCode() : 0);
         return hash;
     }
 
@@ -163,7 +173,7 @@ public class GeneralJournalEntry implements Serializable {
             return false;
         }
         GeneralJournalEntry other = (GeneralJournalEntry) object;
-        if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
+        if ((this.generalJournalEntryId == null && other.generalJournalEntryId != null) || (this.generalJournalEntryId != null && !this.generalJournalEntryId.equals(other.generalJournalEntryId))) {
             return false;
         }
         return true;
@@ -171,7 +181,7 @@ public class GeneralJournalEntry implements Serializable {
 
     @Override
     public String toString() {
-        return "lk.exon.temco_loan_system.entity.GeneralJournalEntry[ id=" + id + " ]";
+        return "lk.exon.temco_loan_system.entity.GeneralJournalEntry[ generalJournalEntryId=" + generalJournalEntryId + " ]";
     }
     
 }

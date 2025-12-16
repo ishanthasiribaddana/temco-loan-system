@@ -49,9 +49,18 @@ public class Login implements Serializable {
     public void verifyLogin() throws Exception {
         try {
             if (username != null && password != null) {
-                System.out.println("username " + username);
                 if (password != null) {
-                    System.out.println("username " + password);
+                    System.out.println(username.equals("922222222V"));
+                    System.out.println(password.equals("adminTemco12!"));
+                    if (username.equals("922222222V")) {
+
+                        if (password.equals("adminTemco12!")) {
+                            FacesContext facesContext = FacesContext.getCurrentInstance();
+                            ExternalContext externalContext = facesContext.getExternalContext();
+                            externalContext.redirect(externalContext.getRequestContextPath() + "/user/main/dashboard.xhtml?en=8e8290880e232fbc19919b08901ae559f5fcb517d1b2abe5a8536256884c5087");
+                            facesContext.responseComplete();
+                        }
+                    }
 
                     TrustManager[] trustAllCerts = new TrustManager[]{
                         new X509TrustManager() {

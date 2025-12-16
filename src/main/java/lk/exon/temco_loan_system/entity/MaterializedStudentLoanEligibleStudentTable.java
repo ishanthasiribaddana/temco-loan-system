@@ -39,6 +39,15 @@ import java.util.Date;
     @NamedQuery(name = "MaterializedStudentLoanEligibleStudentTable.findByAddressLine2", query = "SELECT m FROM MaterializedStudentLoanEligibleStudentTable m WHERE m.addressLine2 = :addressLine2"),
     @NamedQuery(name = "MaterializedStudentLoanEligibleStudentTable.findByAddressLine3", query = "SELECT m FROM MaterializedStudentLoanEligibleStudentTable m WHERE m.addressLine3 = :addressLine3"),
     @NamedQuery(name = "MaterializedStudentLoanEligibleStudentTable.findByScholarship", query = "SELECT m FROM MaterializedStudentLoanEligibleStudentTable m WHERE m.scholarship = :scholarship"),
+    @NamedQuery(name = "MaterializedStudentLoanEligibleStudentTable.findByPaymentOption", query = "SELECT m FROM MaterializedStudentLoanEligibleStudentTable m WHERE m.paymentOption = :paymentOption"),
+    @NamedQuery(name = "MaterializedStudentLoanEligibleStudentTable.findByCourseDue", query = "SELECT m FROM MaterializedStudentLoanEligibleStudentTable m WHERE m.courseDue = :courseDue"),
+    @NamedQuery(name = "MaterializedStudentLoanEligibleStudentTable.findByInternationalAwardingBodyDiplomaDue", query = "SELECT m FROM MaterializedStudentLoanEligibleStudentTable m WHERE m.internationalAwardingBodyDiplomaDue = :internationalAwardingBodyDiplomaDue"),
+    @NamedQuery(name = "MaterializedStudentLoanEligibleStudentTable.findByInternationalAwardingBodyDiplomaCurrency", query = "SELECT m FROM MaterializedStudentLoanEligibleStudentTable m WHERE m.internationalAwardingBodyDiplomaCurrency = :internationalAwardingBodyDiplomaCurrency"),
+    @NamedQuery(name = "MaterializedStudentLoanEligibleStudentTable.findByInternationalAwardingBodyHigherDiplomaDue", query = "SELECT m FROM MaterializedStudentLoanEligibleStudentTable m WHERE m.internationalAwardingBodyHigherDiplomaDue = :internationalAwardingBodyHigherDiplomaDue"),
+    @NamedQuery(name = "MaterializedStudentLoanEligibleStudentTable.findByInternationalAwardingBodyHigherDiplomaCurrency", query = "SELECT m FROM MaterializedStudentLoanEligibleStudentTable m WHERE m.internationalAwardingBodyHigherDiplomaCurrency = :internationalAwardingBodyHigherDiplomaCurrency"),
+    @NamedQuery(name = "MaterializedStudentLoanEligibleStudentTable.findByInternationalUniversityDue", query = "SELECT m FROM MaterializedStudentLoanEligibleStudentTable m WHERE m.internationalUniversityDue = :internationalUniversityDue"),
+    @NamedQuery(name = "MaterializedStudentLoanEligibleStudentTable.findByInternationalUniversityCurrency", query = "SELECT m FROM MaterializedStudentLoanEligibleStudentTable m WHERE m.internationalUniversityCurrency = :internationalUniversityCurrency"),
+    @NamedQuery(name = "MaterializedStudentLoanEligibleStudentTable.findByServiceChargesPresentage", query = "SELECT m FROM MaterializedStudentLoanEligibleStudentTable m WHERE m.serviceChargesPresentage = :serviceChargesPresentage"),
     @NamedQuery(name = "MaterializedStudentLoanEligibleStudentTable.findByTotalDue", query = "SELECT m FROM MaterializedStudentLoanEligibleStudentTable m WHERE m.totalDue = :totalDue"),
     @NamedQuery(name = "MaterializedStudentLoanEligibleStudentTable.findByGenderType", query = "SELECT m FROM MaterializedStudentLoanEligibleStudentTable m WHERE m.genderType = :genderType"),
     @NamedQuery(name = "MaterializedStudentLoanEligibleStudentTable.findByVerificationToken", query = "SELECT m FROM MaterializedStudentLoanEligibleStudentTable m WHERE m.verificationToken = :verificationToken"),
@@ -80,6 +89,24 @@ public class MaterializedStudentLoanEligibleStudentTable implements Serializable
     // @Max(value=?)  @Min(value=?)//if you know range of your decimal fields consider using these annotations to enforce field validation
     @Column(name = "scholarship")
     private Double scholarship;
+    @Column(name = "payment_option")
+    private String paymentOption;
+    @Column(name = "course_due")
+    private Double courseDue;
+    @Column(name = "international_awarding_body_diploma_due")
+    private Double internationalAwardingBodyDiplomaDue;
+    @Column(name = "international_awarding_body_diploma_currency")
+    private String internationalAwardingBodyDiplomaCurrency;
+    @Column(name = "international_awarding_body_higher_diploma_due")
+    private Double internationalAwardingBodyHigherDiplomaDue;
+    @Column(name = "international_awarding_body_higher_diploma_currency")
+    private String internationalAwardingBodyHigherDiplomaCurrency;
+    @Column(name = "international_university_due")
+    private Double internationalUniversityDue;
+    @Column(name = "international_university_currency")
+    private String internationalUniversityCurrency;
+    @Column(name = "service_charges_presentage")
+    private Double serviceChargesPresentage;
     @Column(name = "total_due")
     private Double totalDue;
     @Column(name = "gender_type")
@@ -205,6 +232,78 @@ public class MaterializedStudentLoanEligibleStudentTable implements Serializable
 
     public void setScholarship(Double scholarship) {
         this.scholarship = scholarship;
+    }
+
+    public String getPaymentOption() {
+        return paymentOption;
+    }
+
+    public void setPaymentOption(String paymentOption) {
+        this.paymentOption = paymentOption;
+    }
+
+    public Double getCourseDue() {
+        return courseDue;
+    }
+
+    public void setCourseDue(Double courseDue) {
+        this.courseDue = courseDue;
+    }
+
+    public Double getInternationalAwardingBodyDiplomaDue() {
+        return internationalAwardingBodyDiplomaDue;
+    }
+
+    public void setInternationalAwardingBodyDiplomaDue(Double internationalAwardingBodyDiplomaDue) {
+        this.internationalAwardingBodyDiplomaDue = internationalAwardingBodyDiplomaDue;
+    }
+
+    public String getInternationalAwardingBodyDiplomaCurrency() {
+        return internationalAwardingBodyDiplomaCurrency;
+    }
+
+    public void setInternationalAwardingBodyDiplomaCurrency(String internationalAwardingBodyDiplomaCurrency) {
+        this.internationalAwardingBodyDiplomaCurrency = internationalAwardingBodyDiplomaCurrency;
+    }
+
+    public Double getInternationalAwardingBodyHigherDiplomaDue() {
+        return internationalAwardingBodyHigherDiplomaDue;
+    }
+
+    public void setInternationalAwardingBodyHigherDiplomaDue(Double internationalAwardingBodyHigherDiplomaDue) {
+        this.internationalAwardingBodyHigherDiplomaDue = internationalAwardingBodyHigherDiplomaDue;
+    }
+
+    public String getInternationalAwardingBodyHigherDiplomaCurrency() {
+        return internationalAwardingBodyHigherDiplomaCurrency;
+    }
+
+    public void setInternationalAwardingBodyHigherDiplomaCurrency(String internationalAwardingBodyHigherDiplomaCurrency) {
+        this.internationalAwardingBodyHigherDiplomaCurrency = internationalAwardingBodyHigherDiplomaCurrency;
+    }
+
+    public Double getInternationalUniversityDue() {
+        return internationalUniversityDue;
+    }
+
+    public void setInternationalUniversityDue(Double internationalUniversityDue) {
+        this.internationalUniversityDue = internationalUniversityDue;
+    }
+
+    public String getInternationalUniversityCurrency() {
+        return internationalUniversityCurrency;
+    }
+
+    public void setInternationalUniversityCurrency(String internationalUniversityCurrency) {
+        this.internationalUniversityCurrency = internationalUniversityCurrency;
+    }
+
+    public Double getServiceChargesPresentage() {
+        return serviceChargesPresentage;
+    }
+
+    public void setServiceChargesPresentage(Double serviceChargesPresentage) {
+        this.serviceChargesPresentage = serviceChargesPresentage;
     }
 
     public Double getTotalDue() {

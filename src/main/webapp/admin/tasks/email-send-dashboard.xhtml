@@ -75,8 +75,11 @@
                             <p:column headerText="Mobile No" sortBy="#{customer.mobileNo}" filterBy="#{customer.mobileNo}">
                                 <h:outputText value="#{customer.mobileNo}" />
                             </p:column>
-                            <p:column headerText="Total Due"  filterBy="#{customer.totalDue}">
+                            <p:column headerText="Java Institute Course fee Due"  filterBy="#{customer.totalDue}">
                                 <h:outputText value="#{customer.totalDue}" />
+                            </p:column>
+                            <p:column headerText="International University Payment Due"  filterBy="#{customer.totalintunipaymentdue}">
+                                <h:outputText value="#{customer.totalintunipaymentdue}" />
                             </p:column>
                         </p:dataTable>
                     </div>

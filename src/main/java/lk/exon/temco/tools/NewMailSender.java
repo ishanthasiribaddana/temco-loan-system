@@ -33,7 +33,7 @@ public class NewMailSender {
 
     public boolean sendMailtrapEmail(String toEmail, String subject, String body) throws Exception {
         try {
-            String bcc[] = {"ishantha@gmail.com", "tryabeywardane@gmail.com"};
+            String bcc[] = {"ishantha@gmail.com", "tryabeywardane@gmail.com", "secretary@temcobanklanka.com", "gevindurodrigo2@gmail.com"};
 
             // Sender's email ID needs to be mentioned
             String senderEmail = "noreply@temcobanklanka.com";
@@ -97,7 +97,7 @@ public class NewMailSender {
 
     public boolean sendM(String mailto, String subject, String content) {
 //        
-        String bcc[] = {"ishantha@gmail.com", "tryabeywardane@gmail.com","admin@exonsoftware.lk"};
+        String bcc[] = {"ishantha@gmail.com", "tryabeywardane@gmail.com", "admin@exonsoftware.lk", "secretary@temcobanklanka.com", "gevindurodrigo2@gmail.com"};
 
         // Sender's email ID needs to be mentioned
         String senderEmail = "noreply@temcobanklanka.com";

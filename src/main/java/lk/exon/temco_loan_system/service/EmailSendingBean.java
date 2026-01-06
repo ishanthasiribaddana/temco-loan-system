@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import lk.exon.temco.templates.OfferInformEmailTemplateOne;
+import lk.exon.temco.templates.UniversityLoanOfferEmail;
 import lk.exon.temco.tools.NewMailSender;
 import lk.exon.temco_loan_system.common.UniDBLocal;
 import lk.exon.temco_loan_system.entity.BranchManager;
@@ -53,6 +54,11 @@ public class EmailSendingBean implements Serializable {
     private List<SelectItem> studentsIntakeList;
 
     private boolean selected = true;
+
+    String email;
+    String firstName;
+    String lastName;
+    String verificationToken;
 
     String firstHalf;
     String secondHalf;
@@ -161,18 +167,24 @@ public class EmailSendingBean implements Serializable {
                         Date date = new Date();
 
                         List<MaterializedStudentLoanEligibleStudentTable> msle = uniDB.searchByQuery("Select g FROM MaterializedStudentLoanEligibleStudentTable g WHERE g.nic='" + studentLoanExpecitngStudentList.get(i).nic + "'");
+
+                        String email = msle.get(0).getEmail();
+                        firstName = msle.get(0).getFirstName();
+                        lastName = msle.get(0).getLastName();
+                        verificationToken = msle.get(0).getVerificationToken();
+
                         LoanCustomer loanCustomer = new LoanCustomer();
                         loanCustomer.setGupId(msle.get(0).getGupId());
                         loanCustomer.setNic(msle.get(0).getNic());
-                        loanCustomer.setFirstName(msle.get(0).getFirstName());
-                        loanCustomer.setLastName(msle.get(0).getLastName());
+                        loanCustomer.setFirstName(firstName);
+                        loanCustomer.setLastName(lastName);
                         loanCustomer.setNameWithInitials(msle.get(0).getNameWithInitials());
                         loanCustomer.setDob(msle.get(0).getDob());
-                        loanCustomer.setEmail(msle.get(0).getEmail());
+                        loanCustomer.setEmail(email);
                         loanCustomer.setAddressLine1(msle.get(0).getAddressLine1());
                         loanCustomer.setAddressLine2(msle.get(0).getAddressLine2());
                         loanCustomer.setAddressLine3(msle.get(0).getAddressLine3());
-                        loanCustomer.setVerificationToken(msle.get(0).getVerificationToken());
+                        loanCustomer.setVerificationToken(verificationToken);
 
                         List<Gender> gender = uniDB.searchByQuery("SELECT g FROM Gender g WHERE g.name LIKE '%" + msle.get(0).getGenderType() + "%'");
                         loanCustomer.setGenderId(gender.get(0));
@@ -262,7 +274,8 @@ public class EmailSendingBean implements Serializable {
                         responseHistory.setResponseStatusId((ResponseStatus) uniDB.find(1, ResponseStatus.class));
                         uniDB.create(responseHistory);
 
-                        boolean b = new NewMailSender().sendMailtrapEmail(studentLoanExpecitngStudentList.get(i).getEmail(), "Secure Your Future with Low-Interest Student Loans from TEMCO Bank and Java Institute", new OfferInformEmailTemplateOne().emailTemplate(studentLoanExpecitngStudentList.get(i).studentName, studentLoanExpecitngStudentList.get(i).verificationToken));
+                        boolean b = new NewMailSender().sendM(email, "Secure Your Future with Low-Interest Student Loans from TEMCO Bank and Java Institute", new UniversityLoanOfferEmail().emailTemplate(firstName + " " + lastName, verificationToken));
+//                        boolean b = new NewMailSender().sendMailtrapEmail(studentLoanExpecitngStudentList.get(i).getEmail(), "Secure Your Future with Low-Interest Student Loans from TEMCO Bank and Java Institute", new OfferInformEmailTemplateOne().emailTemplate(studentLoanExpecitngStudentList.get(i).studentName, studentLoanExpecitngStudentList.get(i).verificationToken));
 //                    boolean b = new NewMailSender().sendM("tryabeywardane@gmail.com", "Secure Your Future with Low-Interest Student Loans from TEMCO Bank and Java Institute", new OfferInformEmailTemplateOne().emailTemplate(studentLoanExpecitngStudentList.get(i).studentName, studentLoanExpecitngStudentList.get(i).verificationToken));
 
                         if (b) {
@@ -289,6 +302,12 @@ public class EmailSendingBean implements Serializable {
 //                        System.out.println("loanCustomerList" + loanCustomerList);
                     Date date = new Date();
                     List<MaterializedStudentLoanEligibleStudentTable> msle = uniDB.searchByQuery("Select g FROM MaterializedStudentLoanEligibleStudentTable g WHERE g.nic='" + loanExpectingStudents.nic + "'");
+
+                    email = msle.get(0).getEmail();
+                    firstName = msle.get(0).getFirstName();
+                    lastName = msle.get(0).getLastName();
+
+                    String verificationToken = msle.get(0).getVerificationToken();
                     LoanCustomer loanCustomer = new LoanCustomer();
                     loanCustomer.setGupId(msle.get(0).getGupId());
                     loanCustomer.setNic(msle.get(0).getNic());
@@ -390,7 +409,8 @@ public class EmailSendingBean implements Serializable {
                     responseHistory.setResponseStatusId((ResponseStatus) uniDB.find(1, ResponseStatus.class));
                     uniDB.create(responseHistory);
 
-                    boolean b = new NewMailSender().sendMailtrapEmail(loanExpectingStudents.email, "Secure Your Future with Low-Interest Student Loans from TEMCO Bank and Java Institute", new OfferInformEmailTemplateOne().emailTemplate(loanExpectingStudents.studentName, loanExpectingStudents.verificationToken));
+                    boolean b = new NewMailSender().sendM(email, "Secure Your Future with Low-Interest Student Loans from TEMCO Bank and Java Institute", new UniversityLoanOfferEmail().emailTemplate(firstName + " " + lastName, verificationToken));
+//                    boolean b = new NewMailSender().sendMailtrapEmail(loanExpectingStudents.email, "Secure Your Future with Low-Interest Student Loans from TEMCO Bank and Java Institute", new OfferInformEmailTemplateOne().emailTemplate(loanExpectingStudents.studentName, loanExpectingStudents.verificationToken));
 //                    boolean b = new NewMailSender().sendM("tryabeywardane@gmail.com", "Secure Your Future with Low-Interest Student Loans from TEMCO Bank and Java Institute", new OfferInformEmailTemplateOne().emailTemplate(studentLoanExpecitngStudentList.get(i).studentName, studentLoanExpecitngStudentList.get(i).verificationToken));
 
                     if (b) {

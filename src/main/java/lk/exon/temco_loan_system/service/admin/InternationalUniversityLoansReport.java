@@ -438,9 +438,17 @@ public class InternationalUniversityLoansReport implements Serializable {
             System.out.println("loanObj != null " + (loanObject != null));
             System.out.println("firstGuarantor != null " + (firstGuarantor != null));
             System.out.println("secondGuarantor != null " + (secondGuarantor != null));
+            Date date = new Date();
+
+            double first_installement = loanObject.getLoanMangerObj().getLoanManagerId().getMonthlyInstallement();
+
+            String accptanceEmailContentOne = new AcceptanceEmail().acceptanceEmailTemplate(new SimpleDateFormat("yyyy/MM/dd").format(date), loanObject.loanMangerObj.getLoanManagerId(), gurantorManagersList, first_installement, loanObject.loanMangerObj.getLoanManagerId().getVerificationToke());
+
+            boolean x = new NewMailSender().sendM(loanObject.loanMangerObj.getLoanManagerId().getMemberBankAccountsId().getMemberId().getGeneralUserProfileId().getEmail(), "Acceptance of Your Student Loan Application", accptanceEmailContentOne);
+
             if (firstGuarantor != null && secondGuarantor != null) {
                 List<LoanStatusManager> loanStatusManager = uniDB.searchByQuery("SELECT g FROM LoanStatusManager g WHERE g.loanStatusId.id='2' AND g.loanManagerId.id='" + loanObject.loanMangerObj.getLoanManagerId().getId() + "' ");
-                Date date = new Date();
+
                 if (loanStatusManager.isEmpty()) {
 
                     List<LoanDocumentsScheduler> listDocumentsScheduler = uniDB.searchByQuery("SELECT g FROM LoanDocumentsScheduler g WHERE g.loanManagerId.id=" + loanObject.loanMangerObj.getLoanManagerId().getId() + " AND g.memberId.id=" + loanObject.loanMangerObj.getLoanManagerId().getLoanApplicantAndGurantorsId().getMemberId().getId());

@@ -14,7 +14,10 @@ import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import lk.exon.temco_loan_system.entity.InterestManager;
+import lk.exon.temco_loan_system.entity.LoanStatusManager;
 
 /**
  *
@@ -109,6 +112,48 @@ public class UniDB implements UniDBLocal {
     @Override
     public List<Object> searchByQuery(String query, String parameterOne, String parameterTwo) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public List<InterestManager> searchByQueryInterestManager(String query, Map<String, Object> kv) {
+        try {
+            // Create typed query for InterestManager
+            var typedQuery = em.createQuery(query, InterestManager.class);
+
+            // Set parameters safely
+            if (kv != null) {
+                for (Map.Entry<String, Object> entry : kv.entrySet()) {
+                    typedQuery.setParameter(entry.getKey(), entry.getValue());
+                }
+            }
+
+            return typedQuery.getResultList();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return List.of();  // return empty list instead of null
+        }
+    }
+
+    @Override
+    public List<LoanStatusManager> searchByQueryLoanStatusManager(String query, Map<String, Object> kv) {
+        try {
+            // Create typed query for LoanStatusManager
+            var typedQuery = em.createQuery(query, LoanStatusManager.class);
+
+            // Set parameters safely
+            if (kv != null) {
+                for (Map.Entry<String, Object> entry : kv.entrySet()) {
+                    typedQuery.setParameter(entry.getKey(), entry.getValue());
+                }
+            }
+
+            return typedQuery.getResultList();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return List.of();  // return empty list instead of null
+        }
     }
 
 }

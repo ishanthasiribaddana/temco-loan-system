@@ -13,10 +13,12 @@ import jakarta.faces.model.SelectItem;
 import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Named;
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import lk.exon.temco.templates.OfferInformEmailTemplateOne;
+import lk.exon.temco.templates.UniversityLoanOfferEmail;
 import lk.exon.temco.tools.NewMailSender;
 import lk.exon.temco_loan_system.common.UniDBLocal;
 import lk.exon.temco_loan_system.entity.BranchManager;
@@ -53,6 +55,11 @@ public class EmailSendingBean implements Serializable {
 
     private boolean selected = true;
 
+    String email;
+    String firstName;
+    String lastName;
+    String verificationToken;
+
     String firstHalf;
     String secondHalf;
 
@@ -82,12 +89,19 @@ public class EmailSendingBean implements Serializable {
                 studentLoanExpecitngStudentList = new ArrayList<>();
                 System.out.println("msle " + msle.size());
                 System.out.println("e");
+
+                SimpleDateFormat smp = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+
                 for (MaterializedStudentLoanEligibleStudentTable msle_Object : msle) {
+                    String formattedDateAndTime = "N/A";
+                    if (msle_Object.getTransferDate() != null) {
+                        formattedDateAndTime = smp.format(msle_Object.getTransferDate());
+                    }
                     System.out.println("f");
                     studentLoanExpecitngStudentList.add(new LoanExpectingStudents(msle_Object.getNic(), msle_Object.getFirstName() + " " + msle_Object.getLastName(), msle_Object.getEmail(), msle_Object.getMobileNo(), msle_Object.getTotalDue(), (msle_Object.getInternationalUniversityDue() == null
                             || msle_Object.getInternationalUniversityDue().toString().isEmpty())
                             ? "N/A"
-                            : msle_Object.getInternationalUniversityDue().toString(), false, msle_Object.getVerificationToken(), msle_Object.getIntakeName()));
+                            : msle_Object.getInternationalUniversityDue().toString(), false, msle_Object.getVerificationToken(), msle_Object.getIntakeName(), formattedDateAndTime));
 
 //                    List<LoanCustomer> loanCustomerList = uniDB.searchByQuery("SELECT g FROM LoanCustomer g WHERE g.nic='" + msle_Object.getNic() + "' ");
 //                    if (loanCustomerList.isEmpty()) {
@@ -123,11 +137,17 @@ public class EmailSendingBean implements Serializable {
         if (!msle.isEmpty()) {
             studentLoanExpecitngStudentList = new ArrayList<>();
             System.out.println("msle " + msle.size());
+            SimpleDateFormat smp = new SimpleDateFormat("yyyy-MM-dd HH:mm");
             for (MaterializedStudentLoanEligibleStudentTable msle_Object : msle) {
+                String formattedDateAndTime = "N/A";
+                if (msle_Object.getTransferDate() != null) {
+                    formattedDateAndTime = smp.format(msle_Object.getTransferDate());
+                }
+
                 studentLoanExpecitngStudentList.add(new LoanExpectingStudents(msle_Object.getNic(), msle_Object.getFirstName() + " " + msle_Object.getLastName(), msle_Object.getEmail(), msle_Object.getMobileNo(), msle_Object.getTotalDue(), (msle_Object.getInternationalUniversityDue() == null
                         || msle_Object.getInternationalUniversityDue().toString().isEmpty())
                         ? "N/A"
-                        : msle_Object.getInternationalUniversityDue().toString(), false, msle_Object.getVerificationToken(), msle_Object.getIntakeName()));
+                        : msle_Object.getInternationalUniversityDue().toString(), false, msle_Object.getVerificationToken(), msle_Object.getIntakeName(), formattedDateAndTime));
             }
         }
 
@@ -147,18 +167,24 @@ public class EmailSendingBean implements Serializable {
                         Date date = new Date();
 
                         List<MaterializedStudentLoanEligibleStudentTable> msle = uniDB.searchByQuery("Select g FROM MaterializedStudentLoanEligibleStudentTable g WHERE g.nic='" + studentLoanExpecitngStudentList.get(i).nic + "'");
+
+                        String email = msle.get(0).getEmail();
+                        firstName = msle.get(0).getFirstName();
+                        lastName = msle.get(0).getLastName();
+                        verificationToken = msle.get(0).getVerificationToken();
+
                         LoanCustomer loanCustomer = new LoanCustomer();
                         loanCustomer.setGupId(msle.get(0).getGupId());
                         loanCustomer.setNic(msle.get(0).getNic());
-                        loanCustomer.setFirstName(msle.get(0).getFirstName());
-                        loanCustomer.setLastName(msle.get(0).getLastName());
+                        loanCustomer.setFirstName(firstName);
+                        loanCustomer.setLastName(lastName);
                         loanCustomer.setNameWithInitials(msle.get(0).getNameWithInitials());
                         loanCustomer.setDob(msle.get(0).getDob());
-                        loanCustomer.setEmail(msle.get(0).getEmail());
+                        loanCustomer.setEmail(email);
                         loanCustomer.setAddressLine1(msle.get(0).getAddressLine1());
                         loanCustomer.setAddressLine2(msle.get(0).getAddressLine2());
                         loanCustomer.setAddressLine3(msle.get(0).getAddressLine3());
-                        loanCustomer.setVerificationToken(msle.get(0).getVerificationToken());
+                        loanCustomer.setVerificationToken(verificationToken);
 
                         List<Gender> gender = uniDB.searchByQuery("SELECT g FROM Gender g WHERE g.name LIKE '%" + msle.get(0).getGenderType() + "%'");
                         loanCustomer.setGenderId(gender.get(0));
@@ -248,7 +274,8 @@ public class EmailSendingBean implements Serializable {
                         responseHistory.setResponseStatusId((ResponseStatus) uniDB.find(1, ResponseStatus.class));
                         uniDB.create(responseHistory);
 
-                        boolean b = new NewMailSender().sendMailtrapEmail(studentLoanExpecitngStudentList.get(i).getEmail(), "Secure Your Future with Low-Interest Student Loans from TEMCO Bank and Java Institute", new OfferInformEmailTemplateOne().emailTemplate(studentLoanExpecitngStudentList.get(i).studentName, studentLoanExpecitngStudentList.get(i).verificationToken));
+                        boolean b = new NewMailSender().sendM(email, "Secure Your Future with Low-Interest Student Loans from TEMCO Bank and Java Institute", new UniversityLoanOfferEmail().emailTemplate(firstName + " " + lastName, verificationToken));
+//                        boolean b = new NewMailSender().sendMailtrapEmail(studentLoanExpecitngStudentList.get(i).getEmail(), "Secure Your Future with Low-Interest Student Loans from TEMCO Bank and Java Institute", new OfferInformEmailTemplateOne().emailTemplate(studentLoanExpecitngStudentList.get(i).studentName, studentLoanExpecitngStudentList.get(i).verificationToken));
 //                    boolean b = new NewMailSender().sendM("tryabeywardane@gmail.com", "Secure Your Future with Low-Interest Student Loans from TEMCO Bank and Java Institute", new OfferInformEmailTemplateOne().emailTemplate(studentLoanExpecitngStudentList.get(i).studentName, studentLoanExpecitngStudentList.get(i).verificationToken));
 
                         if (b) {
@@ -275,6 +302,12 @@ public class EmailSendingBean implements Serializable {
 //                        System.out.println("loanCustomerList" + loanCustomerList);
                     Date date = new Date();
                     List<MaterializedStudentLoanEligibleStudentTable> msle = uniDB.searchByQuery("Select g FROM MaterializedStudentLoanEligibleStudentTable g WHERE g.nic='" + loanExpectingStudents.nic + "'");
+
+                    email = msle.get(0).getEmail();
+                    firstName = msle.get(0).getFirstName();
+                    lastName = msle.get(0).getLastName();
+
+                    String verificationToken = msle.get(0).getVerificationToken();
                     LoanCustomer loanCustomer = new LoanCustomer();
                     loanCustomer.setGupId(msle.get(0).getGupId());
                     loanCustomer.setNic(msle.get(0).getNic());
@@ -376,7 +409,8 @@ public class EmailSendingBean implements Serializable {
                     responseHistory.setResponseStatusId((ResponseStatus) uniDB.find(1, ResponseStatus.class));
                     uniDB.create(responseHistory);
 
-                    boolean b = new NewMailSender().sendMailtrapEmail(loanExpectingStudents.email, "Secure Your Future with Low-Interest Student Loans from TEMCO Bank and Java Institute", new OfferInformEmailTemplateOne().emailTemplate(loanExpectingStudents.studentName, loanExpectingStudents.verificationToken));
+                    boolean b = new NewMailSender().sendM(email, "Secure Your Future with Low-Interest Student Loans from TEMCO Bank and Java Institute", new UniversityLoanOfferEmail().emailTemplate(firstName + " " + lastName, verificationToken));
+//                    boolean b = new NewMailSender().sendMailtrapEmail(loanExpectingStudents.email, "Secure Your Future with Low-Interest Student Loans from TEMCO Bank and Java Institute", new OfferInformEmailTemplateOne().emailTemplate(loanExpectingStudents.studentName, loanExpectingStudents.verificationToken));
 //                    boolean b = new NewMailSender().sendM("tryabeywardane@gmail.com", "Secure Your Future with Low-Interest Student Loans from TEMCO Bank and Java Institute", new OfferInformEmailTemplateOne().emailTemplate(studentLoanExpecitngStudentList.get(i).studentName, studentLoanExpecitngStudentList.get(i).verificationToken));
 
                     if (b) {
@@ -423,8 +457,9 @@ public class EmailSendingBean implements Serializable {
         private boolean studentSelected;
         private String verificationToken;
         private String intake;
+        private String transferDate;
 
-        public LoanExpectingStudents(String nic, String studentName, String email, String mobileNo, double totalDue, String totalintunipaymentdue, boolean studentSelected, String verificationToken, String intake) {
+        public LoanExpectingStudents(String nic, String studentName, String email, String mobileNo, double totalDue, String totalintunipaymentdue, boolean studentSelected, String verificationToken, String intake, String transferDate) {
             this.nic = nic;
             this.studentName = studentName;
             this.email = email;
@@ -434,6 +469,7 @@ public class EmailSendingBean implements Serializable {
             this.studentSelected = studentSelected;
             this.verificationToken = verificationToken;
             this.intake = intake;
+            this.transferDate = transferDate;
         }
 
         public String getNic() {
@@ -506,6 +542,14 @@ public class EmailSendingBean implements Serializable {
 
         public void setIntake(String intake) {
             this.intake = intake;
+        }
+
+        public String getTransferDate() {
+            return transferDate;
+        }
+
+        public void setTransferDate(String transferDate) {
+            this.transferDate = transferDate;
         }
 
     }

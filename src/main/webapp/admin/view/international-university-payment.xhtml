@@ -28,6 +28,19 @@
                 </div>
             </div>
             <div class="col-12 md:col-6 lg:col-3">
+                <div class="grid grid-nogutter card overview-box overview-box-1">
+                    <div class="col-12 overview-box-icon">
+                        <i class="pi pi-list"></i>
+                    </div>
+                    <div class="col-12" style="text-align: center">
+                        <span class="overview-box-count">#{internationalUniversityLoansReport.totalLoanApplicants}</span>
+                    </div>
+                    <div class="col-12 overview-box-footer" >
+                        Total Loan Applicants
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 md:col-6 lg:col-3">
                 <div class="grid grid-nogutter card overview-box overview-box-4">
                     <div class="col-12 overview-box-icon">
                         <i class="pi pi-money-bill"></i>
@@ -180,7 +193,7 @@
                                 <h:outputText style="vertical-align: middle; margin-left: .5rem" value="#{loan.loanAmount}" />
                             </p:column>
                             <p:column headerText="Monthly Installment">
-                                <h:outputText style="vertical-align: middle; margin-left: .5rem" value="#{loan.loanMangerObj.loanManagerId.monthlyInstallement}" />
+                                <h:outputText style="vertical-align: middle; margin-left: .5rem" value="#{loan.downPayment}" />
                             </p:column>
                             <p:column headerText="Time Period" >
                                 <h:outputText value="#{loan.loanMangerObj.loanManagerId.repaymentPeriodId.period}" />

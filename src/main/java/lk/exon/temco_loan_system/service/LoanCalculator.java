@@ -248,14 +248,14 @@ public class LoanCalculator implements Serializable {
                                     System.out.println("branch id a" + branchId);
 
                                     System.out.println("branch id a" + branchId);
-
+                                    List<MaterializedStudentLoanEligibleStudentTable> mt = null;
                                     if (branchId == 0) {
                                         if (LoanRequestForm.getBranchId() != 0) {
                                             branchId = LoanRequestForm.getBranchId();
                                         } else {
                                             System.out.println("gup.getId " + gup.getId());
                                             System.out.println("gup.getNic() " + gup.getNic());
-                                            List<MaterializedStudentLoanEligibleStudentTable> mt = UniDB.searchByQuery("SELECT g FROM MaterializedStudentLoanEligibleStudentTable g WHERE g.nic='" + gup.getNic() + "' ");
+                                            mt = UniDB.searchByQuery("SELECT g FROM MaterializedStudentLoanEligibleStudentTable g WHERE g.nic='" + gup.getNic() + "' ");
                                             System.out.println("mt size " + mt.size());
                                             List<OrganizationBranches> orgList = UniDB.searchByQuery("SELECT g FROM OrganizationBranches g WHERE g.name LIKE '%" + mt.get(0).getBranchName() + "%'");
                                             if (orgList.size() > 0) {
@@ -310,11 +310,23 @@ public class LoanCalculator implements Serializable {
 
                                     sendPortalEmail(member.getGeneralUserProfileId().getFirstName() + " " + member.getGeneralUserProfileId().getLastName(), member.getGeneralUserProfileId().getEmail());
 
-                                    System.out.println("saved successfull");
-                                    FacesContext facesContext = FacesContext.getCurrentInstance();
-                                    ExternalContext externalContext = facesContext.getExternalContext();
-                                    externalContext.redirect(externalContext.getRequestContextPath() + "/view/details-submission-success.xhtml");
-                                    facesContext.responseComplete();
+                                    if (mt != null
+                                            && !mt.isEmpty()
+                                            && mt.get(0).getInternationalUniversityDue() != null
+                                            && mt.get(0).getInternationalUniversityDue() != 0.00) {
+
+                                        System.out.println("saved successfull");
+                                        FacesContext facesContext = FacesContext.getCurrentInstance();
+                                        ExternalContext externalContext = facesContext.getExternalContext();
+                                        externalContext.redirect(externalContext.getRequestContextPath() + "/view/international-university-payment-info.xhtml?en=" + mt.get(0).getVerificationToken());
+                                        facesContext.responseComplete();
+                                    } else {
+                                        System.out.println("saved successfull");
+                                        FacesContext facesContext = FacesContext.getCurrentInstance();
+                                        ExternalContext externalContext = facesContext.getExternalContext();
+                                        externalContext.redirect(externalContext.getRequestContextPath() + "/view/details-submission-success.xhtml");
+                                        facesContext.responseComplete();
+                                    }
 
                                 } catch (Exception e) {
                                     e.printStackTrace();

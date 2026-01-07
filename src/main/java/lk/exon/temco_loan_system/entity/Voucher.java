@@ -62,14 +62,21 @@ public class Voucher implements Serializable {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "voucher")
     private Collection<VoucherItem> voucherItemCollection;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "voucherId")
+    private Collection<VoucherDocumentMap> voucherDocumentMapCollection;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "voucherId")
     private Collection<VoucherAttachment> voucherAttachmentCollection;
     @JoinColumn(name = "bank_account_id", referencedColumnName = "id")
-    @ManyToOne(optional = false)
+    @ManyToOne
     private BankAccount bankAccountId;
+    @JoinColumns({
+        @JoinColumn(name = "general_user_profile_id", referencedColumnName = "id"),
+        @JoinColumn(name = "general_user_profile_id", referencedColumnName = "id")})
+    @ManyToOne(optional = false)
+    private GeneralUserProfile generalUserProfile;
     @JoinColumns({
         @JoinColumn(name = "login_session_id", referencedColumnName = "id"),
         @JoinColumn(name = "login_session_id", referencedColumnName = "id")})
-    @ManyToOne(optional = false)
+    @ManyToOne
     private LoginSession loginSession;
     @JoinColumn(name = "org_departments_id", referencedColumnName = "id")
     @ManyToOne
@@ -151,6 +158,14 @@ public class Voucher implements Serializable {
         this.voucherItemCollection = voucherItemCollection;
     }
 
+    public Collection<VoucherDocumentMap> getVoucherDocumentMapCollection() {
+        return voucherDocumentMapCollection;
+    }
+
+    public void setVoucherDocumentMapCollection(Collection<VoucherDocumentMap> voucherDocumentMapCollection) {
+        this.voucherDocumentMapCollection = voucherDocumentMapCollection;
+    }
+
     public Collection<VoucherAttachment> getVoucherAttachmentCollection() {
         return voucherAttachmentCollection;
     }
@@ -165,6 +180,14 @@ public class Voucher implements Serializable {
 
     public void setBankAccountId(BankAccount bankAccountId) {
         this.bankAccountId = bankAccountId;
+    }
+
+    public GeneralUserProfile getGeneralUserProfile() {
+        return generalUserProfile;
+    }
+
+    public void setGeneralUserProfile(GeneralUserProfile generalUserProfile) {
+        this.generalUserProfile = generalUserProfile;
     }
 
     public LoginSession getLoginSession() {

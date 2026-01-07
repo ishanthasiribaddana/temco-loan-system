@@ -20,6 +20,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import lk.exon.temco.templates.AcceptanceEmail;
 import lk.exon.temco.templates.LoanApplicationRejectionEmail;
@@ -35,6 +36,7 @@ import lk.exon.temco_loan_system.entity.GurantorManager;
 import lk.exon.temco_loan_system.entity.InterestManager;
 import lk.exon.temco_loan_system.entity.LoanDocumentsScheduler;
 import lk.exon.temco_loan_system.entity.LoanInstallementPlan;
+import lk.exon.temco_loan_system.entity.LoanManager;
 import lk.exon.temco_loan_system.entity.LoanStatus;
 import lk.exon.temco_loan_system.entity.LoanStatusManager;
 import lk.exon.temco_loan_system.entity.StatusCommentManager;
@@ -70,11 +72,12 @@ public class LoanDashboard implements Serializable {
 
     private int loanRequests = 0;
     private double totalRequestedLoanAmount;
-    private int totalSubmittedPayOrders = 0;
+    private long totalSubmittedPayOrders = 0;
     private int classAttenededRequestors;
     private double totalDuesToCollected = 0.00;
     private String aggregateDisbursementToJIAT = "";
     private double cumulativeDisbursementToJIAT = 0.00;
+    private int totalLoanApplicants = 0;
 
     private Loan loanObject;
 
@@ -125,73 +128,118 @@ public class LoanDashboard implements Serializable {
     }
 
     public void initialized() {
-        LoanBean();
+        loadLoans();
     }
 
-    public void LoanBean() {
+    public void loadLoans() {
         try {
-            // First, get the latest loan request for each member
 
-            double total = 0.00;
+            double totalRequestedAmount = 0.0;
+            int nonRejectedLoanCount = 0;
 
-            List<InterestManager> interestManagerList = uniDB.searchByQuery(
+            // 1. Fetch latest InterestManager rows (one per loan applicant)
+            List<InterestManager> interestManagers = uniDB.searchByQueryInterestManager(
                     "SELECT im FROM InterestManager im "
-                    + "WHERE im.loanid.id='1' "
-                    + "AND im.id IN ("
-                    + "SELECT MAX(im2.id) FROM InterestManager im2 "
-                    + "WHERE im2.loanid.id='1' "
-                    + "GROUP BY im2.loanManagerId.loanApplicantAndGurantorsId.memberId.id"
-                    + ") "
-                    + "ORDER BY im.id DESC"
+                    + "WHERE im.loanid.id = :loanId "
+                    + "AND im.id IN ( "
+                    + "   SELECT MAX(im2.id) FROM InterestManager im2 "
+                    + "   WHERE im2.loanid.id = :loanId "
+                    + "   GROUP BY im2.loanManagerId.loanApplicantAndGurantorsId.memberId.id "
+                    + ") ORDER BY im.id DESC",
+                    Map.of("loanId", 1)
             );
 
-            if (!interestManagerList.isEmpty()) {
-                loanRequests = interestManagerList.size();
-                System.out.println("loanRequests " + loanRequests);
+            if (interestManagers.isEmpty()) {
+                loanRequests = 0;
+                aggregateDisbursementToJIAT = "0.00";
+                totalRequestedLoanAmount = 0.00;
+                return;
+            }
 
-                for (InterestManager loanMangerObj : interestManagerList) {
-                    System.out.println("InterestManager Loan Manager Id " + loanMangerObj.getLoanManagerId().getId());
-                    total = total + loanMangerObj.getLoanManagerId().getLoanCapitalAmount();
+            // 2. Extract loanManagerIds
+            List<Integer> loanManagerIds = interestManagers.stream()
+                    .map(im -> im.getLoanManagerId().getId())
+                    .collect(Collectors.toList());
 
-                    aggregateDisbursementToJIAT = String.format("%,.2f", total);
+            // 3. Fetch latest status for all these loans at once
+            List<LoanStatusManager> latestStatusList = uniDB.searchByQueryLoanStatusManager(
+                    "SELECT lsm FROM LoanStatusManager lsm "
+                    + "WHERE lsm.loanManagerId.id IN :ids "
+                    + "AND lsm.date IN ( "
+                    + "   SELECT MAX(lsm2.date) FROM LoanStatusManager lsm2 "
+                    + "   WHERE lsm2.loanManagerId.id IN :ids "
+                    + "   GROUP BY lsm2.loanManagerId.id "
+                    + ")",
+                    Map.of("ids", loanManagerIds)
+            );
 
-                    List<LoanStatusManager> loanStatusLists = uniDB.searchByQuery(
-                            "SELECT g FROM LoanStatusManager g WHERE g.loanStatusId.id='3' AND g.loanManagerId.id='" + loanMangerObj.getId() + "' "
-                    );
+            // 4. Create a map for O(1) lookup
+            Map<Integer, LoanStatusManager> latestStatusMap = latestStatusList.stream()
+                    .collect(Collectors.toMap(
+                            s -> s.getLoanManagerId().getId(),
+                            s -> s
+                    ));
 
-                    if (!loanStatusLists.isEmpty()) {
-                        totalRequestedLoanAmount = totalRequestedLoanAmount += loanStatusLists.get(0).getLoanManagerId().getLoanCapitalAmount();
-                    }
+            // 5. Count submitted pay orders (status = 3)
+            Long count = (Long) uniDB.searchByQuery(
+                    "SELECT COUNT(g) FROM LoanStatusManager g WHERE g.loanStatusId.id = 3"
+            ).get(0);
 
-                    System.out.println("loanMangerObj id " + loanMangerObj.getId());
-                    List<LoanStatusManager> loanStatusManager = uniDB.searchByQueryLimit(
-                            "SELECT g FROM LoanStatusManager g WHERE g.loanManagerId.id='" + loanMangerObj.getLoanManagerId().getId() + "' ORDER BY g.date DESC", 1
-                    );
+            totalSubmittedPayOrders = count;
 
-                    System.out.println("loanStatusManager.size() " + loanStatusManager.size());
-                    if (!loanStatusManager.isEmpty()) {
-                        loans.add(new Loan(
-                                loanMangerObj.getLoanManagerId().getReferenceId(),
-                                loanMangerObj.getLoanManagerId().getLoanApplicantAndGurantorsId().getMemberId().getGeneralUserProfileId().getNic(),
-                                loanMangerObj.getLoanManagerId().getMemberBankAccountsId().getMemberId().getGeneralUserProfileId().getFirstName() + " "
-                                + loanMangerObj.getLoanManagerId().getMemberBankAccountsId().getMemberId().getGeneralUserProfileId().getLastName(),
-                                loanMangerObj.getLoanManagerId().getLoanCapitalAmount(),
-                                new SimpleDateFormat("yyyy/MM/dd").format(loanMangerObj.getLoanManagerId().getDate()),
-                                loanStatusManager.get(0).getLoanStatusId().getName(),
-                                new SimpleDateFormat("yyyy/MM/dd").format(loanStatusManager.get(0).getDate()),
-                                0.00,
-                                "",
-                                loanMangerObj
-                        ));
-                    }
+            Object value = uniDB.searchByQuery(
+                    "SELECT COUNT(g) FROM LoanStatusManager g WHERE g.loanStatusId.id = 3"
+            ).get(0);
+
+            System.out.println("CLASS = " + value.getClass());
+
+            // 6. Build final loan list and apply business rules (exclude rejected loans)
+            loans.clear();
+
+            for (InterestManager im : interestManagers) {
+
+                LoanManager lm = im.getLoanManagerId();
+                LoanStatusManager latest = latestStatusMap.get(lm.getId());
+
+                boolean isRejected = latest != null && latest.getLoanStatusId().getId() == 7;
+
+                // Count only applicants whose latest status is NOT rejected
+                if (!isRejected) {
+                    totalLoanApplicants++;
+                    nonRejectedLoanCount++;
+                    totalRequestedAmount += lm.getLoanCapitalAmount();
+                    aggregateDisbursementToJIAT = String.format("%,.2f", totalRequestedAmount);
                 }
 
-                List<LoanStatusManager> loanStatusLists = uniDB.searchByQuery("SELECT g FROM LoanStatusManager g WHERE g.loanStatusId.id='3'");
-                totalSubmittedPayOrders = loanStatusLists.size();
+                // Still load all loans into the table including rejected
+                loans.add(new Loan(
+                        lm.getReferenceId(),
+                        lm.getLoanApplicantAndGurantorsId().getMemberId().getGeneralUserProfileId().getNic(),
+                        lm.getMemberBankAccountsId().getMemberId().getGeneralUserProfileId().getFirstName()
+                        + " "
+                        + lm.getMemberBankAccountsId().getMemberId().getGeneralUserProfileId().getLastName(),
+                        lm.getLoanCapitalAmount(),
+                        formatDate(lm.getDate()),
+                        latest != null ? latest.getLoanStatusId().getName() : "Unknown",
+                        latest != null ? formatDate(latest.getDate()) : "",
+                        0.00,
+                        "",
+                        im
+                ));
             }
+
+            // 7. Final aggregated values
+            loanRequests = nonRejectedLoanCount;
+            totalRequestedLoanAmount = totalRequestedAmount;
+            totalLoanApplicants = interestManagers.size();        // this counts ALL applicants
+
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private String formatDate(Date date) {
+        return new SimpleDateFormat("yyyy/MM/dd").format(date);
     }
 
     public void filterLoans() {
@@ -909,11 +957,11 @@ public class LoanDashboard implements Serializable {
         this.totalRequestedLoanAmount = totalRequestedLoanAmount;
     }
 
-    public int getTotalSubmittedPayOrders() {
+    public long getTotalSubmittedPayOrders() {
         return totalSubmittedPayOrders;
     }
 
-    public void setTotalSubmittedPayOrders(int totalSubmittedPayOrders) {
+    public void setTotalSubmittedPayOrders(long totalSubmittedPayOrders) {
         this.totalSubmittedPayOrders = totalSubmittedPayOrders;
     }
 
@@ -1235,6 +1283,14 @@ public class LoanDashboard implements Serializable {
 
     public void setGlobalFilter(String globalFilter) {
         this.globalFilter = globalFilter;
+    }
+
+    public int getTotalLoanApplicants() {
+        return totalLoanApplicants;
+    }
+
+    public void setTotalLoanApplicants(int totalLoanApplicants) {
+        this.totalLoanApplicants = totalLoanApplicants;
     }
 
 }

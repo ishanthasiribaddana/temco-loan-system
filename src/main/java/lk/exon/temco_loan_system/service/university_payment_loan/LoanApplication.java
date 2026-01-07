@@ -17,6 +17,7 @@ import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -45,7 +46,6 @@ import lk.exon.temco_loan_system.entity.OrganizationBranches;
 import lk.exon.temco_loan_system.entity.Penalty;
 import lk.exon.temco_loan_system.entity.RepaymentPeriod;
 import lk.exon.temco_loan_system.entity.ResponseStatus;
-import lk.exon.temco_loan_system.service.university_payment_loan.PersonalDetailsRegistration;
 
 /**
  *
@@ -65,7 +65,7 @@ public class LoanApplication implements Serializable {
     private double monthlyinstallement = 0.00;
     private String repayementPeriod = "5";
     private double grossIncome;
-    private double interestRate = 6;
+    private double interestRate = 0.06;
     private int actualLoanTenture;
     private String actualMonthlyInstallement = "0.00";
     int actualMonth = 0;
@@ -327,123 +327,67 @@ public class LoanApplication implements Serializable {
     }
 
     public void calulateLoan() {
+
         FacesMessage msg;
-        System.out.println("calculateMonthlyInstallementIsLessThanGuarantorsIncome() " + calculateMonthlyInstallementIsLessThanGuarantorsIncome());
-        double monthly_installement = calculateMonthlyInstallment(expectedLoanAmount, interestRate, 12);
         loanStrucure.clear();
-        System.out.println("loan");
-        double loanAmount = 0.0;
-        int installmentPeriod = 0;
-        double interest_rate = 0.0;
 
-        System.out.println("expectedLoanAmount " + expectedLoanAmount);
-        System.out.println("repayementPeriod " + repayementPeriod);
-        if (this.expectedLoanAmount != 0 && this.expectedLoanAmount > 0) {
-            loanAmount = this.expectedLoanAmount;
-            System.out.println("loan amount " + loanAmount);
+        List<RepaymentPeriod> repaymentPeriods = UniDB.searchByQuery(
+                "SELECT r FROM RepaymentPeriod r WHERE r.id = '" + repayementPeriod + "'");
+
+        if (repaymentPeriods.isEmpty()) {
+            msg = new FacesMessage(FacesMessage.SEVERITY_WARN, "Invalid Repayment Period!", "");
+            FacesContext.getCurrentInstance().addMessage(null, msg);
+            return;
         }
 
-        List<RepaymentPeriod> repaymentPeriods = UniDB.searchByQuery("SELECT g FROM RepaymentPeriod g WHERE g.id='" + repayementPeriod + "'");
-        installmentPeriod = Integer.parseInt(repaymentPeriods.get(0).getPeriod());
-        System.out.println("period");
+        int tenureMonths = Integer.parseInt(repaymentPeriods.get(0).getPeriod());
 
-        if (interest_rate != 0.0) {
-            interest_rate = this.interestRate;
+        /* -----------------------------
+     * FLAT INTEREST CALCULATION
+     * ----------------------------- */
+        double totalInterest = expectedLoanAmount * interestRate * tenureMonths / 12;
+        double monthlyInterest = totalInterest / tenureMonths;
+        double monthlyPrincipal = expectedLoanAmount / tenureMonths;
+        double monthlyInstallment = monthlyPrincipal + monthlyInterest;
+
+        actualMonthlyInstallement = new DecimalFormat("0.00").format(monthlyInstallment);
+
+        /* -----------------------------
+     * FIRST INSTALLMENT DATE
+     * ----------------------------- */
+        Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.DAY_OF_MONTH, 7);
+        Date firstDueDate = cal.getTime();
+
+        double openingBalance = expectedLoanAmount;
+        double totalPaid = 0;
+        double totalInterestPaid = 0;
+
+        for (int month = 1; month <= tenureMonths; month++) {
+
+            Calendar installmentCal = Calendar.getInstance();
+            installmentCal.setTime(firstDueDate);
+            installmentCal.add(Calendar.MONTH, month - 1);
+
+            Date installmentDate = installmentCal.getTime();
+
+            totalPaid += monthlyInstallment;
+            totalInterestPaid += monthlyInterest;
+
+            loanStrucure.add(new LoanCalculatorRecords(
+                    month,
+                    ComLib.getDate(installmentDate),
+                    openingBalance,
+                    monthlyPrincipal,
+                    monthlyInterest,
+                    totalInterestPaid,
+                    monthlyInstallment,
+                    monthlyPrincipal * month,
+                    totalPaid
+            ));
+
+            openingBalance -= monthlyPrincipal;
         }
-
-        if (loanAmount == 0.0) {
-            msg = new FacesMessage(FacesMessage.SEVERITY_WARN, "Loan Amount Empty or Invalid!", "");
-            FacesContext.getCurrentInstance().addMessage(null, msg);
-        } else if (installmentPeriod == 0) {
-            msg = new FacesMessage(FacesMessage.SEVERITY_WARN, "Please Select a Repayment Period  !", "");
-            FacesContext.getCurrentInstance().addMessage(null, msg);
-        } else if (monthly_installement == 0) {
-            msg = new FacesMessage(FacesMessage.SEVERITY_WARN, "Please Enter a Monthly Installement  !", "");
-            FacesContext.getCurrentInstance().addMessage(null, msg);
-        } else {
-            System.out.println("loan cal");
-            loanStrucure.clear();
-
-            Date date = new Date();
-            String dt = ComLib.getDate(date);
-            String[] dateArray = dt.split("-");
-            int year = Integer.parseInt(dateArray[0]);
-            int month = Integer.parseInt(dateArray[1]);
-
-            if (month == 12) {
-                month = 1;
-                year++;
-            } else {
-                month++;
-            }
-
-            double val = interestRate / 100;
-            double rate = val / 12;
-
-            double totalInterestPaid = 0.0;
-            double paidCapital = 0.0;
-            double totalPayment = 0.0;
-            double openingBalance = loanAmount;
-            int months = 0;
-
-            while (openingBalance > 0 && months < installmentPeriod) {
-                String lastDay = ComLib.getDate(ComLib.getLastDaYOfMonthFromMonth(year, month));
-                lastDay = lastDay.substring(0, 7) + "-25";
-
-                double interest = openingBalance * rate;
-                totalInterestPaid += interest;
-
-                double monthlyPayment = monthly_installement;
-                if (openingBalance + interest < monthly_installement) {
-                    monthlyPayment = openingBalance + interest;
-                }
-
-                totalPayment += monthlyPayment;
-                double principalAmount = monthlyPayment - interest;
-                paidCapital += principalAmount;
-
-                getLoanStrucure().add(new LoanCalculatorRecords(
-                        months + 1, lastDay, openingBalance,
-                        principalAmount, interest, totalInterestPaid,
-                        monthlyPayment, paidCapital, totalPayment
-                ));
-
-                openingBalance -= principalAmount;
-                months++;
-
-                if (month == 12) {
-                    month = 1;
-                    year++;
-                } else {
-                    month++;
-                }
-            }
-            actualMonth = months;
-            DecimalFormat decimalFormat = new DecimalFormat("#.00");
-            String formattedNumber = decimalFormat.format(monthly_installement);
-            actualMonthlyInstallement = formattedNumber;
-//            if (openingBalance > 0 && !correctMonthlyInstallmentBoolean) {
-//                error_message = "Invalid installment period: The given period is not enough to repay the loan.So we have calulated the matching monthly installement for selected loan tenture";
-//
-//                msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", error_message);
-//                FacesContext.getCurrentInstance().addMessage("", msg);
-//                System.out.println("Invalid installment period: The given period is not enough to repay the loan.");
-//                // Calculate the correct monthly installment
-//                System.out.println("installmentPeriod " + installmentPeriod);
-//                correctMonthlyInstallment = calculateMonthlyInstallment(loanAmount, interestRate, installmentPeriod);
-//                correctMonthlyInstallmentBoolean = true;
-//                System.out.println("Correct Monthly Installment to repay the loan in " + installmentPeriod + " months: " + correctMonthlyInstallment);
-//                // Recalculate loan structure with correct monthly installment
-//                calulateLoan();
-//
-//            }
-//            setActualLoanDetails();
-        }
-    }
-
-    public static double calculateMonthlyInstallment(double loanAmount, double annualInterestRate, int numPayments) {
-        double monthlyInterestRate = annualInterestRate / 12 / 100;
-        return (loanAmount * monthlyInterestRate) / (1 - Math.pow(1 + monthlyInterestRate, -numPayments));
     }
 
     public double pmt(double rate_per_period, double number_of_payments, double present_value, double future_value, int type) {
@@ -519,7 +463,7 @@ public class LoanApplication implements Serializable {
             System.out.println("internationalUniversityDue " + internationalUniversityDue);
 
 //            Double serviceChargesPercentage = materializedObj.get(0).getServiceChargesPresentage();
-            Double serviceChargesPercentage = 10.0;
+            Double serviceChargesPercentage = 0.0;
             System.out.println("serviceChargesPercentage " + serviceChargesPercentage);
             Double diplomaValue = 0.00;
             Double higherDiplomaValue = 0.00;

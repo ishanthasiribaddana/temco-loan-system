@@ -37,8 +37,23 @@ public class AcceptanceEmail {
                 }
             }
             System.out.println("D");
-            String firstGurantor = firstGuarantor.getLoanApplicantAndGurantorsId().getMemberId().getGeneralUserProfileId().getFirstName() + " " + firstGuarantor.getLoanApplicantAndGurantorsId().getMemberId().getGeneralUserProfileId().getLastName();
-            String secondGurantor = secondGuarantor.getLoanApplicantAndGurantorsId().getMemberId().getGeneralUserProfileId().getFirstName() + " " + secondGuarantor.getLoanApplicantAndGurantorsId().getMemberId().getGeneralUserProfileId().getLastName();
+
+            String firstGurantor = null;
+            String secondGurantor = null;
+
+            if (firstGurantor == null) {
+                firstGurantor = "";
+            } else {
+                firstGurantor = firstGuarantor.getLoanApplicantAndGurantorsId().getMemberId().getGeneralUserProfileId().getFirstName() + " " + firstGuarantor.getLoanApplicantAndGurantorsId().getMemberId().getGeneralUserProfileId().getLastName();
+            }
+
+            if (secondGurantor == null) {
+                secondGurantor = "";
+            } else {
+                secondGurantor = secondGuarantor.getLoanApplicantAndGurantorsId().getMemberId().getGeneralUserProfileId().getFirstName() + " " + secondGuarantor.getLoanApplicantAndGurantorsId().getMemberId().getGeneralUserProfileId().getLastName();
+
+            }
+
             System.out.println("D");
             double value = (downPayementAmount);
             double roundedValue = Math.round(value / 100) * 100;
@@ -111,11 +126,11 @@ public class AcceptanceEmail {
                     + "<body>\n"
                     + "    <div class=\"email-container\">\n"
                     + "        <div class=\"header\">\n"
-                    + "            <h1>Promissory Note (PN) for Conditional Enrollment in the Graduate Program</h1>\n"
+                    + "            <h1>Promissory Note (PN) for Conditional Enrollment in the International University Payment Program</h1>\n"
                     + "        </div>\n"
                     + "        <div class=\"content\">\n"
                     + "            <p>\n"
-                    + "                I hereby accept the Promissory Note (PN), allowing me to attend the graduate program at the Java Institute until I fulfill the remaining prerequisites of my loan application.\n"
+                    + "                I hereby accept the Promissory Note (PN), allowing me to attend the International University Payment program at the Java Institute until I fulfill the remaining prerequisites of my loan application.\n"
                     + "            </p>\n"
                     + "            <p>\n"
                     + "                <strong>Date:</strong> "
@@ -181,9 +196,10 @@ public class AcceptanceEmail {
                     + "                    <ul>\n"
                     + "                        <li>TEMCO Bank registration fees (for all three): Rs.1000 x 3 = Rs.3000</li>\n"
                     + "                        <li>Share purchase fees (all three): Rs.1000.00 x 3 = Rs.3000.00</li>\n"
-                    + "                        <li>The last three months' loan installments: Rs. "
+                    + "                        <li>First Month loan installments: Rs. "
                     + roundedValue
                     + "</li>\n"
+                    + "<li>(If you Already paid the registration fees,Share purchase fees you does not need to pay again )</li>\n"
                     + "                    </ul>\n"
                     + "                </li>\n"
                     + "            </ul>\n"

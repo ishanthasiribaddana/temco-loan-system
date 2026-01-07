@@ -73,9 +73,9 @@ public class Member1 implements Serializable {
     @JoinColumn(name = "general_user_profile_id", referencedColumnName = "id")
     @ManyToOne(optional = false)
     private GeneralUserProfile generalUserProfileId;
-    @OneToMany(mappedBy = "interducerMemberId")
-    private Collection<MemberHasMember> memberHasMemberCollection;
     @OneToMany(mappedBy = "interduceeMemberId")
+    private Collection<MemberHasMember> memberHasMemberCollection;
+    @OneToMany(mappedBy = "interducerMemberId")
     private Collection<MemberHasMember> memberHasMemberCollection1;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "memberId")
     private Collection<Nominess> nominessCollection;

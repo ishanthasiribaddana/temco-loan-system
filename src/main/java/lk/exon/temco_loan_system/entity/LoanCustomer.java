@@ -80,6 +80,9 @@ public class LoanCustomer implements Serializable {
     @JoinColumn(name = "gender_id", referencedColumnName = "id")
     @ManyToOne
     private Gender genderId;
+    @JoinColumn(name = "general_user_profile_id", referencedColumnName = "id")
+    @ManyToOne(optional = false)
+    private GeneralUserProfile generalUserProfileId;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "loanCustomerId")
     private Collection<MobileNo> mobileNoCollection;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "loanCustomerId")
@@ -210,6 +213,14 @@ public class LoanCustomer implements Serializable {
 
     public void setGenderId(Gender genderId) {
         this.genderId = genderId;
+    }
+
+    public GeneralUserProfile getGeneralUserProfileId() {
+        return generalUserProfileId;
+    }
+
+    public void setGeneralUserProfileId(GeneralUserProfile generalUserProfileId) {
+        this.generalUserProfileId = generalUserProfileId;
     }
 
     public Collection<MobileNo> getMobileNoCollection() {

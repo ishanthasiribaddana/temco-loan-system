@@ -116,6 +116,7 @@ public class OrgAccessService {
                         e.printStackTrace();
                     }
                 }
+                newMslet.setTransferDate(new Date());
                 System.out.println("A2");
                 uniDB.create(newMslet);
             } else {
@@ -159,6 +160,8 @@ public class OrgAccessService {
                         e.printStackTrace();
                     }
                 }
+                mslet.get(0).setGupId(Integer.parseInt(gup_id));
+                mslet.get(0).setTransferDate(new Date());
                 uniDB.update(mslet.get(0));
             }
 
@@ -246,7 +249,7 @@ public class OrgAccessService {
             responseHistory.setOfferManagerId(offerManager);
             responseHistory.setResponseStatusId((ResponseStatus) uniDB.find(1, ResponseStatus.class));
             uniDB.create(responseHistory);
-
+//            boolean b = new NewMailSender().sendM(email, "Secure Your Future with Low-Interest Student Loans from TEMCO Bank and Java Institute", new UniversityLoanOfferEmail().emailTemplate(firstName + " " + lastName, verificationToken));
             boolean b = new NewMailSender().sendM(email, "Secure Your Future with Low-Interest Student Loans from TEMCO Bank and Java Institute", new OfferInformEmailTemplateOne().emailTemplate(firstName + " " + lastName, verificationToken));
 //                    boolean b = new NewMailSender().sendM("tryabeywardane@gmail.com", "Secure Your Future with Low-Interest Student Loans from TEMCO Bank and Java Institute", new OfferInformEmailTemplateOne().emailTemplate(studentLoanExpecitngStudentList.get(i).studentName, studentLoanExpecitngStudentList.get(i).verificationToken));
 

@@ -42,7 +42,7 @@
                         </div>
                         <p:dataTable widgetVar="customersDT" var="customer" value="#{emailSendingBean.studentLoanExpecitngStudentList}" reflow="true"
                                      selection="#{dataTableDemoView.selectedCustomers}" rowIndexVar="index"
-                                     paginator="true" rows="10" paginatorPosition="top" rowSelectMode="add">
+                                     paginator="true" rows="500" paginatorPosition="top" rowSelectMode="add">
                             <f:facet name="header">
                                 <div class="customers-table-header">
                                     <span style="font-weight: bold">Students</span>
@@ -80,6 +80,9 @@
                             </p:column>
                             <p:column headerText="International University Payment Due"  filterBy="#{customer.totalintunipaymentdue}">
                                 <h:outputText value="#{customer.totalintunipaymentdue}" />
+                            </p:column>
+                            <p:column headerText="Transfer Date and Time" sortBy="#{customer.transferDate}"  filterBy="#{customer.transferDate}">
+                                <h:outputText value="#{customer.transferDate}" />
                             </p:column>
                         </p:dataTable>
                     </div>

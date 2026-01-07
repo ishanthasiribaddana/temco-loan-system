@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.List;
 import lk.exon.temco_loan_system.common.ComLib;
 import lk.exon.temco_loan_system.common.UniDBLocal;
-import lk.exon.temco_loan_system.entity.TransactionType;
 
 /**
  *

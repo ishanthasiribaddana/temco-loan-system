@@ -76,6 +76,10 @@ public class UniversalUserDocument implements Serializable {
     @ManyToOne(optional = false)
     private UserType userTypeId;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "universalUserDocumentId")
+    private Collection<JournalEntryProof> journalEntryProofCollection;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "universalUserDocumentId")
+    private Collection<VoucherDocumentMap> voucherDocumentMapCollection;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "universalUserDocumentId")
     private Collection<DocumentVerification> documentVerificationCollection;
 
     public UniversalUserDocument() {
@@ -195,6 +199,22 @@ public class UniversalUserDocument implements Serializable {
 
     public void setUserTypeId(UserType userTypeId) {
         this.userTypeId = userTypeId;
+    }
+
+    public Collection<JournalEntryProof> getJournalEntryProofCollection() {
+        return journalEntryProofCollection;
+    }
+
+    public void setJournalEntryProofCollection(Collection<JournalEntryProof> journalEntryProofCollection) {
+        this.journalEntryProofCollection = journalEntryProofCollection;
+    }
+
+    public Collection<VoucherDocumentMap> getVoucherDocumentMapCollection() {
+        return voucherDocumentMapCollection;
+    }
+
+    public void setVoucherDocumentMapCollection(Collection<VoucherDocumentMap> voucherDocumentMapCollection) {
+        this.voucherDocumentMapCollection = voucherDocumentMapCollection;
     }
 
     public Collection<DocumentVerification> getDocumentVerificationCollection() {

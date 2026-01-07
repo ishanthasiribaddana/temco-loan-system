@@ -5,7 +5,6 @@
 package lk.exon.temco_loan_system.entity;
 
 import jakarta.persistence.Basic;
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -79,7 +78,7 @@ public class BankAccount implements Serializable {
     @JoinColumn(name = "swift_codes_id", referencedColumnName = "id")
     @ManyToOne
     private SwiftCodes swiftCodesId;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "bankAccountId")
+    @OneToMany(mappedBy = "bankAccountId")
     private Collection<Voucher> voucherCollection;
 
     public BankAccount() {

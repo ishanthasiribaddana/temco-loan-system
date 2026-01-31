@@ -12,7 +12,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinColumns;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.NamedQueries;
 import jakarta.persistence.NamedQuery;
@@ -66,15 +65,10 @@ public class UserLogin implements Serializable {
     private Date lastLoginAt;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "userLoginId")
     private Collection<UserLoginHasSystemInterface> userLoginHasSystemInterfaceCollection;
-    @JoinColumns({
-        @JoinColumn(name = "general_organization_profile_id", referencedColumnName = "id"),
-        @JoinColumn(name = "general_organization_profile_id", referencedColumnName = "id"),
-        @JoinColumn(name = "general_organization_profile_id", referencedColumnName = "id")})
+    @JoinColumn(name = "general_organization_profile_id", referencedColumnName = "id")
     @ManyToOne
     private GeneralOrganizationProfile generalOrganizationProfile;
-    @JoinColumns({
-        @JoinColumn(name = "general_user_profile_id", referencedColumnName = "id"),
-        @JoinColumn(name = "general_user_profile_id", referencedColumnName = "id")})
+    @JoinColumn(name = "general_user_profile_id", referencedColumnName = "id")
     @ManyToOne
     private GeneralUserProfile generalUserProfile;
     @JoinColumn(name = "user_role_id", referencedColumnName = "id")

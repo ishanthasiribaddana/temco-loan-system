@@ -12,7 +12,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinColumns;
 import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.NamedQueries;
@@ -68,14 +67,10 @@ public class Voucher implements Serializable {
     @JoinColumn(name = "bank_account_id", referencedColumnName = "id")
     @ManyToOne
     private BankAccount bankAccountId;
-    @JoinColumns({
-        @JoinColumn(name = "general_user_profile_id", referencedColumnName = "id"),
-        @JoinColumn(name = "general_user_profile_id", referencedColumnName = "id")})
+    @JoinColumn(name = "general_user_profile_id", referencedColumnName = "id")
     @ManyToOne(optional = false)
     private GeneralUserProfile generalUserProfile;
-    @JoinColumns({
-        @JoinColumn(name = "login_session_id", referencedColumnName = "id"),
-        @JoinColumn(name = "login_session_id", referencedColumnName = "id")})
+    @JoinColumn(name = "login_session_id", referencedColumnName = "id")
     @ManyToOne
     private LoginSession loginSession;
     @JoinColumn(name = "org_departments_id", referencedColumnName = "id")

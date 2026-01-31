@@ -11,7 +11,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinColumns;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.NamedQueries;
 import jakarta.persistence.NamedQuery;
@@ -51,9 +50,7 @@ public class VoucherItem implements Serializable {
     private Date enteredDate;
     @Column(name = "is_active")
     private Short isActive;
-    @JoinColumns({
-        @JoinColumn(name = "voucher_id", referencedColumnName = "id"),
-        @JoinColumn(name = "voucher_id", referencedColumnName = "id")})
+    @JoinColumn(name = "voucher_id", referencedColumnName = "id")
     @ManyToOne(optional = false)
     private Voucher voucher;
     @OneToMany(mappedBy = "voucherItemId")

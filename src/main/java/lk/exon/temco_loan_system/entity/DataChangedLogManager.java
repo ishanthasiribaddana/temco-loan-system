@@ -11,7 +11,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinColumns;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.NamedQueries;
 import jakarta.persistence.NamedQuery;
@@ -51,9 +50,7 @@ public class DataChangedLogManager implements Serializable {
     private String comment;
     @Column(name = "referance")
     private String referance;
-    @JoinColumns({
-        @JoinColumn(name = "table_manager_id", referencedColumnName = "id"),
-        @JoinColumn(name = "table_manager_id", referencedColumnName = "id")})
+    @JoinColumn(name = "table_manager_id", referencedColumnName = "id")
     @ManyToOne(optional = false)
     private TableManager tableManager;
     @JoinColumn(name = "user_login_id", referencedColumnName = "id")

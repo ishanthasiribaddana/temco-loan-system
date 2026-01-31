@@ -12,7 +12,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinColumns;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.NamedQueries;
 import jakarta.persistence.NamedQuery;
@@ -52,15 +51,10 @@ public class LoginSession implements Serializable {
     private Date endTime;
     @Column(name = "ip")
     private String ip;
-    @JoinColumns({
-        @JoinColumn(name = "general_organization_profile_id", referencedColumnName = "id"),
-        @JoinColumn(name = "general_organization_profile_id", referencedColumnName = "id"),
-        @JoinColumn(name = "general_organization_profile_id", referencedColumnName = "id")})
+    @JoinColumn(name = "general_organization_profile_id", referencedColumnName = "id")
     @ManyToOne
     private GeneralOrganizationProfile generalOrganizationProfile;
-    @JoinColumns({
-        @JoinColumn(name = "user_login_id", referencedColumnName = "id"),
-        @JoinColumn(name = "user_login_id", referencedColumnName = "id")})
+    @JoinColumn(name = "user_login_id", referencedColumnName = "id")
     @ManyToOne
     private UserLogin userLogin;
     @JoinColumn(name = "user_login_group_id", referencedColumnName = "id")

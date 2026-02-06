@@ -11,6 +11,7 @@ import jakarta.faces.context.ExternalContext;
 import jakarta.faces.context.FacesContext;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.core.Context;
 import java.io.IOException;
@@ -44,13 +45,80 @@ public class AdminLogin implements Serializable {
         httpRequest = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
     }
 
+    private static final String AUTH_COOKIE_NAME = "auth_token";
+    private static final int SUPER_ADMIN_ROLE_ID = 10;
+    private static final String SUPER_ADMIN_ROLE_NAME = "Super Admin";
+
     public void checkSession() throws IOException {
         ExternalContext externalContext = FacesContext.getCurrentInstance().getExternalContext();
         Object adminUser = externalContext.getSessionMap().get("adminUser");
+        
+        // If no session, check for SSO cookie
         if (adminUser == null) {
+            UserLoginGroup ssoUser = validateSSOCookie();
+            if (ssoUser != null && isSuperAdmin(ssoUser)) {
+                // SSO cookie valid AND user is Super Admin - create session
+                externalContext.getSessionMap().put("adminUser", ssoUser);
+                System.out.println("SSO: Super Admin authenticated via cookie - " + 
+                        ssoUser.getUserLoginId().getUsername());
+                return; // User authenticated via SSO
+            }
+            
             externalContext.redirect(externalContext.getRequestContextPath() + "/admin/login.xhtml");
             FacesContext.getCurrentInstance().responseComplete();
         }
+    }
+
+    private boolean isSuperAdmin(UserLoginGroup user) {
+        if (user == null || user.getUserRoleId() == null) {
+            return false;
+        }
+        Integer roleId = user.getUserRoleId().getId();
+        String roleName = user.getUserRoleId().getName();
+        
+        // Check by role ID or role name
+        return (roleId != null && roleId.equals(SUPER_ADMIN_ROLE_ID)) ||
+               (roleName != null && roleName.equalsIgnoreCase(SUPER_ADMIN_ROLE_NAME));
+    }
+
+    private UserLoginGroup validateSSOCookie() {
+        try {
+            HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance()
+                    .getExternalContext().getRequest();
+            Cookie[] cookies = request.getCookies();
+            
+            if (cookies != null) {
+                for (Cookie cookie : cookies) {
+                    if (AUTH_COOKIE_NAME.equals(cookie.getName())) {
+                        String token = cookie.getValue();
+                        if (token != null && !token.isEmpty()) {
+                            // Validate token against com_session_token table using native query
+                            String nativeQuery = "SELECT user_login_id FROM com_session_token " +
+                                    "WHERE token_hash = '" + token + "' " +
+                                    "AND is_active = 1 " +
+                                    "AND expires_at > NOW()";
+                            List<?> result = uni.searchByNativeQuery(nativeQuery);
+                            
+                            if (!result.isEmpty()) {
+                                Object userLoginId = result.get(0);
+                                // Fetch UserLoginGroup with role info
+                                String jpqlQuery = "SELECT u FROM UserLoginGroup u " +
+                                        "JOIN FETCH u.userRoleId " +
+                                        "WHERE u.userLoginId.id = " + userLoginId;
+                                List<UserLoginGroup> users = uni.searchByQuery(jpqlQuery);
+                                if (!users.isEmpty()) {
+                                    return users.get(0);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("SSO Cookie validation error: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return null;
     }
 
     public void verifyLogin() throws Exception {
@@ -83,7 +151,6 @@ public class AdminLogin implements Serializable {
                                 }
 
                                 LoginSession ls = new LoginSession();
-                                ls.setGeneralOrganizationProfile(ulg.getGeneralOrganizationProfileId());
                                 ls.setUserLogin(ulg.getUserLoginId());
                                 ls.setUserLoginGroupId(ulg);
                                 ls.setStartTime(new Date());

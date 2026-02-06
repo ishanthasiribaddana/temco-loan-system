@@ -156,4 +156,14 @@ public class UniDB implements UniDBLocal {
         }
     }
 
+    @Override
+    public List searchByNativeQuery(String nativeQuery) {
+        try {
+            return em.createNativeQuery(nativeQuery).getResultList();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return List.of();
+        }
+    }
+
 }

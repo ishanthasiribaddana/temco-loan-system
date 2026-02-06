@@ -40,4 +40,6 @@ public interface UniDBLocal {
     public List<InterestManager> searchByQueryInterestManager(String query, Map<String, Object> kv);
 
     public List<LoanStatusManager> searchByQueryLoanStatusManager(String query, Map<String, Object> kv);
+
+    List searchByNativeQuery(String nativeQuery);
 }

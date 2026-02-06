@@ -19,9 +19,29 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.EnumType;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
+
+/**
+ * Enum for member types
+ */
+enum MemberType {
+    INDIVIDUAL_MEMBER("Individual Member"),
+    ORGANIZATIONAL_MEMBER("Organizational Member");
+    
+    private final String value;
+    
+    MemberType(String value) {
+        this.value = value;
+    }
+    
+    public String getValue() {
+        return value;
+    }
+}
 
 /**
  *
@@ -62,6 +82,10 @@ public class Member1 implements Serializable {
     @Column(name = "updated_at")
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedAt;
+    
+    @Column(name = "member_type", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private MemberType memberType = MemberType.INDIVIDUAL_MEMBER;
     @OneToMany(mappedBy = "memberId")
     private Collection<Supplier> supplierCollection;
     @OneToMany(mappedBy = "memberId")
@@ -70,9 +94,13 @@ public class Member1 implements Serializable {
     private Collection<GopHasMember> gopHasMemberCollection;
     @OneToMany(mappedBy = "onwerMemberId")
     private Collection<ShareCertificate> shareCertificateCollection;
-    @JoinColumn(name = "general_user_profile_id", referencedColumnName = "id")
+    @JoinColumn(name = "general_user_or_org_profile_id", referencedColumnName = "id")
     @ManyToOne(optional = false)
-    private GeneralUserProfile generalUserProfileId;
+    private GeneralUserProfile generalUserOrOrgProfileId;
+    
+    // Relationship to member_has_category will be added when MemberHasCategory entity is created
+    // @OneToMany(cascade = CascadeType.ALL, mappedBy = "member")
+    // private Collection<MemberHasCategory> memberHasCategoryCollection;
     @OneToMany(mappedBy = "interduceeMemberId")
     private Collection<MemberHasMember> memberHasMemberCollection;
     @OneToMany(mappedBy = "interducerMemberId")
@@ -185,13 +213,36 @@ public class Member1 implements Serializable {
         this.shareCertificateCollection = shareCertificateCollection;
     }
 
-    public GeneralUserProfile getGeneralUserProfileId() {
-        return generalUserProfileId;
+    public GeneralUserProfile getGeneralUserOrOrgProfileId() {
+        return generalUserOrOrgProfileId;
     }
 
-    public void setGeneralUserProfileId(GeneralUserProfile generalUserProfileId) {
-        this.generalUserProfileId = generalUserProfileId;
+    public void setGeneralUserOrOrgProfileId(GeneralUserProfile generalUserOrOrgProfileId) {
+        this.generalUserOrOrgProfileId = generalUserOrOrgProfileId;
     }
+    
+    // Backward compatibility - alias methods
+    @Deprecated
+    public GeneralUserProfile getGeneralUserProfileId() {
+        return getGeneralUserOrOrgProfileId();
+    }
+    
+    @Deprecated
+    public void setGeneralUserProfileId(GeneralUserProfile profile) {
+        setGeneralUserOrOrgProfileId(profile);
+    }
+    
+    public MemberType getMemberType() {
+        return memberType;
+    }
+    
+    public void setMemberType(MemberType memberType) {
+        this.memberType = memberType;
+    }
+    
+    // Getters/setters for memberHasCategoryCollection will be added when MemberHasCategory entity is created
+    // public Collection<MemberHasCategory> getMemberHasCategoryCollection() { return memberHasCategoryCollection; }
+    // public void setMemberHasCategoryCollection(Collection<MemberHasCategory> c) { this.memberHasCategoryCollection = c; }
 
     public Collection<MemberHasMember> getMemberHasMemberCollection() {
         return memberHasMemberCollection;

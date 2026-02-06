@@ -124,8 +124,6 @@ public class GeneralOrganizationProfile implements Serializable {
     private Collection<LoginSession> loginSessionCollection;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "generalOrganizationProfileId")
     private Collection<BranchOfTheBank> branchOfTheBankCollection;
-    @OneToMany(mappedBy = "generalOrganizationProfileId")
-    private Collection<UserLoginGroup> userLoginGroupCollection;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "generalOrganizationProfileId")
     private Collection<OrgBranchers> orgBranchersCollection;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "generalOrganizationProfileId")
@@ -394,14 +392,6 @@ public class GeneralOrganizationProfile implements Serializable {
 
     public void setBranchOfTheBankCollection(Collection<BranchOfTheBank> branchOfTheBankCollection) {
         this.branchOfTheBankCollection = branchOfTheBankCollection;
-    }
-
-    public Collection<UserLoginGroup> getUserLoginGroupCollection() {
-        return userLoginGroupCollection;
-    }
-
-    public void setUserLoginGroupCollection(Collection<UserLoginGroup> userLoginGroupCollection) {
-        this.userLoginGroupCollection = userLoginGroupCollection;
     }
 
     public Collection<OrgBranchers> getOrgBranchersCollection() {

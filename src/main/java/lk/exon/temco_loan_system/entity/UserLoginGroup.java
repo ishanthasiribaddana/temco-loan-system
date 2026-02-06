@@ -51,9 +51,6 @@ public class UserLoginGroup implements Serializable {
     private Integer countAttempt;
     @OneToMany(mappedBy = "userLoginGroupId")
     private Collection<LoginSession> loginSessionCollection;
-    @JoinColumn(name = "general_organization_profile_id", referencedColumnName = "id")
-    @ManyToOne
-    private GeneralOrganizationProfile generalOrganizationProfileId;
     @JoinColumn(name = "user_login_id", referencedColumnName = "id")
     @ManyToOne
     private UserLogin userLoginId;
@@ -114,14 +111,6 @@ public class UserLoginGroup implements Serializable {
 
     public void setLoginSessionCollection(Collection<LoginSession> loginSessionCollection) {
         this.loginSessionCollection = loginSessionCollection;
-    }
-
-    public GeneralOrganizationProfile getGeneralOrganizationProfileId() {
-        return generalOrganizationProfileId;
-    }
-
-    public void setGeneralOrganizationProfileId(GeneralOrganizationProfile generalOrganizationProfileId) {
-        this.generalOrganizationProfileId = generalOrganizationProfileId;
     }
 
     public UserLogin getUserLoginId() {

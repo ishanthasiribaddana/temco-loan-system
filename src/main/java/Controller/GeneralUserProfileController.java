@@ -5,6 +5,7 @@ import jakarta.ejb.Stateless;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
+import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
@@ -126,6 +127,70 @@ public class GeneralUserProfileController {
         return Response.status(Response.Status.CREATED)
                 .entity(toJson(gup).toString())
                 .build();
+    }
+
+    @PUT
+    @Path("/{id}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response update(@PathParam("id") int id, String body) {
+        if (id <= 0) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(new JSONObject().put("message", "Invalid id").toString())
+                    .build();
+        }
+        if (body == null || body.trim().isEmpty()) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(new JSONObject().put("message", "Request body is required").toString())
+                    .build();
+        }
+
+        Object found = uniDB.find(id, GeneralUserProfile.class);
+        if (!(found instanceof GeneralUserProfile)) {
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity(new JSONObject().put("message", "Profile not found").toString())
+                    .build();
+        }
+
+        JSONObject json;
+        try {
+            json = new JSONObject(body);
+        } catch (Exception e) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(new JSONObject().put("message", "Invalid JSON body").toString())
+                    .build();
+        }
+
+        GeneralUserProfile gup = (GeneralUserProfile) found;
+
+        gup.setFirstName(nullIfBlank(json.optString("firstName", gup.getFirstName())));
+        gup.setLastName(nullIfBlank(json.optString("lastName", gup.getLastName())));
+
+        String fullName = null;
+        if (gup.getFirstName() != null || gup.getLastName() != null) {
+            String fn = gup.getFirstName() == null ? "" : gup.getFirstName().trim();
+            String ln = gup.getLastName() == null ? "" : gup.getLastName().trim();
+            String combined = (fn + " " + ln).trim();
+            if (!combined.isEmpty()) {
+                fullName = combined;
+            }
+        }
+        if (fullName == null) {
+            fullName = nullIfBlank(json.optString("fullName", gup.getFullName()));
+        }
+        gup.setFullName(fullName);
+
+        gup.setEmail(nullIfBlank(json.optString("email", gup.getEmail())));
+        gup.setMobileNo(nullIfBlank(json.optString("mobileNo", gup.getMobileNo())));
+
+        try {
+            uniDB.update(gup);
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(new JSONObject().put("message", "Failed to update profile").put("error", e.getMessage()).toString())
+                    .build();
+        }
+
+        return Response.ok(toJson(gup).toString()).build();
     }
 
     private static JSONObject toJson(GeneralUserProfile g) {
